@@ -1,0 +1,100 @@
+{
+  "formatVersion": "1.0.0",
+  "metadata": {
+    "name": "Simple Project",
+    "description": "A simple SK8 project with basic shapes",
+    "author": "SK8 Team",
+    "created": "2025-11-12T00:00:00.000Z",
+    "modified": "2025-11-12T00:00:00.000Z",
+    "version": "1.0.0",
+    "sk8Version": "0.3.0"
+  },
+  "stages": [
+    {
+      "id": "main",
+      "name": "Main Stage",
+      "width": 800,
+      "height": 600,
+      "backgroundColor": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 1
+      },
+      "actorIds": ["rect1", "circle1"]
+    }
+  ],
+  "actors": [
+    {
+      "id": "rect1",
+      "className": "SK8Rectangle",
+      "name": "RedRectangle",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 100,
+            "top": 100,
+            "right": 200,
+            "bottom": 200
+          },
+          "type": "object"
+        },
+        "fillColor": {
+          "value": {
+            "r": 255,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "frameColor": {
+          "value": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "circle1",
+      "className": "SK8Circle",
+      "name": "BlueCircle",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 300,
+            "top": 150,
+            "right": 400,
+            "bottom": 250
+          },
+          "type": "object"
+        },
+        "fillColor": {
+          "value": {
+            "r": 0,
+            "g": 0,
+            "b": 255,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    }
+  ],
+  "assets": [],
+  "scripts": []
+}

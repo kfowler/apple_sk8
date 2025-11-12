@@ -23,7 +23,9 @@ export {
   SK8Group,
   createStar,
   createRegularPolygon,
+  ImageFitMode,
 } from './graphics/advanced-shapes.js';
+export type { ImageTransform, ImageEffects } from './graphics/advanced-shapes.js';
 
 // Interactive Actors (Widgets)
 export { SK8Button } from './actors/Button.js';
@@ -41,6 +43,22 @@ export { SK8Panel } from './actors/Panel.js';
 export { SK8Scroller } from './actors/Scroller.js';
 export { SK8MenuButton } from './actors/MenuButton.js';
 export type { MenuItem } from './actors/MenuButton.js';
+
+// Extended Shapes (Phase 1 Additional Shapes)
+export { SK8Arrow } from './actors/Arrow.js';
+export type { ArrowDirection } from './actors/Arrow.js';
+export { SK8Star } from './actors/Star.js';
+export { SK8Path } from './actors/Path.js';
+export type { PathCommand } from './actors/Path.js';
+export { SK8TextBox } from './actors/TextBox.js';
+export type { TextAlignment } from './actors/TextBox.js';
+export { SK8ProgressBar } from './actors/ProgressBar.js';
+export type { ProgressBarOrientation } from './actors/ProgressBar.js';
+
+// Media Actors (Phase 3.1)
+export { SK8Picture, createPicture } from './actors/Picture.js';
+export { SK8MovieRectangle, createMovieRectangle, VideoFitMode } from './actors/MovieRectangle.js';
+export { SK8Sound, SoundManager, createSound, SoundState } from './actors/Sound.js';
 
 // Stage
 export { SK8Stage } from './graphics/SK8Stage.js';
@@ -93,8 +111,159 @@ export {
   CollectionUtils,
 } from './runtime/collections.js';
 
+// Gradients (already implemented in Phase 1)
+export { Gradient, LinearGradient, RadialGradient } from './graphics/gradients.js';
+export type { ColorStop } from './graphics/gradients.js';
+
+// Text Styling
+export { TextStyle } from './graphics/text-style.js';
+
+// Media Management (Phase 3.1)
+export {
+  MediaManager,
+  getMediaManager,
+  registerAsset,
+  loadAsset,
+  getAsset,
+  getAssetData,
+  preloadAssets,
+  MediaType,
+  MediaStatus,
+} from './media/media-manager.js';
+export type { MediaAsset, ProgressCallback } from './media/media-manager.js';
+
+// Audio Utilities (Phase 3.1)
+export {
+  getAudioContext,
+  resumeAudioContext,
+  getAudioContextState,
+  closeAudioContext,
+  loadAudio,
+  preloadAudio,
+  clearAudioCache,
+  removeFromCache,
+  getCacheSize,
+  playAudioBuffer,
+  VolumeController,
+  create3DAudioSource,
+  setListenerPosition,
+  createAudioAnalyzer,
+  playBeep,
+  playToneSequence,
+} from './media/audio-utils.js';
+export type { AudioPlayer, Audio3DOptions } from './media/audio-utils.js';
+
+// SK8Script - Scripting Language (Phase 2.1)
+export { tokenize, Lexer, LexerError } from './sk8script/lexer/lexer.js';
+export { Token, TokenType, KEYWORDS, getOperatorPrecedence } from './sk8script/lexer/token.js';
+export { parse, Parser, ParserError } from './sk8script/parser/parser.js';
+export {
+  isLiteral,
+  isIdentifier,
+  isBinaryOp,
+  isUnaryOp,
+  isPropertyAccess,
+  isIndexAccess,
+  isGrouping,
+  isAssignment,
+  createLiteral,
+  createIdentifier,
+  createBinaryOp,
+  createUnaryOp,
+  createPropertyAccess,
+  createIndexAccess,
+  createGrouping,
+  createAssignment,
+  printAST,
+} from './sk8script/parser/ast.js';
+export type {
+  ASTNode,
+  LiteralNode,
+  IdentifierNode,
+  BinaryOpNode,
+  UnaryOpNode,
+  PropertyAccessNode,
+  IndexAccessNode,
+  GroupingNode,
+  AssignmentNode,
+} from './sk8script/parser/ast.js';
+export { evaluate, Evaluator, EvaluatorError } from './sk8script/evaluator/evaluator.js';
+export type { EvaluationContext } from './sk8script/evaluator/evaluator.js';
+
+// Project System (Phase 3.2)
+export {
+  SK8Project,
+  createProject,
+  createProjectFromTemplate,
+} from './project/project.js';
+export type {
+  ProjectMetadata,
+  ProjectAsset,
+  ProjectScript,
+  StageDefinition,
+} from './project/project.js';
+
+// Serialization
+export {
+  serializeProject,
+  serializeProjectToObject,
+  validateSerializedProject,
+  serializeHandler,
+} from './project/serializer.js';
+export type {
+  SerializedProject,
+  SerializationOptions,
+} from './project/serializer.js';
+
+// Deserialization
+export {
+  deserializeProject,
+  deserializeProjectFromObject,
+  validateProject,
+  registerActorClass,
+} from './project/deserializer.js';
+export type { DeserializationOptions } from './project/deserializer.js';
+
+// File I/O
+export {
+  saveProjectToFile,
+  loadProjectFromFile,
+  openProjectFromFilePicker,
+  saveProjectToLocalStorage,
+  loadProjectFromLocalStorage,
+  enableAutoSave,
+  recoverProjectFromAutoSave,
+  hasAutoSave,
+  clearAutoSave,
+  getRecentProjects,
+  clearRecentProjects,
+  exportProjectAsJSON,
+  importProjectFromJSON,
+  isLocalStorageAvailable,
+  getStorageInfo,
+  backupProjectToIndexedDB,
+  restoreProjectFromIndexedDB,
+} from './project/file-io.js';
+export type {
+  FileIOOptions,
+  AutoSaveConfig,
+  RecentProjectEntry,
+} from './project/file-io.js';
+
+// Project Manager
+export {
+  ProjectManager,
+  getProjectManager,
+  createProjectManager,
+} from './project/project-manager.js';
+export type {
+  ProjectChangeListener,
+  DirtyStateListener,
+  ProjectManagerOptions,
+} from './project/project-manager.js';
+
 // Version
-export const VERSION = '0.3.0';
+export const VERSION = '0.3.1';
 
 /**
  * Helper function to initialize SK8 with a canvas

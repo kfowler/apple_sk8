@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SK8Script REPL - Interactive Parser Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .repl-section {
+        margin-bottom: 30px;
+      }
+
+      .repl-section h2 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+      }
+
+      .input-area {
+        margin-bottom: 20px;
+      }
+
+      .input-area label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .input-area textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        resize: vertical;
+        min-height: 80px;
+        transition: border-color 0.3s;
+      }
+
+      .input-area textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button.secondary {
+        background: #6c757d;
+      }
+
+      .output-area {
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .output-area h3 {
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+      }
+
+      .output-area pre {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .output-area.result {
+        background: #e7f5ff;
+        border-color: #339af0;
+      }
+
+      .output-area.result h3 {
+        color: #1971c2;
+      }
+
+      .output-area.error {
+        background: #ffe0e0;
+        border-color: #ff6b6b;
+      }
+
+      .output-area.error h3 {
+        color: #c92a2a;
+      }
+
+      .examples {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+      }
+
+      .examples h3 {
+        color: #667eea;
+        margin-bottom: 15px;
+      }
+
+      .example-item {
+        background: white;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+      }
+
+      .example-item:hover {
+        background: #e7f5ff;
+      }
+
+      .example-item code {
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .feature-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+      }
+
+      .feature-card h4 {
+        color: #667eea;
+        margin-bottom: 8px;
+      }
+
+      .feature-card p {
+        color: #666;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>SK8Script REPL</h1>
+        <p>Interactive Parser & Evaluator - Phase 2.1 Foundation</p>
+      </div>
+
+      <div class="content">
+        <div class="repl-section">
+          <h2>Try SK8Script</h2>
+
+          <div class="input-area">
+            <label for="input">Enter SK8Script Expression:</label>
+            <textarea
+              id="input"
+              placeholder="Try: 5 + 3 * 2&#10;Or: the left of myActor&#10;Or: item 1 of myList"
+            >5 + 3 * 2</textarea>
+          </div>
+
+          <div class="button-group">
+            <button onclick="evaluateExpression()">Evaluate</button>
+            <button onclick="parseOnly()" class="secondary">Parse Only</button>
+            <button onclick="tokenizeOnly()" class="secondary">Tokenize Only</button>
+            <button onclick="clearAll()" class="secondary">Clear</button>
+          </div>
+
+          <div id="result-area" style="display: none" class="output-area result">
+            <h3>Result</h3>
+            <pre id="result"></pre>
+          </div>
+
+          <div id="tokens-area" style="display: none" class="output-area">
+            <h3>Tokens</h3>
+            <pre id="tokens"></pre>
+          </div>
+
+          <div id="ast-area" style="display: none" class="output-area">
+            <h3>Abstract Syntax Tree (AST)</h3>
+            <pre id="ast"></pre>
+          </div>
+
+          <div id="error-area" style="display: none" class="output-area error">
+            <h3>Error</h3>
+            <pre id="error"></pre>
+          </div>
+        </div>
+
+        <div class="examples">
+          <h3>Example Expressions</h3>
+          <div class="example-item" onclick="loadExample('5 + 3 * 2')">
+            <code>5 + 3 * 2</code> → Arithmetic with precedence
+          </div>
+          <div class="example-item" onclick="loadExample('(5 + 3) * 2')">
+            <code>(5 + 3) * 2</code> → Parentheses grouping
+          </div>
+          <div class="example-item" onclick="loadExample('the left of myActor')">
+            <code>the left of myActor</code> → Natural language property access
+          </div>
+          <div class="example-item" onclick="loadExample('item 1 of myList')">
+            <code>item 1 of myList</code> → List indexing (1-based)
+          </div>
+          <div class="example-item" onclick="loadExample('myActor.width')">
+            <code>myActor.width</code> → Dot notation
+          </div>
+          <div class="example-item" onclick="loadExample('-5 + 10')">
+            <code>-5 + 10</code> → Unary minus
+          </div>
+          <div class="example-item" onclick="loadExample('not true')">
+            <code>not true</code> → Logical NOT
+          </div>
+          <div class="example-item" onclick="loadExample('5 < 10 and true')">
+            <code>5 < 10 and true</code> → Comparison and logic
+          </div>
+          <div class="example-item" onclick="loadExample('"hello" & " " & "world"')">
+            <code>"hello" & " " & "world"</code> → String concatenation
+          </div>
+          <div class="example-item" onclick="loadExample('2 ^ 8')">
+            <code>2 ^ 8</code> → Exponentiation
+          </div>
+        </div>
+
+        <div class="features">
+          <div class="feature-card">
+            <h4>Natural Language Syntax</h4>
+            <p>
+              SK8Script uses natural language constructs like "the X of Y" for intuitive property
+              access.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h4>Operator Precedence</h4>
+            <p>
+              Properly handles mathematical operator precedence: multiplication and division before
+              addition and subtraction.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h4>1-Based Indexing</h4>
+            <p>
+              Following SK8's convention, lists and arrays use 1-based indexing for more natural
+              human interaction.
+            </p>
+          </div>
+          <div class="feature-card">
+            <h4>Comprehensive Operators</h4>
+            <p>
+              Supports arithmetic (+, -, *, /, %, ^), comparison (=, !=, <, >, <=, >=), and logical
+              (and, or, not) operators.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { tokenize } from '../dist/sk8script/lexer/lexer.js';
+      import { parse } from '../dist/sk8script/parser/parser.js';
+      import { evaluate, Evaluator } from '../dist/sk8script/evaluator/evaluator.js';
+      import { printAST } from '../dist/sk8script/parser/ast.js';
+
+      // Create a global evaluator with sample context
+      const evaluator = new Evaluator({
+        variables: new Map([
+          ['myActor', { left: 100, top: 50, width: 200, height: 150 }],
+          ['myList', [10, 20, 30, 40, 50]],
+          ['x', 42],
+          ['y', 7],
+        ]),
+      });
+
+      window.evaluateExpression = function () {
+        const input = document.getElementById('input').value;
+        clearOutputs();
+
+        try {
+          const tokens = tokenize(input);
+          const ast = parse(tokens);
+          const result = evaluator.evaluate(ast);
+
+          showTokens(tokens);
+          showAST(ast);
+          showResult(result);
+        } catch (error) {
+          showError(error);
+        }
+      };
+
+      window.parseOnly = function () {
+        const input = document.getElementById('input').value;
+        clearOutputs();
+
+        try {
+          const tokens = tokenize(input);
+          const ast = parse(tokens);
+
+          showTokens(tokens);
+          showAST(ast);
+        } catch (error) {
+          showError(error);
+        }
+      };
+
+      window.tokenizeOnly = function () {
+        const input = document.getElementById('input').value;
+        clearOutputs();
+
+        try {
+          const tokens = tokenize(input);
+          showTokens(tokens);
+        } catch (error) {
+          showError(error);
+        }
+      };
+
+      window.clearAll = function () {
+        document.getElementById('input').value = '';
+        clearOutputs();
+      };
+
+      window.loadExample = function (example) {
+        document.getElementById('input').value = example;
+        evaluateExpression();
+      };
+
+      function showTokens(tokens) {
+        const area = document.getElementById('tokens-area');
+        const pre = document.getElementById('tokens');
+        area.style.display = 'block';
+        pre.textContent = JSON.stringify(
+          tokens.map((t) => ({
+            type: t.type,
+            value: t.value,
+            literal: t.literal,
+            position: `${t.line}:${t.column}`,
+          })),
+          null,
+          2
+        );
+      }
+
+      function showAST(ast) {
+        const area = document.getElementById('ast-area');
+        const pre = document.getElementById('ast');
+        area.style.display = 'block';
+        pre.textContent = printAST(ast);
+      }
+
+      function showResult(result) {
+        const area = document.getElementById('result-area');
+        const pre = document.getElementById('result');
+        area.style.display = 'block';
+
+        if (typeof result === 'object' && result !== null) {
+          pre.textContent = JSON.stringify(result, null, 2);
+        } else {
+          pre.textContent = String(result);
+        }
+      }
+
+      function showError(error) {
+        const area = document.getElementById('error-area');
+        const pre = document.getElementById('error');
+        area.style.display = 'block';
+        pre.textContent = error.toString();
+      }
+
+      function clearOutputs() {
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('tokens-area').style.display = 'none';
+        document.getElementById('ast-area').style.display = 'none';
+        document.getElementById('error-area').style.display = 'none';
+      }
+
+      // Initial evaluation
+      evaluateExpression();
+    </script>
+  </body>
+</html>

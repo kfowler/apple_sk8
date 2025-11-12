@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Media Demo - Images, Video & Audio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            display: block;
+            margin: 15px auto;
+            background: #fff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #fff;
+        }
+
+        .feature-card h3 {
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        #drop-zone {
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        #drop-zone:hover, #drop-zone.drag-over {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .media-list {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .media-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status.loaded { background: #4ade80; color: #000; }
+        .status.loading { background: #fbbf24; color: #000; }
+        .status.error { background: #ef4444; color: #fff; }
+        .status.pending { background: #94a3b8; color: #000; }
+    </style>
+</head>
+<body>
+    <h1>🎬 SK8 Media Demo</h1>
+    <p class="subtitle">Comprehensive Media Handling: Images, Video & Audio</p>
+
+    <!-- Image Features -->
+    <div class="section">
+        <h2>📸 Enhanced Image Support</h2>
+        <canvas id="image-canvas" width="800" height="400"></canvas>
+
+        <div class="controls">
+            <button onclick="loadSampleImage()">Load Sample Image</button>
+            <button onclick="applyImageEffect('brightness')">Brightness +</button>
+            <button onclick="applyImageEffect('contrast')">Contrast +</button>
+            <button onclick="applyImageEffect('grayscale')">Grayscale</button>
+            <button onclick="applyImageEffect('blur')">Blur</button>
+            <button onclick="applyImageEffect('flip-h')">Flip H</button>
+            <button onclick="applyImageEffect('flip-v')">Flip V</button>
+            <button onclick="resetImage()">Reset</button>
+        </div>
+
+        <div class="info">
+            <strong>Features:</strong> Fit modes (fill, contain, cover), transformations (flip, crop),
+            effects (brightness, contrast, grayscale, blur), automatic caching, and more!
+        </div>
+    </div>
+
+    <!-- Picture with Drag & Drop -->
+    <div class="section">
+        <h2>🖼️ Picture with Drag & Drop</h2>
+        <canvas id="picture-canvas" width="800" height="400"></canvas>
+
+        <div id="drop-zone">
+            <h3>📁 Drop Image Here or Click to Select</h3>
+            <p>Supports PNG, JPG, GIF, SVG, WebP</p>
+        </div>
+
+        <div class="info">
+            <strong>Interactive Features:</strong> Click to select file, drag & drop support,
+            automatic format detection, file validation, and loading progress.
+        </div>
+    </div>
+
+    <!-- Video Player -->
+    <div class="section">
+        <h2>🎥 Video Player (MovieRectangle)</h2>
+        <canvas id="video-canvas" width="800" height="450"></canvas>
+
+        <div class="controls">
+            <button onclick="loadSampleVideo()">Load Sample Video</button>
+            <button onclick="toggleVideoPlay()">Play/Pause</button>
+            <button onclick="stopVideo()">Stop</button>
+            <button onclick="toggleVideoControls()">Toggle Controls</button>
+            <button onclick="videoSeek(-10)">-10s</button>
+            <button onclick="videoSeek(10)">+10s</button>
+            <button onclick="videoSpeed(0.5)">0.5x</button>
+            <button onclick="videoSpeed(1.0)">1.0x</button>
+            <button onclick="videoSpeed(2.0)">2.0x</button>
+        </div>
+
+        <div class="info">
+            <strong>Video Features:</strong> Play/pause/stop controls, seek, playback speed,
+            volume control, fit modes (fill, contain, cover), built-in control overlay,
+            frame extraction, and event handling (onPlay, onPause, onEnded, onTimeUpdate).
+        </div>
+    </div>
+
+    <!-- Audio Player -->
+    <div class="section">
+        <h2>🔊 Audio Player (Sound)</h2>
+
+        <div class="controls">
+            <button onclick="playSound('beep')">Play Beep</button>
+            <button onclick="playSound('tone-sequence')">Play Melody</button>
+            <button onclick="loadBackgroundMusic()">Load Music</button>
+            <button onclick="toggleMusicPlay()">Play/Pause Music</button>
+            <button onclick="stopMusic()">Stop Music</button>
+            <button onclick="fadeMusic('in')">Fade In</button>
+            <button onclick="fadeMusic('out')">Fade Out</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-value" id="sound-state">IDLE</span>
+                <span class="stat-label">State</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="sound-volume">100%</span>
+                <span class="stat-label">Volume</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="sound-time">0:00</span>
+                <span class="stat-label">Time</span>
+            </div>
+        </div>
+
+        <div class="info">
+            <strong>Audio Features:</strong> Web Audio API integration, multiple simultaneous sounds,
+            volume control, fading, looping, playback rate adjustment, 3D positioning support,
+            preloading & caching, and tone generation.
+        </div>
+    </div>
+
+    <!-- Media Manager -->
+    <div class="section">
+        <h2>📦 Media Manager</h2>
+
+        <div class="controls">
+            <button onclick="registerAssets()">Register Sample Assets</button>
+            <button onclick="loadAllAssets()">Load All Assets</button>
+            <button onclick="unloadAllAssets()">Unload All</button>
+            <button onclick="clearAssets()">Clear Registry</button>
+            <button onclick="showAssetCatalog()">Show Catalog</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-value" id="assets-total">0</span>
+                <span class="stat-label">Total Assets</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="assets-loaded">0</span>
+                <span class="stat-label">Loaded</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="assets-memory">0 KB</span>
+                <span class="stat-label">Memory</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="assets-progress">0%</span>
+                <span class="stat-label">Progress</span>
+            </div>
+        </div>
+
+        <div class="media-list" id="asset-list">
+            <p style="text-align: center; opacity: 0.7;">No assets registered</p>
+        </div>
+
+        <div class="info">
+            <strong>Manager Features:</strong> Central asset registry, batch preloading,
+            progress tracking, memory management, asset cataloging, format detection,
+            and automatic caching.
+        </div>
+    </div>
+
+    <!-- Features Overview -->
+    <div class="section">
+        <h2>✨ Key Features</h2>
+
+        <div class="feature-list">
+            <div class="feature-card">
+                <h3>🎨 Image Processing</h3>
+                <p>Multiple fit modes, transformations, visual effects, and format support</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎬 Video Playback</h3>
+                <p>Full playback controls, seeking, speed control, and frame extraction</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎵 Audio System</h3>
+                <p>Web Audio API, multiple sounds, volume fading, and 3D positioning</p>
+            </div>
+            <div class="feature-card">
+                <h3>💾 Smart Caching</h3>
+                <p>Automatic caching, memory management, and asset preloading</p>
+            </div>
+            <div class="feature-card">
+                <h3>📥 Drag & Drop</h3>
+                <p>Native file selection and drag-drop support for media import</p>
+            </div>
+            <div class="feature-card">
+                <h3>📊 Progress Tracking</h3>
+                <p>Real-time loading progress, error handling, and status reporting</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            createStage,
+            SK8Image,
+            SK8Picture,
+            SK8MovieRectangle,
+            SK8Sound,
+            ImageFitMode,
+            VideoFitMode,
+            SoundState,
+            MediaManager,
+            MediaType,
+            MediaStatus,
+            playBeep,
+            playToneSequence,
+            resumeAudioContext,
+        } from '../dist/sk8.js';
+
+        // Initialize stages
+        const imageStage = createStage('image-canvas');
+        const pictureStage = createStage('picture-canvas');
+        const videoStage = createStage('video-canvas');
+
+        // Create actors
+        let imageActor, pictureActor, videoActor, musicSound;
+        let imageEffects = { brightness: 1, contrast: 1, grayscale: false, blur: 0 };
+
+        // Image Demo
+        window.loadSampleImage = function() {
+            if (!imageActor) {
+                imageActor = new SK8Image();
+                imageActor.setBoundsRect({ left: 50, top: 50, right: 750, bottom: 350 });
+                imageActor.setFitMode(ImageFitMode.CONTAIN);
+                imageStage.addActor(imageActor);
+            }
+
+            // Use a sample image URL (placeholder)
+            imageActor.setSource('https://picsum.photos/800/600');
+        };
+
+        window.applyImageEffect = function(effect) {
+            if (!imageActor) {
+                alert('Please load an image first!');
+                return;
+            }
+
+            switch(effect) {
+                case 'brightness':
+                    imageEffects.brightness = Math.min(2, imageEffects.brightness + 0.2);
+                    imageActor.setBrightness(imageEffects.brightness);
+                    break;
+                case 'contrast':
+                    imageEffects.contrast = Math.min(2, imageEffects.contrast + 0.2);
+                    imageActor.setContrast(imageEffects.contrast);
+                    break;
+                case 'grayscale':
+                    imageEffects.grayscale = !imageEffects.grayscale;
+                    imageActor.setGrayscale(imageEffects.grayscale);
+                    break;
+                case 'blur':
+                    imageEffects.blur = (imageEffects.blur + 2) % 10;
+                    imageActor.setBlur(imageEffects.blur);
+                    break;
+                case 'flip-h':
+                    imageActor.setFlipHorizontal(true);
+                    break;
+                case 'flip-v':
+                    imageActor.setFlipVertical(true);
+                    break;
+            }
+        };
+
+        window.resetImage = function() {
+            if (!imageActor) return;
+
+            imageEffects = { brightness: 1, contrast: 1, grayscale: false, blur: 0 };
+            imageActor.setBrightness(1);
+            imageActor.setContrast(1);
+            imageActor.setGrayscale(false);
+            imageActor.setBlur(0);
+            imageActor.setFlipHorizontal(false);
+            imageActor.setFlipVertical(false);
+        };
+
+        // Picture with Drag & Drop
+        pictureActor = new SK8Picture();
+        pictureActor.setBoundsRect({ left: 50, top: 50, right: 750, bottom: 350 });
+        pictureActor.setFitMode(ImageFitMode.CONTAIN);
+        pictureActor.setAllowFileSelection(true);
+        pictureActor.setAllowDragDrop(true);
+        pictureStage.addActor(pictureActor);
+
+        const dropZone = document.getElementById('drop-zone');
+
+        dropZone.onclick = () => {
+            pictureActor.selectFile();
+        };
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.classList.remove('drag-over');
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            pictureActor.handleDrop(e);
+        };
+
+        // Video Demo
+        window.loadSampleVideo = function() {
+            if (!videoActor) {
+                videoActor = new SK8MovieRectangle();
+                videoActor.setBoundsRect({ left: 50, top: 50, right: 750, bottom: 400 });
+                videoActor.setFitMode(VideoFitMode.CONTAIN);
+                videoActor.setShowControls(true);
+                videoStage.addActor(videoActor);
+            }
+
+            // Use Big Buck Bunny sample video
+            videoActor.setSource('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+        };
+
+        window.toggleVideoPlay = async function() {
+            if (!videoActor) {
+                alert('Please load a video first!');
+                return;
+            }
+
+            await resumeAudioContext();
+
+            if (videoActor.isPlayingVideo()) {
+                videoActor.pause();
+            } else {
+                await videoActor.play();
+            }
+        };
+
+        window.stopVideo = function() {
+            if (videoActor) videoActor.stop();
+        };
+
+        window.toggleVideoControls = function() {
+            if (videoActor) {
+                videoActor.setShowControls(!videoActor.getShowControls());
+            }
+        };
+
+        window.videoSeek = function(seconds) {
+            if (videoActor) {
+                videoActor.seek(videoActor.getCurrentTime() + seconds);
+            }
+        };
+
+        window.videoSpeed = function(rate) {
+            if (videoActor) {
+                videoActor.setPlaybackRate(rate);
+            }
+        };
+
+        // Audio Demo
+        window.playSound = async function(type) {
+            await resumeAudioContext();
+
+            if (type === 'beep') {
+                playBeep(440, 0.3, 0.3);
+            } else if (type === 'tone-sequence') {
+                playToneSequence([
+                    { frequency: 262, duration: 0.2, volume: 0.3 },
+                    { frequency: 294, duration: 0.2, volume: 0.3 },
+                    { frequency: 330, duration: 0.2, volume: 0.3 },
+                    { frequency: 349, duration: 0.4, volume: 0.3 },
+                ]);
+            }
+        };
+
+        window.loadBackgroundMusic = async function() {
+            await resumeAudioContext();
+
+            if (!musicSound) {
+                musicSound = new SK8Sound();
+                // Use a sample audio URL
+                // Note: In production, you'd use a real audio file
+                musicSound.setLoop(true);
+                musicSound.setVolume(0.5);
+            }
+
+            updateSoundUI();
+        };
+
+        window.toggleMusicPlay = async function() {
+            if (!musicSound) {
+                alert('Please load music first!');
+                return;
+            }
+
+            await resumeAudioContext();
+
+            if (musicSound.isPlaying()) {
+                musicSound.pause();
+            } else {
+                musicSound.resume();
+            }
+
+            updateSoundUI();
+        };
+
+        window.stopMusic = function() {
+            if (musicSound) {
+                musicSound.stop();
+                updateSoundUI();
+            }
+        };
+
+        window.fadeMusic = function(direction) {
+            if (!musicSound) return;
+
+            const targetVolume = direction === 'in' ? 1.0 : 0.0;
+            musicSound.fadeVolume(targetVolume, 2.0);
+
+            updateSoundUI();
+        };
+
+        function updateSoundUI() {
+            if (!musicSound) return;
+
+            document.getElementById('sound-state').textContent = musicSound.getState();
+            document.getElementById('sound-volume').textContent =
+                Math.round(musicSound.getVolume() * 100) + '%';
+            document.getElementById('sound-time').textContent =
+                formatTime(musicSound.getCurrentTime());
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Media Manager Demo
+        const manager = MediaManager.getInstance();
+
+        window.registerAssets = function() {
+            manager.clear();
+            manager.registerMany([
+                { id: 'sample1', url: 'https://picsum.photos/200/200', type: MediaType.IMAGE },
+                { id: 'sample2', url: 'https://picsum.photos/300/200', type: MediaType.IMAGE },
+                { id: 'sample3', url: 'https://picsum.photos/400/300', type: MediaType.IMAGE },
+            ]);
+
+            updateManagerUI();
+        };
+
+        window.loadAllAssets = async function() {
+            await manager.loadAll((loaded, total) => {
+                updateManagerUI();
+            });
+
+            updateManagerUI();
+        };
+
+        window.unloadAllAssets = function() {
+            manager.unloadAll();
+            updateManagerUI();
+        };
+
+        window.clearAssets = function() {
+            manager.clear();
+            updateManagerUI();
+        };
+
+        window.showAssetCatalog = function() {
+            const catalog = manager.exportCatalog();
+            console.log('Asset Catalog:', catalog);
+            alert('Asset catalog logged to console. Check developer tools.');
+        };
+
+        function updateManagerUI() {
+            const progress = manager.getProgress();
+            const all = manager.getAll();
+
+            document.getElementById('assets-total').textContent = progress.total;
+            document.getElementById('assets-loaded').textContent = progress.loaded;
+            document.getElementById('assets-memory').textContent = manager.getMemoryUsageString();
+            document.getElementById('assets-progress').textContent =
+                Math.round(progress.percent) + '%';
+
+            const listEl = document.getElementById('asset-list');
+            if (all.length === 0) {
+                listEl.innerHTML = '<p style="text-align: center; opacity: 0.7;">No assets registered</p>';
+            } else {
+                listEl.innerHTML = all.map(asset => `
+                    <div class="media-item">
+                        <span>${asset.id} (${asset.type})</span>
+                        <span class="status ${asset.status}">${asset.status}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initial UI update
+        updateManagerUI();
+
+        // Animation loop for stages
+        function animate() {
+            imageStage.render();
+            pictureStage.render();
+            videoStage.render();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        console.log('SK8 Media Demo initialized!');
+        console.log('Explore comprehensive media handling with images, video, and audio.');
+    </script>
+</body>
+</html>

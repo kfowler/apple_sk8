@@ -30,6 +30,13 @@ export abstract class SK8Actor extends SK8Object {
   private skewX: number = 0;
   private skewY: number = 0;
 
+  // Visual effects
+  private opacity: number = 1.0; // 0 to 1
+  private shadowColor: Color | null = null;
+  private shadowBlur: number = 0;
+  private shadowOffsetX: number = 0;
+  private shadowOffsetY: number = 0;
+
   // Event handling
   eventListeners = new Map<string, EventListenerEntry[]>();
 
@@ -70,6 +77,11 @@ export abstract class SK8Actor extends SK8Object {
     this.defineProperty('droppable', {
       getter: () => this.getDroppable(),
       setter: (value: boolean) => this.setDroppable(value),
+    });
+
+    this.defineProperty('opacity', {
+      getter: () => this.getOpacity(),
+      setter: (value: number) => this.setOpacity(value),
     });
   }
 
@@ -183,6 +195,111 @@ export abstract class SK8Actor extends SK8Object {
   setLineWidth(width: number): void {
     this.lineWidth = width;
     this.setNeedsDraw();
+  }
+
+  // Opacity
+
+  getOpacity(): number {
+    return this.opacity;
+  }
+
+  setOpacity(opacity: number): void {
+    this.opacity = Math.max(0, Math.min(1, opacity));
+    this.setNeedsDraw();
+  }
+
+  /**
+   * Fade in animation helper
+   */
+  fadeIn(duration: number = 300): void {
+    const startOpacity = this.opacity;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      this.setOpacity(startOpacity + (1 - startOpacity) * progress);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    animate();
+  }
+
+  /**
+   * Fade out animation helper
+   */
+  fadeOut(duration: number = 300): void {
+    const startOpacity = this.opacity;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      this.setOpacity(startOpacity * (1 - progress));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    animate();
+  }
+
+  // Shadow effects
+
+  /**
+   * Set shadow effect
+   */
+  setShadow(
+    color: Color,
+    blur: number = 4,
+    offsetX: number = 2,
+    offsetY: number = 2
+  ): void {
+    this.shadowColor = color;
+    this.shadowBlur = blur;
+    this.shadowOffsetX = offsetX;
+    this.shadowOffsetY = offsetY;
+    this.setNeedsDraw();
+  }
+
+  /**
+   * Clear shadow effect
+   */
+  clearShadow(): void {
+    this.shadowColor = null;
+    this.shadowBlur = 0;
+    this.shadowOffsetX = 0;
+    this.shadowOffsetY = 0;
+    this.setNeedsDraw();
+  }
+
+  getShadowColor(): Color | null {
+    return this.shadowColor;
+  }
+
+  getShadowBlur(): number {
+    return this.shadowBlur;
+  }
+
+  getShadowOffsetX(): number {
+    return this.shadowOffsetX;
+  }
+
+  getShadowOffsetY(): number {
+    return this.shadowOffsetY;
+  }
+
+  /**
+   * Check if shadow is enabled
+   */
+  hasShadow(): boolean {
+    return this.shadowColor !== null;
   }
 
   // Transformations
@@ -306,6 +423,35 @@ export abstract class SK8Actor extends SK8Object {
       const m = this.transformMatrix;
       ctx.transform(m.a, m.b, m.c, m.d, m.e, m.f);
     }
+  }
+
+  /**
+   * Apply visual effects (opacity and shadow) to a canvas context
+   */
+  protected applyVisualEffects(ctx: CanvasRenderingContext2D): void {
+    // Apply opacity
+    if (this.opacity < 1) {
+      ctx.globalAlpha = this.opacity;
+    }
+
+    // Apply shadow
+    if (this.shadowColor) {
+      ctx.shadowColor = ColorUtils.toCSS(this.shadowColor);
+      ctx.shadowBlur = this.shadowBlur;
+      ctx.shadowOffsetX = this.shadowOffsetX;
+      ctx.shadowOffsetY = this.shadowOffsetY;
+    }
+  }
+
+  /**
+   * Clear visual effects from canvas context
+   */
+  protected clearVisualEffects(ctx: CanvasRenderingContext2D): void {
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
   }
 
   // Hit testing

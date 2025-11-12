@@ -1,0 +1,149 @@
+{
+  "formatVersion": "1.0.0",
+  "metadata": {
+    "name": "Interactive Project",
+    "description": "An SK8 project with interactive elements and handlers",
+    "author": "SK8 Team",
+    "created": "2025-11-12T00:00:00.000Z",
+    "modified": "2025-11-12T00:00:00.000Z",
+    "version": "1.0.0",
+    "sk8Version": "0.3.0"
+  },
+  "stages": [
+    {
+      "id": "main",
+      "name": "Interactive Stage",
+      "width": 800,
+      "height": 600,
+      "backgroundColor": {
+        "r": 240,
+        "g": 240,
+        "b": 240,
+        "a": 1
+      },
+      "actorIds": ["button1", "text1", "slider1"]
+    }
+  ],
+  "actors": [
+    {
+      "id": "button1",
+      "className": "SK8Button",
+      "name": "ClickMeButton",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 300,
+            "top": 200,
+            "right": 500,
+            "bottom": 250
+          },
+          "type": "object"
+        },
+        "text": {
+          "value": "Click Me!",
+          "type": "string"
+        },
+        "fillColor": {
+          "value": {
+            "r": 0,
+            "g": 122,
+            "b": 255,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {
+        "click": "function(x, y) { console.log('Button clicked!'); }"
+      }
+    },
+    {
+      "id": "text1",
+      "className": "SK8Text",
+      "name": "TitleText",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 200,
+            "top": 100,
+            "right": 600,
+            "bottom": 150
+          },
+          "type": "object"
+        },
+        "text": {
+          "value": "Welcome to SK8!",
+          "type": "string"
+        },
+        "fillColor": {
+          "value": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "slider1",
+      "className": "SK8Slider",
+      "name": "ValueSlider",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 250,
+            "top": 350,
+            "right": 550,
+            "bottom": 380
+          },
+          "type": "object"
+        },
+        "value": {
+          "value": 50,
+          "type": "number"
+        },
+        "minValue": {
+          "value": 0,
+          "type": "number"
+        },
+        "maxValue": {
+          "value": 100,
+          "type": "number"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {
+        "change": "function(value) { console.log('Slider value:', value); }"
+      }
+    }
+  ],
+  "assets": [],
+  "scripts": [
+    {
+      "objectId": "button1",
+      "handlerName": "click",
+      "source": "function(x, y) { console.log('Button clicked at', x, y); }",
+      "parameters": ["x", "y"]
+    },
+    {
+      "objectId": "slider1",
+      "handlerName": "change",
+      "source": "function(value) { console.log('Slider value changed to', value); }",
+      "parameters": ["value"]
+    }
+  ]
+}

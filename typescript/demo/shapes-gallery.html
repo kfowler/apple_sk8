@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Shapes Gallery - Phase 1 Extended Shapes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f8f9fa;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .canvas-label {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .demo-box {
+            display: inline-block;
+            text-align: center;
+            margin: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .feature-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            min-width: 150px;
+            margin: 10px;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SK8 Shapes Gallery</h1>
+        <div class="subtitle">Phase 1 Extended Shapes & Visual Effects</div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number">5</div>
+                <div class="stat-label">New Shapes</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Visual Effects</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">40+</div>
+                <div class="stat-label">Test Cases</div>
+            </div>
+        </div>
+
+        <!-- Arrow Shapes -->
+        <div class="section">
+            <h2>1. Arrow Shape</h2>
+            <div class="feature-list">
+                <ul>
+                    <li>Customizable start and end points</li>
+                    <li>Adjustable head size and angle</li>
+                    <li>Direction: start, end, both, or none</li>
+                    <li>Perfect for diagrams and flowcharts</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="arrow-canvas" width="400" height="300"></canvas>
+                    <div class="canvas-label">Arrow Variations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Star Shapes -->
+        <div class="section">
+            <h2>2. Star Shape</h2>
+            <div class="feature-list">
+                <ul>
+                    <li>Configurable number of points (3+)</li>
+                    <li>Inner and outer radius control</li>
+                    <li>Center-based positioning</li>
+                    <li>Automatic bounds calculation</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="star-canvas" width="700" height="300"></canvas>
+                    <div class="canvas-label">Star Variations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Path Shapes -->
+        <div class="section">
+            <h2>3. Path Shape (SVG-style)</h2>
+            <div class="feature-list">
+                <ul>
+                    <li>Support for M, L, C, Q, A, Z commands</li>
+                    <li>Absolute and relative coordinates</li>
+                    <li>Built-in common shapes: heart, cloud, lightning</li>
+                    <li>Complex custom paths</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="path-canvas" width="700" height="300"></canvas>
+                    <div class="canvas-label">Path Shapes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TextBox -->
+        <div class="section">
+            <h2>4. TextBox</h2>
+            <div class="feature-list">
+                <ul>
+                    <li>Multi-line text with automatic wrapping</li>
+                    <li>Alignment: left, center, right</li>
+                    <li>Scroll support for overflow</li>
+                    <li>Configurable padding and line height</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="textbox-canvas" width="700" height="400"></canvas>
+                    <div class="canvas-label">TextBox Examples</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="section">
+            <h2>5. ProgressBar</h2>
+            <div class="feature-list">
+                <ul>
+                    <li>Horizontal and vertical orientations</li>
+                    <li>Smooth animated value changes</li>
+                    <li>Optional percentage text display</li>
+                    <li>Customizable colors</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="progressbar-canvas" width="700" height="300"></canvas>
+                    <div class="canvas-label">ProgressBar Examples</div>
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="animateProgressBars()">Animate Progress Bars</button>
+                <button onclick="resetProgressBars()">Reset</button>
+            </div>
+        </div>
+
+        <!-- Visual Effects -->
+        <div class="section">
+            <h2>6. Visual Effects</h2>
+            <div class="feature-list">
+                <ul>
+                    <li><strong>Opacity:</strong> Full transparency control (0-1)</li>
+                    <li><strong>Shadow:</strong> Drop shadow with blur and offset</li>
+                    <li>Fade in/out animations</li>
+                    <li>Effects work on all shapes</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="effects-canvas" width="700" height="400"></canvas>
+                    <div class="canvas-label">Opacity & Shadow Effects</div>
+                </div>
+            </div>
+            <div class="controls">
+                <button onclick="animateOpacity()">Animate Opacity</button>
+                <button onclick="toggleShadows()">Toggle Shadows</button>
+            </div>
+        </div>
+
+        <!-- Gradients -->
+        <div class="section">
+            <h2>7. Gradient Fills (Phase 1)</h2>
+            <div class="feature-list">
+                <ul>
+                    <li>Linear gradients (horizontal, vertical, diagonal)</li>
+                    <li>Radial gradients (centered, spotlight)</li>
+                    <li>Multiple color stops</li>
+                    <li>Works with all shapes</li>
+                </ul>
+            </div>
+            <div class="canvas-container">
+                <div class="demo-box">
+                    <canvas id="gradient-canvas" width="700" height="300"></canvas>
+                    <div class="canvas-label">Gradient Examples</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import {
+            SK8Arrow,
+            SK8Star,
+            SK8Path,
+            SK8TextBox,
+            SK8ProgressBar,
+            SK8Rectangle,
+            SK8Circle,
+            LinearGradient,
+            RadialGradient,
+        } from '../dist/sk8.js';
+
+        // Helper function to render shapes on a canvas
+        function renderShapes(canvasId, renderFn) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            renderFn(ctx, canvas);
+        }
+
+        // 1. Arrow Shapes
+        renderShapes('arrow-canvas', (ctx) => {
+            // Simple arrow
+            const arrow1 = new SK8Arrow();
+            arrow1.setPoints(50, 50, 150, 50);
+            arrow1.setFrameColor({ r: 0, g: 0, b: 0 });
+            arrow1.setFillColor({ r: 100, g: 100, b: 255 });
+            arrow1.setLineWidth(2);
+            arrow1.render(ctx);
+
+            // Double-headed arrow
+            const arrow2 = new SK8Arrow();
+            arrow2.setPoints(50, 120, 150, 120);
+            arrow2.setDirection('both');
+            arrow2.setFrameColor({ r: 255, g: 0, b: 0 });
+            arrow2.setFillColor({ r: 255, g: 100, b: 100 });
+            arrow2.setLineWidth(3);
+            arrow2.render(ctx);
+
+            // Diagonal arrow with large head
+            const arrow3 = new SK8Arrow();
+            arrow3.setPoints(250, 50, 350, 180);
+            arrow3.setHeadSize(25);
+            arrow3.setHeadAngle(45);
+            arrow3.setFrameColor({ r: 0, g: 150, b: 0 });
+            arrow3.setFillColor({ r: 100, g: 255, b: 100 });
+            arrow3.setLineWidth(3);
+            arrow3.render(ctx);
+        });
+
+        // 2. Star Shapes
+        renderShapes('star-canvas', (ctx) => {
+            const starConfigs = [
+                { points: 5, inner: 20, outer: 50, color: { r: 255, g: 215, b: 0 } },
+                { points: 6, inner: 25, outer: 55, color: { r: 255, g: 100, b: 180 } },
+                { points: 8, inner: 30, outer: 60, color: { r: 100, g: 200, b: 255 } },
+                { points: 4, inner: 25, outer: 50, color: { r: 150, g: 255, b: 150 } },
+            ];
+
+            starConfigs.forEach((config, i) => {
+                const star = new SK8Star();
+                star.setCenter(100 + i * 150, 150);
+                star.setNumPoints(config.points);
+                star.setInnerRadius(config.inner);
+                star.setOuterRadius(config.outer);
+                star.setFillColor(config.color);
+                star.setFrameColor({ r: 0, g: 0, b: 0 });
+                star.setLineWidth(2);
+                star.render(ctx);
+            });
+        });
+
+        // 3. Path Shapes
+        renderShapes('path-canvas', (ctx) => {
+            // Heart
+            const heart = SK8Path.createHeart(120, 150, 70);
+            heart.setFillColor({ r: 255, g: 50, b: 100 });
+            heart.setFrameColor({ r: 150, g: 0, b: 50 });
+            heart.setLineWidth(2);
+            heart.render(ctx);
+
+            // Cloud
+            const cloud = SK8Path.createCloud(350, 150, 70);
+            cloud.setFillColor({ r: 200, g: 230, b: 255 });
+            cloud.setFrameColor({ r: 100, g: 150, b: 200 });
+            cloud.setLineWidth(2);
+            cloud.render(ctx);
+
+            // Lightning
+            const lightning = SK8Path.createLightning(550, 150, 70);
+            lightning.setFillColor({ r: 255, g: 255, b: 0 });
+            lightning.setFrameColor({ r: 200, g: 150, b: 0 });
+            lightning.setLineWidth(2);
+            lightning.render(ctx);
+        });
+
+        // 4. TextBox
+        renderShapes('textbox-canvas', (ctx) => {
+            // Left-aligned text box
+            const textBox1 = new SK8TextBox();
+            textBox1.setBoundsRect({ left: 20, top: 20, right: 230, bottom: 180 });
+            textBox1.setText('This is a TextBox with automatic word wrapping. It supports multiple lines and can handle long paragraphs of text gracefully.');
+            textBox1.setAlignment('left');
+            textBox1.setFillColor({ r: 255, g: 255, b: 230 });
+            textBox1.setFrameColor({ r: 0, g: 0, b: 0 });
+            textBox1.setLineWidth(2);
+            textBox1.render(ctx);
+
+            // Center-aligned text box
+            const textBox2 = new SK8TextBox();
+            textBox2.setBoundsRect({ left: 250, top: 20, right: 460, bottom: 180 });
+            textBox2.setText('Center-aligned text looks great for titles and headlines in your SK8 applications!');
+            textBox2.setAlignment('center');
+            textBox2.setFillColor({ r: 230, g: 240, b: 255 });
+            textBox2.setFrameColor({ r: 0, g: 0, b: 150 });
+            textBox2.setLineWidth(2);
+            textBox2.render(ctx);
+
+            // Right-aligned text box
+            const textBox3 = new SK8TextBox();
+            textBox3.setBoundsRect({ left: 480, top: 20, right: 690, bottom: 180 });
+            textBox3.setText('Right-aligned text is perfect for quotations and side notes in your designs.');
+            textBox3.setAlignment('right');
+            textBox3.setFillColor({ r: 255, g: 230, b: 240 });
+            textBox3.setFrameColor({ r: 150, g: 0, b: 0 });
+            textBox3.setLineWidth(2);
+            textBox3.render(ctx);
+
+            // Scrollable text box
+            const textBox4 = new SK8TextBox();
+            textBox4.setBoundsRect({ left: 150, top: 210, right: 560, bottom: 370 });
+            textBox4.setText('This TextBox demonstrates scroll functionality. When text exceeds the visible area, you can scroll through it. It also supports configurable padding, line height, and can even be made editable for user input. The TextBox is a versatile component for any text-heavy application!');
+            textBox4.setFillColor({ r: 240, g: 255, b: 240 });
+            textBox4.setFrameColor({ r: 0, g: 100, b: 0 });
+            textBox4.setLineWidth(2);
+            textBox4.render(ctx);
+        });
+
+        // 5. ProgressBar
+        let progressBars = [];
+        renderShapes('progressbar-canvas', (ctx) => {
+            progressBars = [];
+
+            // Horizontal progress bar
+            const bar1 = SK8ProgressBar.createDeterminate(50, 40, 300, 30);
+            bar1.setValue(65, false);
+            bar1.setBarColor({ r: 76, g: 175, b: 80 });
+            bar1.setFrameColor({ r: 0, g: 0, b: 0 });
+            progressBars.push(bar1);
+            bar1.render(ctx);
+
+            // Horizontal with different color
+            const bar2 = SK8ProgressBar.createDeterminate(50, 100, 300, 30);
+            bar2.setValue(40, false);
+            bar2.setBarColor({ r: 255, g: 152, b: 0 });
+            bar2.setFrameColor({ r: 0, g: 0, b: 0 });
+            progressBars.push(bar2);
+            bar2.render(ctx);
+
+            // Vertical progress bar
+            const bar3 = SK8ProgressBar.createVertical(450, 40, 40, 200);
+            bar3.setValue(80, false);
+            bar3.setBarColor({ r: 33, g: 150, b: 243 });
+            bar3.setFrameColor({ r: 0, g: 0, b: 0 });
+            progressBars.push(bar3);
+            bar3.render(ctx);
+
+            // Vertical with different color
+            const bar4 = SK8ProgressBar.createVertical(520, 40, 40, 200);
+            bar4.setValue(50, false);
+            bar4.setBarColor({ r: 156, g: 39, b: 176 });
+            bar4.setFrameColor({ r: 0, g: 0, b: 0 });
+            progressBars.push(bar4);
+            bar4.render(ctx);
+
+            // Small horizontal without text
+            const bar5 = SK8ProgressBar.createDeterminate(50, 170, 300, 15);
+            bar5.setValue(90, false);
+            bar5.setShowText(false);
+            bar5.setBarColor({ r: 244, g: 67, b: 54 });
+            bar5.setFrameColor({ r: 0, g: 0, b: 0 });
+            progressBars.push(bar5);
+            bar5.render(ctx);
+        });
+
+        window.animateProgressBars = () => {
+            progressBars.forEach((bar, i) => {
+                const targetValue = Math.random() * 100;
+                bar.setValue(targetValue, true);
+            });
+
+            // Re-render with animation
+            const animateFrame = () => {
+                renderShapes('progressbar-canvas', (ctx) => {
+                    progressBars.forEach(bar => bar.render(ctx));
+                });
+
+                if (progressBars.some(bar => Math.abs(bar.getCurrentValue() - bar.getValue()) > 0.5)) {
+                    requestAnimationFrame(animateFrame);
+                }
+            };
+            animateFrame();
+        };
+
+        window.resetProgressBars = () => {
+            progressBars.forEach(bar => bar.reset());
+            renderShapes('progressbar-canvas', (ctx) => {
+                progressBars.forEach(bar => bar.render(ctx));
+            });
+        };
+
+        // 6. Visual Effects
+        let effectsShapes = [];
+        renderShapes('effects-canvas', (ctx) => {
+            effectsShapes = [];
+
+            // Opacity variations
+            const opacities = [1.0, 0.8, 0.6, 0.4, 0.2];
+            opacities.forEach((opacity, i) => {
+                const rect = new SK8Rectangle();
+                rect.setBoundsRect({ left: 50 + i * 120, top: 40, right: 140 + i * 120, bottom: 130 });
+                rect.setFillColor({ r: 100, g: 149, b: 237 });
+                rect.setOpacity(opacity);
+                effectsShapes.push(rect);
+                rect.render(ctx);
+
+                ctx.fillStyle = '#000';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.round(opacity * 100)}%`, 95 + i * 120, 160);
+            });
+
+            // Shadow effects
+            const shadowConfigs = [
+                { blur: 0, offset: 0, label: 'No Shadow' },
+                { blur: 5, offset: 3, label: 'Small' },
+                { blur: 10, offset: 5, label: 'Medium' },
+                { blur: 20, offset: 8, label: 'Large' },
+            ];
+
+            shadowConfigs.forEach((config, i) => {
+                const circle = new SK8Circle();
+                circle.setBoundsRect({ left: 80 + i * 150, top: 220, right: 170 + i * 150, bottom: 310 });
+                circle.setFillColor({ r: 255, g: 193, b: 7 });
+                if (config.blur > 0) {
+                    circle.setShadow({ r: 0, g: 0, b: 0 }, config.blur, config.offset, config.offset);
+                }
+                effectsShapes.push(circle);
+                circle.render(ctx);
+
+                ctx.fillStyle = '#000';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(config.label, 125 + i * 150, 340);
+            });
+        });
+
+        let opacityAnimating = false;
+        window.animateOpacity = () => {
+            if (opacityAnimating) return;
+            opacityAnimating = true;
+
+            const startTime = Date.now();
+            const duration = 2000;
+
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = (elapsed % duration) / duration;
+                const opacity = Math.abs(Math.sin(progress * Math.PI * 2));
+
+                renderShapes('effects-canvas', (ctx) => {
+                    effectsShapes.forEach((shape, i) => {
+                        if (i < 5) {
+                            shape.setOpacity(opacity);
+                        }
+                        shape.render(ctx);
+                    });
+
+                    // Redraw labels
+                    for (let i = 0; i < 5; i++) {
+                        ctx.fillStyle = '#000';
+                        ctx.font = '14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${Math.round((i < 5 ? opacity : (5 - i) * 0.2) * 100)}%`, 95 + i * 120, 160);
+                    }
+
+                    const shadowConfigs = [
+                        { label: 'No Shadow' },
+                        { label: 'Small' },
+                        { label: 'Medium' },
+                        { label: 'Large' },
+                    ];
+                    shadowConfigs.forEach((config, i) => {
+                        ctx.fillStyle = '#000';
+                        ctx.font = '14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(config.label, 125 + i * 150, 340);
+                    });
+                });
+
+                if (elapsed < duration * 2) {
+                    requestAnimationFrame(animate);
+                } else {
+                    opacityAnimating = false;
+                    // Reset
+                    effectsShapes.forEach((shape, i) => {
+                        if (i < 5) shape.setOpacity((5 - i) * 0.2);
+                    });
+                    renderShapes('effects-canvas', (ctx) => {
+                        effectsShapes.forEach(shape => shape.render(ctx));
+                    });
+                }
+            };
+            animate();
+        };
+
+        let shadowsEnabled = true;
+        window.toggleShadows = () => {
+            shadowsEnabled = !shadowsEnabled;
+            renderShapes('effects-canvas', (ctx) => {
+                effectsShapes.forEach((shape, i) => {
+                    if (i >= 5) {
+                        if (shadowsEnabled) {
+                            const configs = [
+                                { blur: 0, offset: 0 },
+                                { blur: 5, offset: 3 },
+                                { blur: 10, offset: 5 },
+                                { blur: 20, offset: 8 },
+                            ];
+                            const config = configs[i - 5];
+                            if (config.blur > 0) {
+                                shape.setShadow({ r: 0, g: 0, b: 0 }, config.blur, config.offset, config.offset);
+                            } else {
+                                shape.clearShadow();
+                            }
+                        } else {
+                            shape.clearShadow();
+                        }
+                    }
+                    shape.render(ctx);
+                });
+            });
+        };
+
+        // 7. Gradients
+        renderShapes('gradient-canvas', (ctx) => {
+            // Linear gradient - horizontal
+            const rect1 = new SK8Rectangle();
+            rect1.setBoundsRect({ left: 30, top: 40, right: 130, bottom: 140 });
+            const gradient1 = LinearGradient.horizontal();
+            gradient1.addColorStop(0, { r: 255, g: 0, b: 0 });
+            gradient1.addColorStop(1, { r: 255, g: 255, b: 0 });
+            rect1.setFillColor(gradient1);
+            rect1.setFrameColor({ r: 0, g: 0, b: 0 });
+            rect1.render(ctx);
+
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Horizontal', 80, 165);
+
+            // Linear gradient - vertical
+            const rect2 = new SK8Rectangle();
+            rect2.setBoundsRect({ left: 160, top: 40, right: 260, bottom: 140 });
+            const gradient2 = LinearGradient.vertical();
+            gradient2.addColorStop(0, { r: 0, g: 0, b: 255 });
+            gradient2.addColorStop(1, { r: 0, g: 255, b: 255 });
+            rect2.setFillColor(gradient2);
+            rect2.setFrameColor({ r: 0, g: 0, b: 0 });
+            rect2.render(ctx);
+
+            ctx.fillText('Vertical', 210, 165);
+
+            // Linear gradient - diagonal
+            const rect3 = new SK8Rectangle();
+            rect3.setBoundsRect({ left: 290, top: 40, right: 390, bottom: 140 });
+            const gradient3 = LinearGradient.diagonal();
+            gradient3.addColorStop(0, { r: 255, g: 0, b: 255 });
+            gradient3.addColorStop(1, { r: 0, g: 255, b: 0 });
+            rect3.setFillColor(gradient3);
+            rect3.setFrameColor({ r: 0, g: 0, b: 0 });
+            rect3.render(ctx);
+
+            ctx.fillText('Diagonal', 340, 165);
+
+            // Radial gradient - centered
+            const circle1 = new SK8Circle();
+            circle1.setBoundsRect({ left: 450, top: 40, right: 550, bottom: 140 });
+            const gradient4 = RadialGradient.centered();
+            gradient4.addColorStop(0, { r: 255, g: 255, b: 255 });
+            gradient4.addColorStop(1, { r: 100, g: 100, b: 255 });
+            circle1.setFillColor(gradient4);
+            circle1.setFrameColor({ r: 0, g: 0, b: 0 });
+            circle1.render(ctx);
+
+            ctx.fillText('Radial', 500, 165);
+
+            // Multi-stop gradient
+            const rect4 = new SK8Rectangle();
+            rect4.setBoundsRect({ left: 150, top: 200, right: 550, bottom: 260 });
+            const gradient5 = LinearGradient.horizontal();
+            gradient5.addColorStop(0, { r: 255, g: 0, b: 0 });
+            gradient5.addColorStop(0.25, { r: 255, g: 255, b: 0 });
+            gradient5.addColorStop(0.5, { r: 0, g: 255, b: 0 });
+            gradient5.addColorStop(0.75, { r: 0, g: 255, b: 255 });
+            gradient5.addColorStop(1, { r: 0, g: 0, b: 255 });
+            rect4.setFillColor(gradient5);
+            rect4.setFrameColor({ r: 0, g: 0, b: 0 });
+            rect4.render(ctx);
+
+            ctx.fillText('Multi-Stop Gradient (Rainbow)', 350, 280);
+        });
+
+    </script>
+</body>
+</html>

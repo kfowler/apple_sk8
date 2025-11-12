@@ -1,0 +1,301 @@
+{
+  "formatVersion": "1.0.0",
+  "metadata": {
+    "name": "Complex Project",
+    "description": "A complex SK8 project demonstrating multiple stages and actors",
+    "author": "SK8 Team",
+    "created": "2025-11-12T00:00:00.000Z",
+    "modified": "2025-11-12T00:00:00.000Z",
+    "version": "2.0.0",
+    "sk8Version": "0.3.0",
+    "category": "Demo",
+    "tags": ["demo", "complex", "multi-stage"]
+  },
+  "stages": [
+    {
+      "id": "stage1",
+      "name": "Drawing Stage",
+      "width": 800,
+      "height": 600,
+      "backgroundColor": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 1
+      },
+      "actorIds": ["rect1", "circle1", "polygon1"]
+    },
+    {
+      "id": "stage2",
+      "name": "UI Stage",
+      "width": 800,
+      "height": 600,
+      "backgroundColor": {
+        "r": 240,
+        "g": 240,
+        "b": 245,
+        "a": 1
+      },
+      "actorIds": ["button1", "slider1", "checkbox1"]
+    }
+  ],
+  "actors": [
+    {
+      "id": "rect1",
+      "className": "SK8Rectangle",
+      "name": "GreenRectangle",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 50,
+            "top": 50,
+            "right": 150,
+            "bottom": 150
+          },
+          "type": "object"
+        },
+        "fillColor": {
+          "value": {
+            "r": 0,
+            "g": 255,
+            "b": 0,
+            "a": 0.8
+          },
+          "type": "object"
+        },
+        "frameColor": {
+          "value": {
+            "r": 0,
+            "g": 128,
+            "b": 0,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "lineWidth": {
+          "value": 3,
+          "type": "number"
+        },
+        "draggable": {
+          "value": true,
+          "type": "boolean"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "circle1",
+      "className": "SK8Circle",
+      "name": "OrangeCircle",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 250,
+            "top": 100,
+            "right": 400,
+            "bottom": 250
+          },
+          "type": "object"
+        },
+        "fillColor": {
+          "value": {
+            "r": 255,
+            "g": 165,
+            "b": 0,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "draggable": {
+          "value": true,
+          "type": "boolean"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "polygon1",
+      "className": "SK8Polygon",
+      "name": "StarPolygon",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 500,
+            "top": 150,
+            "right": 650,
+            "bottom": 300
+          },
+          "type": "object"
+        },
+        "points": {
+          "value": [
+            {"x": 575, "y": 150},
+            {"x": 600, "y": 225},
+            {"x": 650, "y": 225},
+            {"x": 615, "y": 265},
+            {"x": 630, "y": 300},
+            {"x": 575, "y": 275},
+            {"x": 520, "y": 300},
+            {"x": 535, "y": 265},
+            {"x": 500, "y": 225},
+            {"x": 550, "y": 225}
+          ],
+          "type": "array"
+        },
+        "fillColor": {
+          "value": {
+            "r": 255,
+            "g": 215,
+            "b": 0,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "button1",
+      "className": "SK8Button",
+      "name": "ActionButton",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 300,
+            "top": 250,
+            "right": 500,
+            "bottom": 300
+          },
+          "type": "object"
+        },
+        "text": {
+          "value": "Execute Action",
+          "type": "string"
+        },
+        "fillColor": {
+          "value": {
+            "r": 0,
+            "g": 122,
+            "b": 255,
+            "a": 1
+          },
+          "type": "object"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "slider1",
+      "className": "SK8Slider",
+      "name": "OpacitySlider",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 200,
+            "top": 400,
+            "right": 600,
+            "bottom": 430
+          },
+          "type": "object"
+        },
+        "value": {
+          "value": 75,
+          "type": "number"
+        },
+        "minValue": {
+          "value": 0,
+          "type": "number"
+        },
+        "maxValue": {
+          "value": 100,
+          "type": "number"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    },
+    {
+      "id": "checkbox1",
+      "className": "SK8CheckBox",
+      "name": "EnableCheckbox",
+      "properties": {
+        "boundsRect": {
+          "value": {
+            "left": 300,
+            "top": 150,
+            "right": 500,
+            "bottom": 180
+          },
+          "type": "object"
+        },
+        "text": {
+          "value": "Enable Feature",
+          "type": "string"
+        },
+        "checked": {
+          "value": true,
+          "type": "boolean"
+        },
+        "visible": {
+          "value": true,
+          "type": "boolean"
+        }
+      },
+      "handlers": {}
+    }
+  ],
+  "assets": [
+    {
+      "id": "logo1",
+      "type": "image",
+      "name": "company-logo.png",
+      "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...",
+      "size": 15234,
+      "mimeType": "image/png",
+      "metadata": {
+        "width": 256,
+        "height": 256,
+        "description": "Company logo"
+      }
+    }
+  ],
+  "scripts": [
+    {
+      "objectId": "button1",
+      "handlerName": "click",
+      "source": "function(x, y) { this.set('text', 'Clicked!'); setTimeout(() => this.set('text', 'Execute Action'), 1000); }",
+      "parameters": ["x", "y"]
+    },
+    {
+      "objectId": "slider1",
+      "handlerName": "change",
+      "source": "function(value) { const opacity = value / 100; console.log('Opacity set to:', opacity); }",
+      "parameters": ["value"]
+    },
+    {
+      "objectId": "checkbox1",
+      "handlerName": "change",
+      "source": "function(checked) { console.log('Feature', checked ? 'enabled' : 'disabled'); }",
+      "parameters": ["checked"]
+    }
+  ]
+}
