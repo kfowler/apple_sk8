@@ -26,6 +26,23 @@ export interface Point {
 export type Color = string | { r: number; g: number; b: number; a?: number };
 
 /**
+ * Type guard to check if a value is a Color
+ */
+export function isColor(value: unknown): value is Color {
+  if (typeof value === 'string') return true;
+  if (typeof value === 'object' && value !== null) {
+    const obj = value as Record<string, unknown>;
+    return (
+      typeof obj.r === 'number' &&
+      typeof obj.g === 'number' &&
+      typeof obj.b === 'number' &&
+      (obj.a === undefined || typeof obj.a === 'number')
+    );
+  }
+  return false;
+}
+
+/**
  * Helper functions for rectangles
  */
 export class RectUtils {

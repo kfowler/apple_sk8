@@ -9,11 +9,25 @@ export type PropertyValue = any;
 
 export type HandlerFunction = (...args: any[]) => any;
 
+export type PropertyValidator = (value: PropertyValue) => boolean | string;
+export type PropertyObserver = (newValue: PropertyValue, oldValue: PropertyValue) => void;
+
+export interface PropertyMetadata {
+  type?: string;
+  description?: string;
+  category?: string;
+  [key: string]: any;
+}
+
 export interface PropertyDescriptor {
   value?: PropertyValue;
   getter?: () => PropertyValue;
   setter?: (value: PropertyValue) => void;
   propagate?: boolean;
+  computed?: boolean;
+  dependencies?: string[];
+  validator?: PropertyValidator;
+  metadata?: PropertyMetadata;
 }
 
 /**
@@ -29,6 +43,9 @@ export class SK8Object {
   private parent: SK8Object | null = null;
   private properties = new Map<string, PropertyDescriptor>();
   private handlers = new Map<string, HandlerFunction>();
+  private observers = new Map<string, Set<PropertyObserver>>();
+  private computedCache = new Map<string, PropertyValue>();
+  private isComputingProperty = new Set<string>();
   protected objectName: string;
 
   constructor(parent?: SK8Object | null, name?: string) {
@@ -57,9 +74,34 @@ export class SK8Object {
     const descriptor = this.properties.get(propertyName);
 
     if (descriptor) {
+      // Handle computed properties
+      if (descriptor.computed && descriptor.getter) {
+        // Check for circular dependencies
+        if (this.isComputingProperty.has(propertyName)) {
+          throw new Error(
+            `Circular dependency detected in computed property '${propertyName}'`
+          );
+        }
+
+        // Check if we have a cached value
+        if (this.computedCache.has(propertyName)) {
+          return this.computedCache.get(propertyName);
+        }
+
+        // Compute the value
+        this.isComputingProperty.add(propertyName);
+        try {
+          const value = descriptor.getter.call(this);
+          this.computedCache.set(propertyName, value);
+          return value;
+        } finally {
+          this.isComputingProperty.delete(propertyName);
+        }
+      }
+
       // If it has a getter, call it
       if (descriptor.getter) {
-        return descriptor.getter();
+        return descriptor.getter.call(this);
       }
       // Otherwise return the value
       return descriptor.value;
@@ -80,16 +122,37 @@ export class SK8Object {
   set(propertyName: string, value: PropertyValue, propagate: boolean = false): void {
     const descriptor = this.properties.get(propertyName);
 
+    // Validate the value if a validator is defined
+    if (descriptor?.validator) {
+      const result = descriptor.validator(value);
+      if (result === false) {
+        throw new Error(`Validation failed for property '${propertyName}'`);
+      }
+      if (typeof result === 'string') {
+        throw new Error(`Validation failed for property '${propertyName}': ${result}`);
+      }
+    }
+
+    // Get old value for observers
+    const oldValue = this.get(propertyName);
+
     if (descriptor?.setter) {
       // Use custom setter if defined
-      descriptor.setter(value);
+      descriptor.setter.call(this, value);
     } else {
       // Store the value
       this.properties.set(propertyName, {
+        ...descriptor,
         value,
         propagate,
       });
     }
+
+    // Invalidate computed properties that depend on this property
+    this.invalidateDependentProperties(propertyName);
+
+    // Notify observers
+    this.notifyObservers(propertyName, value, oldValue);
 
     // Propagate to children if requested
     if (propagate) {
@@ -202,6 +265,89 @@ export class SK8Object {
    */
   setName(name: string): void {
     this.objectName = name;
+  }
+
+  /**
+   * Add a property observer
+   */
+  addPropertyObserver(propertyName: string, observer: PropertyObserver): void {
+    if (!this.observers.has(propertyName)) {
+      this.observers.set(propertyName, new Set());
+    }
+    this.observers.get(propertyName)!.add(observer);
+  }
+
+  /**
+   * Remove a property observer
+   */
+  removePropertyObserver(propertyName: string, observer: PropertyObserver): void {
+    const propertyObservers = this.observers.get(propertyName);
+    if (propertyObservers) {
+      propertyObservers.delete(observer);
+      if (propertyObservers.size === 0) {
+        this.observers.delete(propertyName);
+      }
+    }
+  }
+
+  /**
+   * Notify observers of a property change
+   */
+  private notifyObservers(
+    propertyName: string,
+    newValue: PropertyValue,
+    oldValue: PropertyValue
+  ): void {
+    const propertyObservers = this.observers.get(propertyName);
+    if (propertyObservers) {
+      propertyObservers.forEach((observer) => {
+        observer(newValue, oldValue);
+      });
+    }
+  }
+
+  /**
+   * Invalidate computed properties that depend on the given property
+   */
+  private invalidateDependentProperties(propertyName: string): void {
+    // Find all computed properties that depend on this property
+    const toInvalidate: string[] = [];
+
+    for (const [key, descriptor] of this.properties.entries()) {
+      if (descriptor.computed && descriptor.dependencies?.includes(propertyName)) {
+        // Clear the cache for this computed property
+        if (this.computedCache.has(key)) {
+          this.computedCache.delete(key);
+          toInvalidate.push(key);
+        }
+      }
+    }
+
+    // Recursively invalidate properties that depend on the properties we just invalidated
+    for (const key of toInvalidate) {
+      this.invalidateDependentProperties(key);
+    }
+  }
+
+  /**
+   * Get metadata for a property
+   */
+  getPropertyMetadata(propertyName: string): PropertyMetadata | undefined {
+    const descriptor = this.properties.get(propertyName);
+    return descriptor?.metadata;
+  }
+
+  /**
+   * Get metadata for all properties
+   */
+  getAllPropertiesMetadata(): Record<string, PropertyMetadata> {
+    const result: Record<string, PropertyMetadata> = {};
+    for (const [key, descriptor] of this.properties.entries()) {
+      if (descriptor.metadata) {
+        result[key] = descriptor.metadata;
+      }
+    }
+    return result;
   }
 
   /**

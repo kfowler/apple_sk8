@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SK8 Interactive Widgets Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Geneva', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .canvas-wrapper {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    canvas {
+      display: block;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: #f5f5f5;
+    }
+
+    .info {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .info h2 {
+      margin-top: 0;
+      color: #667eea;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .info ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .info li {
+      margin: 8px 0;
+      color: #444;
+    }
+
+    .info code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #d63384;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 SK8 Interactive Widgets Demo</h1>
+    <p class="subtitle">
+      Explore 10 essential interactive actors for building rich user interfaces
+    </p>
+
+    <div class="canvas-wrapper">
+      <canvas id="stage" width="1160" height="800"></canvas>
+    </div>
+
+    <div class="info">
+      <h2>Interactive Widgets</h2>
+      <p>This demo showcases all 10 interactive actors implemented in Phase 1.3:</p>
+      <ul>
+        <li><code>SK8Button</code> - Interactive buttons with visual states (normal, hover, pressed, disabled)</li>
+        <li><code>SK8CheckBox</code> - Checkboxes with toggle functionality and labels</li>
+        <li><code>SK8RadioButton</code> - Radio buttons with automatic group behavior</li>
+        <li><code>SK8Slider</code> - Draggable sliders with value constraints and orientation options</li>
+        <li><code>SK8EditText</code> - Text input fields with keyboard support and cursor management</li>
+        <li><code>SK8Label</code> - Static text labels with alignment and styling options</li>
+        <li><code>SK8Container</code> - Layout containers with multiple layout modes (horizontal, vertical, grid)</li>
+        <li><code>SK8Panel</code> - Panels with title bars, close buttons, and collapsible content</li>
+        <li><code>SK8Scroller</code> - Scrollable content areas with draggable scrollbars</li>
+        <li><code>SK8MenuButton</code> - Dropdown menu buttons with selectable items</li>
+      </ul>
+
+      <h2>Try It Out</h2>
+      <ul>
+        <li>Click buttons to see visual feedback</li>
+        <li>Toggle checkboxes and radio buttons</li>
+        <li>Drag sliders to change values</li>
+        <li>Click the edit text field and type</li>
+        <li>Click the menu button to open the dropdown</li>
+        <li>Click the panel's title bar to collapse/expand it</li>
+        <li>Drag scrollbars to scroll content</li>
+      </ul>
+
+      <div id="status" class="status">
+        Status: Initializing...
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import {
+      createStage,
+      SK8Button,
+      SK8CheckBox,
+      SK8RadioButton,
+      SK8Slider,
+      SK8EditText,
+      SK8Label,
+      SK8Container,
+      SK8Panel,
+      SK8Scroller,
+      SK8MenuButton,
+      SK8Rectangle,
+      ColorUtils,
+    } from '../dist/sk8.js';
+
+    // Create stage
+    const stage = createStage('stage');
+    stage.startRendering();
+
+    const statusEl = document.getElementById('status');
+    function updateStatus(message) {
+      statusEl.textContent = `Status: ${message}`;
+    }
+
+    // Section 1: Buttons
+    const buttonLabel = new SK8Label();
+    buttonLabel.setText('Buttons');
+    buttonLabel.setFontSize(18);
+    buttonLabel.setFontWeight('bold');
+    buttonLabel.setBoundsRect({ left: 20, top: 20, right: 200, bottom: 40 });
+    buttonLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(buttonLabel);
+
+    const normalButton = new SK8Button();
+    normalButton.setLabel('Normal Button');
+    normalButton.setBoundsRect({ left: 20, top: 50, right: 150, bottom: 80 });
+    normalButton.setHandler('click', () => updateStatus('Normal button clicked!'));
+    stage.addActor(normalButton);
+
+    const disabledButton = new SK8Button();
+    disabledButton.setLabel('Disabled Button');
+    disabledButton.setBoundsRect({ left: 170, top: 50, right: 300, bottom: 80 });
+    disabledButton.setEnabled(false);
+    stage.addActor(disabledButton);
+
+    const successButton = new SK8Button();
+    successButton.setLabel('Success');
+    successButton.setBoundsRect({ left: 320, top: 50, right: 420, bottom: 80 });
+    successButton.setHandler('click', () => updateStatus('Success! ✓'));
+    stage.addActor(successButton);
+
+    // Section 2: CheckBoxes
+    const checkboxLabel = new SK8Label();
+    checkboxLabel.setText('CheckBoxes');
+    checkboxLabel.setFontSize(18);
+    checkboxLabel.setFontWeight('bold');
+    checkboxLabel.setBoundsRect({ left: 20, top: 100, right: 200, bottom: 120 });
+    checkboxLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(checkboxLabel);
+
+    const checkbox1 = new SK8CheckBox();
+    checkbox1.setLabel('Enable feature A');
+    checkbox1.setBoundsRect({ left: 20, top: 130, right: 200, bottom: 150 });
+    checkbox1.setHandler('toggle', (checked) => updateStatus(`Feature A: ${checked ? 'ON' : 'OFF'}`));
+    stage.addActor(checkbox1);
+
+    const checkbox2 = new SK8CheckBox();
+    checkbox2.setLabel('Enable feature B');
+    checkbox2.setBoundsRect({ left: 20, top: 160, right: 200, bottom: 180 });
+    checkbox2.setChecked(true);
+    checkbox2.setHandler('toggle', (checked) => updateStatus(`Feature B: ${checked ? 'ON' : 'OFF'}`));
+    stage.addActor(checkbox2);
+
+    const checkbox3 = new SK8CheckBox();
+    checkbox3.setLabel('Disabled option');
+    checkbox3.setBoundsRect({ left: 20, top: 190, right: 200, bottom: 210 });
+    checkbox3.setEnabled(false);
+    stage.addActor(checkbox3);
+
+    // Section 3: Radio Buttons
+    const radioLabel = new SK8Label();
+    radioLabel.setText('Radio Buttons');
+    radioLabel.setFontSize(18);
+    radioLabel.setFontWeight('bold');
+    radioLabel.setBoundsRect({ left: 220, top: 100, right: 400, bottom: 120 });
+    radioLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(radioLabel);
+
+    const radio1 = new SK8RadioButton();
+    radio1.setLabel('Option 1');
+    radio1.setGroup('demo-group');
+    radio1.setBoundsRect({ left: 220, top: 130, right: 350, bottom: 150 });
+    radio1.setSelected(true);
+    radio1.setHandler('select', () => updateStatus('Selected: Option 1'));
+    stage.addActor(radio1);
+
+    const radio2 = new SK8RadioButton();
+    radio2.setLabel('Option 2');
+    radio2.setGroup('demo-group');
+    radio2.setBoundsRect({ left: 220, top: 160, right: 350, bottom: 180 });
+    radio2.setHandler('select', () => updateStatus('Selected: Option 2'));
+    stage.addActor(radio2);
+
+    const radio3 = new SK8RadioButton();
+    radio3.setLabel('Option 3');
+    radio3.setGroup('demo-group');
+    radio3.setBoundsRect({ left: 220, top: 190, right: 350, bottom: 210 });
+    radio3.setHandler('select', () => updateStatus('Selected: Option 3'));
+    stage.addActor(radio3);
+
+    // Section 4: Sliders
+    const sliderLabel = new SK8Label();
+    sliderLabel.setText('Sliders');
+    sliderLabel.setFontSize(18);
+    sliderLabel.setFontWeight('bold');
+    sliderLabel.setBoundsRect({ left: 460, top: 20, right: 640, bottom: 40 });
+    sliderLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(sliderLabel);
+
+    const slider1 = new SK8Slider();
+    slider1.setValue(50);
+    slider1.setBoundsRect({ left: 460, top: 50, right: 710, bottom: 90 });
+    slider1.setHandler('change', (value) => updateStatus(`Slider value: ${value}`));
+    stage.addActor(slider1);
+
+    const slider2 = new SK8Slider();
+    slider2.setValue(75);
+    slider2.setMin(0);
+    slider2.setMax(200);
+    slider2.setStep(10);
+    slider2.setBoundsRect({ left: 460, top: 100, right: 710, bottom: 140 });
+    slider2.setHandler('change', (value) => updateStatus(`Volume: ${value}`));
+    stage.addActor(slider2);
+
+    const verticalSlider = new SK8Slider();
+    verticalSlider.setOrientation('vertical');
+    verticalSlider.setValue(60);
+    verticalSlider.setBoundsRect({ left: 720, top: 50, right: 760, bottom: 180 });
+    verticalSlider.setHandler('change', (value) => updateStatus(`Vertical slider: ${value}`));
+    stage.addActor(verticalSlider);
+
+    // Section 5: EditText
+    const editTextLabel = new SK8Label();
+    editTextLabel.setText('Text Input');
+    editTextLabel.setFontSize(18);
+    editTextLabel.setFontWeight('bold');
+    editTextLabel.setBoundsRect({ left: 460, top: 150, right: 640, bottom: 170 });
+    editTextLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(editTextLabel);
+
+    const editText1 = new SK8EditText();
+    editText1.setPlaceholder('Enter your name...');
+    editText1.setBoundsRect({ left: 460, top: 180, right: 710, bottom: 210 });
+    editText1.setHandler('change', (text) => updateStatus(`Text: ${text}`));
+    editText1.setHandler('enter', (text) => updateStatus(`Submitted: ${text}`));
+    stage.addActor(editText1);
+
+    const editText2 = new SK8EditText();
+    editText2.setText('Read-only text');
+    editText2.setReadonly(true);
+    editText2.setBoundsRect({ left: 460, top: 220, right: 710, bottom: 250 });
+    stage.addActor(editText2);
+
+    // Section 6: Menu Button
+    const menuLabel = new SK8Label();
+    menuLabel.setText('Menu Button');
+    menuLabel.setFontSize(18);
+    menuLabel.setFontWeight('bold');
+    menuLabel.setBoundsRect({ left: 780, top: 20, right: 960, bottom: 40 });
+    menuLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(menuLabel);
+
+    const menuButton = new SK8MenuButton();
+    menuButton.setLabel('File');
+    menuButton.setBoundsRect({ left: 780, top: 50, right: 900, bottom: 80 });
+    menuButton.setMenuItems([
+      { label: 'New File', value: 'new' },
+      { label: 'Open...', value: 'open' },
+      { label: 'Save', value: 'save' },
+      { label: '', value: '', separator: true },
+      { label: 'Export', value: 'export', enabled: false },
+      { label: '', value: '', separator: true },
+      { label: 'Exit', value: 'exit' },
+    ]);
+    menuButton.setHandler('menuSelect', (item) => updateStatus(`Menu: ${item.label}`));
+    stage.addActor(menuButton);
+
+    const menuButton2 = new SK8MenuButton();
+    menuButton2.setLabel('Edit');
+    menuButton2.setBoundsRect({ left: 920, top: 50, right: 1040, bottom: 80 });
+    menuButton2.setMenuItems([
+      { label: 'Cut', value: 'cut' },
+      { label: 'Copy', value: 'copy' },
+      { label: 'Paste', value: 'paste' },
+    ]);
+    menuButton2.setHandler('menuSelect', (item) => updateStatus(`Edit: ${item.label}`));
+    stage.addActor(menuButton2);
+
+    // Section 7: Container with Layout
+    const containerLabel = new SK8Label();
+    containerLabel.setText('Container (Horizontal Layout)');
+    containerLabel.setFontSize(18);
+    containerLabel.setFontWeight('bold');
+    containerLabel.setBoundsRect({ left: 20, top: 230, right: 350, bottom: 250 });
+    containerLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(containerLabel);
+
+    const container = new SK8Container();
+    container.setBoundsRect({ left: 20, top: 260, right: 440, bottom: 330 });
+    container.setLayoutMode('horizontal');
+    container.setBackgroundColor({ r: 245, g: 245, b: 245, a: 1.0 });
+    container.setShowBorder(true);
+
+    const btn1 = new SK8Button();
+    btn1.setLabel('Button 1');
+    container.addChild(btn1);
+
+    const btn2 = new SK8Button();
+    btn2.setLabel('Button 2');
+    container.addChild(btn2);
+
+    const btn3 = new SK8Button();
+    btn3.setLabel('Button 3');
+    container.addChild(btn3);
+
+    stage.addActor(container);
+
+    // Section 8: Container with Grid Layout
+    const gridLabel = new SK8Label();
+    gridLabel.setText('Container (Grid Layout)');
+    gridLabel.setFontSize(18);
+    gridLabel.setFontWeight('bold');
+    gridLabel.setBoundsRect({ left: 460, top: 270, right: 740, bottom: 290 });
+    gridLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(gridLabel);
+
+    const gridContainer = new SK8Container();
+    gridContainer.setBoundsRect({ left: 460, top: 300, right: 710, bottom: 450 });
+    gridContainer.setLayoutMode('grid');
+    gridContainer.setGridColumns(2);
+    gridContainer.setBackgroundColor({ r: 245, g: 245, b: 245, a: 1.0 });
+    gridContainer.setShowBorder(true);
+
+    for (let i = 1; i <= 6; i++) {
+      const btn = new SK8Button();
+      btn.setLabel(`Item ${i}`);
+      gridContainer.addChild(btn);
+    }
+
+    stage.addActor(gridContainer);
+
+    // Section 9: Panel
+    const panelLabel = new SK8Label();
+    panelLabel.setText('Panel (Collapsible)');
+    panelLabel.setFontSize(18);
+    panelLabel.setFontWeight('bold');
+    panelLabel.setBoundsRect({ left: 20, top: 350, right: 300, bottom: 370 });
+    panelLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(panelLabel);
+
+    const panel = new SK8Panel();
+    panel.setTitle('Settings Panel');
+    panel.setBoundsRect({ left: 20, top: 380, right: 440, bottom: 580 });
+    panel.setCollapsible(true);
+
+    const panelLabel1 = new SK8Label();
+    panelLabel1.setText('This is a collapsible panel.');
+    panelLabel1.setBoundsRect({ left: 30, top: 420, right: 430, bottom: 440 });
+    panel.addChild(panelLabel1);
+
+    const panelLabel2 = new SK8Label();
+    panelLabel2.setText('Click the title bar to collapse/expand.');
+    panelLabel2.setBoundsRect({ left: 30, top: 450, right: 430, bottom: 470 });
+    panel.addChild(panelLabel2);
+
+    const panelCheckbox = new SK8CheckBox();
+    panelCheckbox.setLabel('Enable notifications');
+    panelCheckbox.setBoundsRect({ left: 30, top: 490, right: 250, bottom: 510 });
+    panel.addChild(panelCheckbox);
+
+    const panelSlider = new SK8Slider();
+    panelSlider.setValue(80);
+    panelSlider.setBoundsRect({ left: 30, top: 530, right: 430, bottom: 560 });
+    panel.addChild(panelSlider);
+
+    stage.addActor(panel);
+
+    // Section 10: Scroller
+    const scrollerLabel = new SK8Label();
+    scrollerLabel.setText('Scroller');
+    scrollerLabel.setFontSize(18);
+    scrollerLabel.setFontWeight('bold');
+    scrollerLabel.setBoundsRect({ left: 460, top: 470, right: 640, bottom: 490 });
+    scrollerLabel.setTextColor({ r: 0, g: 120, b: 215, a: 1.0 });
+    stage.addActor(scrollerLabel);
+
+    const scroller = new SK8Scroller();
+    scroller.setBoundsRect({ left: 460, top: 500, right: 710, bottom: 700 });
+    scroller.setContentWidth(400);
+    scroller.setContentHeight(600);
+
+    // Create content for scroller
+    const scrollContent = new SK8Rectangle();
+    scrollContent.setBoundsRect({ left: 460, top: 500, right: 860, bottom: 1100 });
+    scrollContent.setFillColor({ r: 255, g: 255, b: 240, a: 1.0 });
+    scrollContent.setFrameColor({ r: 200, g: 200, b: 200, a: 1.0 });
+
+    scroller.setContent(scrollContent);
+    stage.addActor(scroller);
+
+    // Add some text in the scrollable area
+    for (let i = 0; i < 20; i++) {
+      const label = new SK8Label();
+      label.setText(`Scrollable line ${i + 1}`);
+      label.setBoundsRect({ left: 470, top: 510 + i * 25, right: 850, bottom: 530 + i * 25 });
+      stage.addActor(label);
+    }
+
+    // Final status update
+    updateStatus('All widgets loaded! Try interacting with them.');
+
+    console.log('SK8 Widgets Demo initialized');
+  </script>
+</body>
+</html>

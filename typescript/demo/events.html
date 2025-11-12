@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SK8 Event System Demo</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .description {
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      .demo-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-section h2 {
+        margin-top: 0;
+        color: #333;
+        font-size: 18px;
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 10px;
+      }
+
+      .demo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      canvas {
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        display: block;
+        background: white;
+        cursor: pointer;
+      }
+
+      .info-panel {
+        background: #f9f9f9;
+        border-radius: 4px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        min-height: 200px;
+        overflow-y: auto;
+        max-height: 400px;
+      }
+
+      .info-panel .event-log {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .info-panel .event-log li {
+        padding: 5px;
+        border-bottom: 1px solid #e0e0e0;
+        animation: fadeIn 0.3s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .controls {
+        margin-top: 15px;
+      }
+
+      .btn {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        font-size: 14px;
+      }
+
+      .btn:hover {
+        background: #45a049;
+      }
+
+      .btn.secondary {
+        background: #2196F3;
+      }
+
+      .btn.secondary:hover {
+        background: #0b7dda;
+      }
+
+      .instructions {
+        background: #e3f2fd;
+        border-left: 4px solid #2196F3;
+        padding: 10px 15px;
+        margin-top: 15px;
+        border-radius: 4px;
+      }
+
+      .instructions strong {
+        color: #1976D2;
+      }
+
+      .feature-badge {
+        display: inline-block;
+        background: #4CAF50;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-left: 8px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .stat-box {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4CAF50;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>SK8 Event System Demo</h1>
+      <p class="description">
+        Comprehensive demonstration of the SK8 event system including mouse events,
+        keyboard navigation, drag-and-drop, and touch gestures.
+      </p>
+
+      <!-- Mouse Events Demo -->
+      <div class="demo-section">
+        <h2>
+          1. Mouse Events
+          <span class="feature-badge">Click</span>
+          <span class="feature-badge">Hover</span>
+          <span class="feature-badge">Context Menu</span>
+        </h2>
+        <div class="demo-grid">
+          <div>
+            <canvas id="mouseCanvas" width="500" height="300"></canvas>
+            <div class="instructions">
+              <strong>Try:</strong> Click rectangles, hover over them, right-click for
+              context menu. Notice how events bubble and can be prevented.
+            </div>
+          </div>
+          <div>
+            <div class="info-panel">
+              <h3 style="margin-top: 0;">Event Log</h3>
+              <ul id="mouseLog" class="event-log"></ul>
+            </div>
+            <div class="controls">
+              <button class="btn" onclick="clearLog('mouseLog')">Clear Log</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag and Drop Demo -->
+      <div class="demo-section">
+        <h2>
+          2. Drag and Drop
+          <span class="feature-badge">Draggable</span>
+          <span class="feature-badge">Drop Targets</span>
+          <span class="feature-badge">Constraints</span>
+        </h2>
+        <div class="demo-grid">
+          <div>
+            <canvas id="dragCanvas" width="500" height="300"></canvas>
+            <div class="instructions">
+              <strong>Try:</strong> Drag the blue box anywhere, drag the green box
+              horizontally only, or drop the red box into the yellow drop zone!
+            </div>
+          </div>
+          <div>
+            <div class="info-panel">
+              <h3 style="margin-top: 0;">Drag Events</h3>
+              <ul id="dragLog" class="event-log"></ul>
+            </div>
+            <div class="controls">
+              <button class="btn" onclick="resetDragDemo()">Reset Positions</button>
+              <button class="btn secondary" onclick="clearLog('dragLog')">
+                Clear Log
+              </button>
+            </div>
+            <div class="stats">
+              <div class="stat-box">
+                <div class="stat-value" id="dragCount">0</div>
+                <div class="stat-label">Total Drags</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value" id="dropCount">0</div>
+                <div class="stat-label">Successful Drops</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keyboard Events Demo -->
+      <div class="demo-section">
+        <h2>
+          3. Keyboard Navigation
+          <span class="feature-badge">Arrow Keys</span>
+          <span class="feature-badge">Focus</span>
+          <span class="feature-badge">Modifiers</span>
+        </h2>
+        <div class="demo-grid">
+          <div>
+            <canvas id="keyboardCanvas" width="500" height="300"></canvas>
+            <div class="instructions">
+              <strong>Try:</strong> Click a square to focus it, then use arrow keys to
+              move. Hold Shift for faster movement. Press Space to change color.
+            </div>
+          </div>
+          <div>
+            <div class="info-panel">
+              <h3 style="margin-top: 0;">Keyboard Events</h3>
+              <ul id="keyboardLog" class="event-log"></ul>
+            </div>
+            <div class="controls">
+              <button class="btn secondary" onclick="clearLog('keyboardLog')">
+                Clear Log
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Touch and Gestures Demo -->
+      <div class="demo-section">
+        <h2>
+          4. Touch Gestures
+          <span class="feature-badge">Tap</span>
+          <span class="feature-badge">Swipe</span>
+          <span class="feature-badge">Pinch</span>
+          <span class="feature-badge">Rotate</span>
+        </h2>
+        <div class="demo-grid">
+          <div>
+            <canvas id="touchCanvas" width="500" height="300"></canvas>
+            <div class="instructions">
+              <strong>Try (on touch device):</strong> Tap, double-tap, long press,
+              swipe, pinch to zoom, or rotate with two fingers.
+              <em>On desktop: Use mouse to simulate tap/swipe.</em>
+            </div>
+          </div>
+          <div>
+            <div class="info-panel">
+              <h3 style="margin-top: 0;">Gesture Events</h3>
+              <ul id="touchLog" class="event-log"></ul>
+            </div>
+            <div class="controls">
+              <button class="btn secondary" onclick="clearLog('touchLog')">
+                Clear Log
+              </button>
+            </div>
+            <div class="stats">
+              <div class="stat-box">
+                <div class="stat-value" id="tapCount">0</div>
+                <div class="stat-label">Taps</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value" id="swipeCount">0</div>
+                <div class="stat-label">Swipes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { SK8Stage } from '../dist/graphics/SK8Stage.js';
+      import { SK8Rectangle, SK8Circle } from '../dist/graphics/shapes.js';
+      import { ColorUtils } from '../dist/graphics/types.js';
+      import { debounce, throttle } from '../dist/events/event-utils.js';
+
+      // Utility function to log events
+      function logEvent(logId, message) {
+        const log = document.getElementById(logId);
+        const li = document.createElement('li');
+        const timestamp = new Date().toLocaleTimeString();
+        li.textContent = `[${timestamp}] ${message}`;
+        log.insertBefore(li, log.firstChild);
+
+        // Keep only last 20 events
+        while (log.children.length > 20) {
+          log.removeChild(log.lastChild);
+        }
+      }
+
+      window.clearLog = function (logId) {
+        document.getElementById(logId).innerHTML = '';
+      };
+
+      // Demo 1: Mouse Events
+      {
+        const stage = new SK8Stage('mouseCanvas');
+        stage.startRendering();
+
+        // Create some interactive rectangles
+        const colors = [
+          ColorUtils.Red,
+          ColorUtils.Green,
+          ColorUtils.Blue,
+          ColorUtils.Yellow,
+        ];
+
+        for (let i = 0; i < 4; i++) {
+          const rect = new SK8Rectangle();
+          rect.moveTo(50 + i * 110, 100);
+          rect.setWidth(90);
+          rect.setHeight(90);
+          rect.setFillColor(colors[i]);
+          rect.setFrameColor(ColorUtils.Black);
+          rect.setLineWidth(2);
+
+          // Click event
+          rect.addEventListener('click', (e) => {
+            logEvent('mouseLog', `Clicked ${colors[i].name || 'box ' + i}`);
+          });
+
+          // Mouse enter/leave
+          rect.addEventListener('mouseenter', (e) => {
+            rect.setLineWidth(4);
+            stage.setNeedsRender();
+            logEvent('mouseLog', `Mouse entered ${colors[i].name || 'box ' + i}`);
+          });
+
+          rect.addEventListener('mouseleave', (e) => {
+            rect.setLineWidth(2);
+            stage.setNeedsRender();
+            logEvent('mouseLog', `Mouse left ${colors[i].name || 'box ' + i}`);
+          });
+
+          // Context menu
+          rect.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            logEvent(
+              'mouseLog',
+              `Right-click on ${colors[i].name || 'box ' + i} (context menu prevented)`
+            );
+          });
+
+          stage.addActor(rect);
+        }
+      }
+
+      // Demo 2: Drag and Drop
+      {
+        const stage = new SK8Stage('dragCanvas');
+        stage.startRendering();
+
+        let dragCount = 0;
+        let dropCount = 0;
+
+        // Free draggable box
+        const freeBox = new SK8Rectangle();
+        freeBox.moveTo(50, 50);
+        freeBox.setWidth(60);
+        freeBox.setHeight(60);
+        freeBox.setFillColor(ColorUtils.Blue);
+        freeBox.setDraggable(true);
+
+        freeBox.addEventListener('dragstart', (e) => {
+          logEvent('dragLog', '🔵 Blue box: Drag started');
+          dragCount++;
+          document.getElementById('dragCount').textContent = dragCount;
+        });
+
+        freeBox.addEventListener('drag', throttle((e) => {
+          const bounds = freeBox.getBoundsRect();
+          logEvent('dragLog', `🔵 Blue box: Dragging to (${Math.round(bounds.left)}, ${Math.round(bounds.top)})`);
+        }, 200));
+
+        freeBox.addEventListener('dragend', (e) => {
+          logEvent('dragLog', '🔵 Blue box: Drag ended');
+        });
+
+        stage.addActor(freeBox);
+
+        // Horizontal-only draggable box
+        const hBox = new SK8Rectangle();
+        hBox.moveTo(150, 50);
+        hBox.setWidth(60);
+        hBox.setHeight(60);
+        hBox.setFillColor(ColorUtils.Green);
+        hBox.setDraggable(true);
+
+        hBox.addEventListener('dragstart', (e) => {
+          logEvent('dragLog', '🟢 Green box: Horizontal drag started');
+          stage.setDragConstraints({ horizontal: true });
+          dragCount++;
+          document.getElementById('dragCount').textContent = dragCount;
+        });
+
+        hBox.addEventListener('dragend', (e) => {
+          logEvent('dragLog', '🟢 Green box: Horizontal drag ended');
+        });
+
+        stage.addActor(hBox);
+
+        // Droppable box
+        const dropBox = new SK8Rectangle();
+        dropBox.moveTo(250, 50);
+        dropBox.setWidth(60);
+        dropBox.setHeight(60);
+        dropBox.setFillColor(ColorUtils.Red);
+        dropBox.setDraggable(true);
+
+        dropBox.addEventListener('dragstart', (e) => {
+          logEvent('dragLog', '🔴 Red box: Drag started (try dropping in yellow zone!)');
+          dragCount++;
+          document.getElementById('dragCount').textContent = dragCount;
+        });
+
+        stage.addActor(dropBox);
+
+        // Drop target
+        const dropTarget = new SK8Rectangle();
+        dropTarget.moveTo(350, 150);
+        dropTarget.setWidth(120);
+        dropTarget.setHeight(120);
+        dropTarget.setFillColor(ColorUtils.Yellow);
+        dropTarget.setFrameColor(ColorUtils.Black);
+        dropTarget.setLineWidth(2);
+        dropTarget.setDroppable(true);
+
+        dropTarget.addEventListener('dragenter', (e) => {
+          dropTarget.setLineWidth(4);
+          dropTarget.setFrameColor(ColorUtils.Green);
+          stage.setNeedsRender();
+          logEvent('dragLog', '🟡 Drop zone: Item entered');
+        });
+
+        dropTarget.addEventListener('dragleave', (e) => {
+          dropTarget.setLineWidth(2);
+          dropTarget.setFrameColor(ColorUtils.Black);
+          stage.setNeedsRender();
+          logEvent('dragLog', '🟡 Drop zone: Item left');
+        });
+
+        dropTarget.addEventListener('drop', (e) => {
+          dropTarget.setLineWidth(2);
+          dropTarget.setFrameColor(ColorUtils.Black);
+          stage.setNeedsRender();
+          logEvent('dragLog', '✅ Drop zone: Item dropped successfully!');
+          dropCount++;
+          document.getElementById('dropCount').textContent = dropCount;
+        });
+
+        stage.addActor(dropTarget);
+        stage.registerDropTarget(dropTarget);
+
+        window.resetDragDemo = function () {
+          freeBox.moveTo(50, 50);
+          hBox.moveTo(150, 50);
+          dropBox.moveTo(250, 50);
+          stage.setNeedsRender();
+          logEvent('dragLog', '🔄 Positions reset');
+        };
+      }
+
+      // Demo 3: Keyboard Navigation
+      {
+        const stage = new SK8Stage('keyboardCanvas');
+        stage.startRendering();
+
+        const colors = [
+          ColorUtils.Magenta,
+          ColorUtils.Cyan,
+          ColorUtils.Orange,
+        ];
+
+        for (let i = 0; i < 3; i++) {
+          const box = new SK8Rectangle();
+          box.moveTo(50 + i * 150, 100);
+          box.setWidth(80);
+          box.setHeight(80);
+          box.setFillColor(colors[i]);
+          box.setFrameColor(ColorUtils.Gray);
+          box.setLineWidth(2);
+
+          // Focus handling
+          box.addEventListener('focus', (e) => {
+            box.setFrameColor(ColorUtils.Black);
+            box.setLineWidth(4);
+            stage.setNeedsRender();
+            logEvent('keyboardLog', `Box ${i + 1} focused`);
+          });
+
+          box.addEventListener('blur', (e) => {
+            box.setFrameColor(ColorUtils.Gray);
+            box.setLineWidth(2);
+            stage.setNeedsRender();
+            logEvent('keyboardLog', `Box ${i + 1} blurred`);
+          });
+
+          // Keyboard navigation
+          box.addEventListener('keydown', (e) => {
+            const speed = e.shiftKey ? 20 : 5;
+            let moved = false;
+
+            switch (e.key) {
+              case 'ArrowLeft':
+                box.moveBy(-speed, 0);
+                moved = true;
+                break;
+              case 'ArrowRight':
+                box.moveBy(speed, 0);
+                moved = true;
+                break;
+              case 'ArrowUp':
+                box.moveBy(0, -speed);
+                moved = true;
+                break;
+              case 'ArrowDown':
+                box.moveBy(0, speed);
+                moved = true;
+                break;
+              case ' ':
+                // Change color
+                const randomColor = {
+                  r: Math.random() * 255,
+                  g: Math.random() * 255,
+                  b: Math.random() * 255,
+                };
+                box.setFillColor(randomColor);
+                logEvent('keyboardLog', `Box ${i + 1}: Color changed`);
+                moved = true;
+                break;
+            }
+
+            if (moved) {
+              stage.setNeedsRender();
+              e.preventDefault();
+              if (e.key.startsWith('Arrow')) {
+                logEvent(
+                  'keyboardLog',
+                  `Box ${i + 1}: Moved ${e.key.replace('Arrow', '')} (${e.shiftKey ? 'fast' : 'slow'})`
+                );
+              }
+            }
+          });
+
+          stage.addActor(box);
+        }
+      }
+
+      // Demo 4: Touch and Gestures
+      {
+        const stage = new SK8Stage('touchCanvas');
+        stage.startRendering();
+
+        let tapCount = 0;
+        let swipeCount = 0;
+
+        // Create a circle for gesture interactions
+        const circle = new SK8Circle();
+        circle.moveTo(200, 100);
+        circle.setWidth(100);
+        circle.setHeight(100);
+        circle.setFillColor(ColorUtils.Purple);
+        circle.setFrameColor(ColorUtils.Black);
+        circle.setLineWidth(2);
+
+        let baseScale = 1;
+        let baseRotation = 0;
+
+        // Tap
+        circle.addEventListener('tap', (e) => {
+          tapCount++;
+          document.getElementById('tapCount').textContent = tapCount;
+          logEvent('touchLog', '👆 Tap detected');
+
+          // Visual feedback
+          const originalColor = circle.getFillColor();
+          circle.setFillColor(ColorUtils.White);
+          stage.setNeedsRender();
+          setTimeout(() => {
+            circle.setFillColor(originalColor);
+            stage.setNeedsRender();
+          }, 100);
+        });
+
+        // Double tap
+        circle.addEventListener('doubletap', (e) => {
+          logEvent('touchLog', '👆👆 Double-tap detected');
+          baseScale = 1;
+          baseRotation = 0;
+          circle.resetTransform();
+          stage.setNeedsRender();
+        });
+
+        // Long press
+        circle.addEventListener('longpress', (e) => {
+          logEvent('touchLog', '⏱️ Long press detected');
+          circle.setFillColor(ColorUtils.Orange);
+          stage.setNeedsRender();
+        });
+
+        // Swipe
+        circle.addEventListener('swipe', (e) => {
+          swipeCount++;
+          document.getElementById('swipeCount').textContent = swipeCount;
+          const gesture = e.gesture;
+          logEvent('touchLog', `👉 Swipe ${gesture.direction} (velocity: ${gesture.velocity?.toFixed(2)})`);
+
+          // Move in swipe direction
+          const distance = 30;
+          switch (gesture.direction) {
+            case 'left':
+              circle.moveBy(-distance, 0);
+              break;
+            case 'right':
+              circle.moveBy(distance, 0);
+              break;
+            case 'up':
+              circle.moveBy(0, -distance);
+              break;
+            case 'down':
+              circle.moveBy(0, distance);
+              break;
+          }
+          stage.setNeedsRender();
+        });
+
+        // Pinch (zoom)
+        circle.addEventListener('pinch', (e) => {
+          const gesture = e.gesture;
+          baseScale *= gesture.scale;
+          circle.scale(baseScale);
+          stage.setNeedsRender();
+          logEvent('touchLog', `🤏 Pinch (scale: ${baseScale.toFixed(2)})`);
+        });
+
+        // Rotate
+        circle.addEventListener('rotate', (e) => {
+          const gesture = e.gesture;
+          baseRotation += gesture.rotation;
+          circle.rotate(baseRotation);
+          stage.setNeedsRender();
+          logEvent('touchLog', `🔄 Rotate (${baseRotation.toFixed(1)}°)`);
+        });
+
+        stage.addActor(circle);
+
+        // Add instruction text
+        logEvent('touchLog', '📱 Touch gestures ready! Try tapping, swiping, or multi-touch gestures.');
+      }
+    </script>
+  </body>
+</html>
