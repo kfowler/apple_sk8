@@ -4,6 +4,7 @@
 
 import { SK8Actor } from './SK8Actor.js';
 import { RectUtils } from './types.js';
+import { TextStyle } from './text-style.js';
 
 /**
  * SK8Rectangle - A rectangular actor
@@ -111,13 +112,11 @@ export class SK8Circle extends SK8Actor {
  */
 export class SK8Text extends SK8Actor {
   private text: string = '';
-  private textStyle: import('./text-style.js').TextStyle;
+  private textStyle: TextStyle;
 
   constructor(parent?: SK8Actor, name?: string) {
     super(parent, name || 'Text');
 
-    // Import TextStyle dynamically to avoid circular dependencies
-    const { TextStyle } = require('./text-style.js');
     this.textStyle = new TextStyle();
 
     // Define text properties
