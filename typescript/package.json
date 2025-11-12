@@ -1,0 +1,31 @@
+{
+  "name": "sk8-ts",
+  "version": "0.1.0",
+  "description": "SK8 reimagined in TypeScript - A multimedia authoring environment for the web",
+  "main": "dist/sk8.js",
+  "types": "dist/sk8.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch & node -e \"require('http').createServer((q,s)=>{require('fs').readFile('./demo/index.html',(e,d)=>{s.end(d)})}).listen(8080);console.log('Server: http://localhost:8080')\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "sk8",
+    "multimedia",
+    "authoring",
+    "canvas",
+    "graphics",
+    "animation",
+    "apple"
+  ],
+  "author": "SK8 TypeScript Port Contributors",
+  "license": "SEE LICENSE IN ../sk8_license.pdf",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
+}

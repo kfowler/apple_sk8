@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 TypeScript Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Geneva, Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .canvas-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            display: block;
+            border-radius: 4px;
+        }
+
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .info h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .code {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .controls {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛹 SK8 TypeScript</h1>
+            <p class="subtitle">A multimedia authoring environment for the web - reimagined from Apple's SK8</p>
+        </header>
+
+        <div class="canvas-container">
+            <h2>Live Demo</h2>
+            <p>Click the shapes below to interact with them!</p>
+            <div class="controls">
+                <button onclick="addRectangle()">Add Rectangle</button>
+                <button onclick="addCircle()">Add Circle</button>
+                <button onclick="addText()">Add Text</button>
+                <button onclick="clearStage()">Clear All</button>
+                <button onclick="animateShapes()">Animate!</button>
+            </div>
+            <canvas id="sk8-canvas" width="800" height="600"></canvas>
+        </div>
+
+        <div class="info">
+            <h2>About This Demo</h2>
+            <p>This is a working proof-of-concept of SK8 reimplemented in TypeScript. It demonstrates:</p>
+
+            <ul class="feature-list">
+                <li>Prototype-based object system (SK8Object)</li>
+                <li>Actor/Stage rendering architecture</li>
+                <li>Canvas-based graphics (replaces QuickDraw)</li>
+                <li>Event handling (click, mouse events)</li>
+                <li>Property system with getters/setters</li>
+                <li>Live object manipulation</li>
+            </ul>
+
+            <h2 style="margin-top: 20px;">Example Code</h2>
+            <div class="code">// Create a stage
+const stage = new SK8Stage('sk8-canvas');
+
+// Create a rectangle
+const rect = new SK8Rectangle();
+rect.set('boundsRect', { left: 100, top: 100, right: 300, bottom: 250 });
+rect.set('fillColor', 'red');
+rect.set('frameColor', 'black');
+
+// Add click handler
+rect.addHandler('click', function() {
+    this.set('fillColor', 'blue');
+    stage.render();
+});
+
+// Add to stage
+stage.addActor(rect);
+stage.render();
+            </div>
+
+            <h2 style="margin-top: 20px;">What's Missing (vs Original SK8)</h2>
+            <p>This is a minimal proof-of-concept. The original SK8 had:</p>
+            <ul class="feature-list">
+                <li>SK8Script language (natural language scripting)</li>
+                <li>QuickTime integration (movies, sound)</li>
+                <li>Visual development environment</li>
+                <li>Project system (save/load)</li>
+                <li>Comprehensive actor library</li>
+                <li>Animation timeline</li>
+                <li>Much more!</li>
+            </ul>
+
+            <p style="margin-top: 15px; color: #999; font-size: 12px;">
+                Original SK8 © 1997 Apple Computer, Inc. This TypeScript port is an educational reimplementation.
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import SK8 modules
+        import { SK8Stage, SK8Rectangle, SK8Circle, SK8Text, SK8RoundRect, ColorUtils } from '../dist/sk8.js';
+
+        // Create stage
+        const stage = new SK8Stage('sk8-canvas');
+
+        // Make stage globally accessible
+        window.stage = stage;
+
+        // Demo: Create initial shapes
+        function createDemoShapes() {
+            // Red rectangle
+            const rect1 = new SK8Rectangle();
+            rect1.set('boundsRect', { left: 50, top: 50, right: 200, bottom: 150 });
+            rect1.set('fillColor', 'red');
+            rect1.set('frameColor', 'darkred');
+            rect1.set('lineWidth', 3);
+
+            // Add click handler
+            rect1.addHandler('click', function(x, y) {
+                const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                this.set('fillColor', randomColor);
+                console.log(`Rectangle clicked at (${x}, ${y}), changed to ${randomColor}`);
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(rect1);
+
+            // Blue circle
+            const circle = new SK8Circle();
+            circle.set('boundsRect', { left: 250, top: 50, right: 450, bottom: 250 });
+            circle.set('fillColor', 'lightblue');
+            circle.set('frameColor', 'blue');
+            circle.set('lineWidth', 2);
+
+            circle.addHandler('click', function() {
+                const currentSize = this.getWidth();
+                const newSize = currentSize === 200 ? 150 : 200;
+                const center = { x: this.getLeft() + currentSize / 2, y: this.getTop() + currentSize / 2 };
+                this.set('boundsRect', {
+                    left: center.x - newSize / 2,
+                    top: center.y - newSize / 2,
+                    right: center.x + newSize / 2,
+                    bottom: center.y + newSize / 2
+                });
+                console.log('Circle clicked, resized');
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(circle);
+
+            // Text
+            const text = new SK8Text();
+            text.set('boundsRect', { left: 50, top: 200, right: 750, bottom: 250 });
+            text.set('text', 'SK8 TypeScript - Click shapes to interact!');
+            text.set('fillColor', 'black');
+            text.set('fontSize', 24);
+
+            stage.addActor(text);
+
+            // Rounded rectangle
+            const roundRect = new SK8RoundRect();
+            roundRect.set('boundsRect', { left: 500, top: 50, right: 750, bottom: 150 });
+            roundRect.set('fillColor', 'lightgreen');
+            roundRect.set('frameColor', 'green');
+            roundRect.set('cornerRadius', 20);
+
+            roundRect.addHandler('click', function() {
+                this.moveBy(10, 10);
+                console.log('RoundRect moved');
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(roundRect);
+        }
+
+        // Initialize demo
+        createDemoShapes();
+        stage.render();
+
+        // Global functions for buttons
+        window.addRectangle = function() {
+            const rect = new SK8Rectangle();
+            const x = Math.random() * 600 + 50;
+            const y = Math.random() * 400 + 50;
+            rect.set('boundsRect', { left: x, top: y, right: x + 100, bottom: y + 80 });
+            rect.set('fillColor', `hsl(${Math.random() * 360}, 70%, 60%)`);
+            rect.set('frameColor', 'black');
+
+            rect.addHandler('click', function() {
+                stage.removeActor(this);
+                console.log('Rectangle removed');
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(rect);
+            stage.setNeedsRender();
+        };
+
+        window.addCircle = function() {
+            const circle = new SK8Circle();
+            const x = Math.random() * 600 + 50;
+            const y = Math.random() * 400 + 50;
+            const size = Math.random() * 100 + 50;
+            circle.set('boundsRect', { left: x, top: y, right: x + size, bottom: y + size });
+            circle.set('fillColor', `hsl(${Math.random() * 360}, 70%, 60%)`);
+            circle.set('frameColor', 'white');
+
+            circle.addHandler('click', function() {
+                stage.bringToFront(this);
+                console.log('Circle brought to front');
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(circle);
+            stage.setNeedsRender();
+        };
+
+        window.addText = function() {
+            const text = new SK8Text();
+            const x = Math.random() * 600 + 50;
+            const y = Math.random() * 500 + 50;
+            text.set('boundsRect', { left: x, top: y, right: x + 200, bottom: y + 40 });
+            text.set('text', 'Hello SK8!');
+            text.set('fillColor', 'black');
+            text.set('fontSize', 20);
+
+            text.addHandler('click', function() {
+                const messages = ['Click!', 'Hello!', 'SK8!', 'TypeScript!', 'Wow!'];
+                this.set('text', messages[Math.floor(Math.random() * messages.length)]);
+                console.log('Text changed');
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(text);
+            stage.setNeedsRender();
+        };
+
+        window.clearStage = function() {
+            stage.clearActors();
+            stage.setNeedsRender();
+            console.log('Stage cleared');
+        };
+
+        window.animateShapes = function() {
+            const actors = stage.getActors();
+            actors.forEach(actor => {
+                if (actor instanceof SK8Rectangle || actor instanceof SK8Circle) {
+                    const duration = 1000;
+                    const startTime = Date.now();
+                    const startX = actor.getLeft();
+                    const startY = actor.getTop();
+                    const endX = Math.random() * 600 + 50;
+                    const endY = Math.random() * 400 + 50;
+
+                    const animate = () => {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const eased = progress < 0.5 ?
+                            2 * progress * progress :
+                            1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+                        const currentX = startX + (endX - startX) * eased;
+                        const currentY = startY + (endY - startY) * eased;
+
+                        actor.moveTo(currentX, currentY);
+                        stage.setNeedsRender();
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        }
+                    };
+
+                    animate();
+                }
+            });
+        };
+
+        // Start render loop
+        stage.startRendering();
+
+        console.log('SK8 TypeScript Demo loaded successfully!');
+        console.log('Stage:', stage);
+        console.log('Try: stage.getActors()');
+    </script>
+</body>
+</html>

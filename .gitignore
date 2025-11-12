@@ -1,0 +1,25 @@
+# Node modules
+typescript/node_modules/
+node_modules/
+
+# Build outputs
+typescript/dist/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
