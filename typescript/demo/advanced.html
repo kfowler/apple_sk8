@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 TypeScript - Advanced Features</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Geneva, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .feature-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            height: fit-content;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .canvas-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            display: block;
+            border-radius: 8px;
+            background: #f8f8f8;
+        }
+
+        .stats {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        .info-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .code .keyword { color: #f92672; }
+        .code .string { color: #e6db74; }
+        .code .comment { color: #75715e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛹 SK8 TypeScript - Advanced Features</h1>
+            <p class="subtitle">Animations, Collections, Polygons, Images, and More!</p>
+
+            <div class="features">
+                <div class="feature-badge">✨ Smooth Animations</div>
+                <div class="feature-badge">📦 Collections (List/Table)</div>
+                <div class="feature-badge">⬟ Polygons & Stars</div>
+                <div class="feature-badge">🖼️ Image Support</div>
+                <div class="feature-badge">👥 Group Actors</div>
+                <div class="feature-badge">🎨 Advanced Rendering</div>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <div class="controls">
+                <div class="control-section">
+                    <h3>🎭 Create Actors</h3>
+                    <button onclick="addRectangle()">Rectangle</button>
+                    <button onclick="addCircle()">Circle</button>
+                    <button onclick="addStar()">Star</button>
+                    <button onclick="addPolygon()">Hexagon</button>
+                    <button onclick="addText()">Text</button>
+                    <button onclick="addImage()">Image</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>✨ Animations</h3>
+                    <button onclick="animateAll()">Animate All</button>
+                    <button onclick="pulseAll()">Pulse All</button>
+                    <button onclick="shakeAll()">Shake All</button>
+                    <button onclick="fadeAll()">Fade Out/In</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>📦 Collections Demo</h3>
+                    <button onclick="demoList()">List Operations</button>
+                    <button onclick="demoTable()">Table Operations</button>
+                    <button onclick="groupActors()">Group Selected</button>
+                </div>
+
+                <div class="control-section">
+                    <h3>🎮 Actions</h3>
+                    <button onclick="selectRandom()">Select Random</button>
+                    <button onclick="clearStage()">Clear All</button>
+                    <button onclick="createScene()">Create Scene</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="canvas-container">
+                    <canvas id="sk8-canvas" width="1000" height="700"></canvas>
+
+                    <div class="stats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="actor-count">0</div>
+                                <div class="stat-label">Actors</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="animation-count">0</div>
+                                <div class="stat-label">Animations</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="fps">60</div>
+                                <div class="stat-label">FPS</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <h3 style="margin-bottom: 15px;">💡 Try This!</h3>
+                    <ul style="line-height: 2; color: #666;">
+                        <li>Click any shape to select it (gets a red outline)</li>
+                        <li>Selected shapes can be animated with the animation buttons</li>
+                        <li>Use Collections Demo to see List and Table operations</li>
+                        <li>Create multiple actors and group them together</li>
+                        <li>Watch the console for collection operation results</li>
+                    </ul>
+
+                    <h3 style="margin: 20px 0 10px;">🚀 What's New in v0.2</h3>
+                    <div class="code"><span class="comment">// Animation System</span>
+animations.animate(actor, <span class="string">'left'</span>, <span class="string">500</span>, <span class="string">1000</span>, {
+  easing: Easing.easeInOutCubic,
+  onComplete: () => console.log(<span class="string">'Done!'</span>)
+});
+
+<span class="comment">// Collections</span>
+<span class="keyword">const</span> list = newList(<span class="string">1</span>, <span class="string">2</span>, <span class="string">3</span>);
+list.map(x => x * <span class="string">2</span>).filter(x => x > <span class="string">3</span>);
+
+<span class="keyword">const</span> table = newTable({ name: <span class="string">'SK8'</span>, version: <span class="string">'0.2'</span> });
+table.forEach((v, k) => console.log(k, v));
+
+<span class="comment">// Polygons & Stars</span>
+<span class="keyword">const</span> star = createStar(<span class="string">100</span>, <span class="string">100</span>, <span class="string">5</span>, <span class="string">50</span>, <span class="string">25</span>);
+<span class="keyword">const</span> hex = createRegularPolygon(<span class="string">200</span>, <span class="string">200</span>, <span class="string">6</span>, <span class="string">40</span>);</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            SK8Stage,
+            SK8Rectangle,
+            SK8Circle,
+            SK8Text,
+            SK8Polygon,
+            SK8Image,
+            SK8Group,
+            createStar,
+            createRegularPolygon,
+            animations,
+            Easing,
+            AnimationHelpers,
+            newList,
+            newTable,
+            ColorUtils
+        } from '../dist/sk8.js';
+
+        // Create stage
+        const stage = new SK8Stage('sk8-canvas');
+        window.stage = stage;
+
+        // Track selected actor
+        let selectedActor = null;
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('actor-count').textContent = stage.getActors().length;
+            // Animation count would need to be exposed from AnimationManager
+            document.getElementById('animation-count').textContent = '~';
+        }
+
+        // FPS counter
+        let lastTime = Date.now();
+        let frames = 0;
+        setInterval(() => {
+            const now = Date.now();
+            const fps = Math.round(frames * 1000 / (now - lastTime));
+            document.getElementById('fps').textContent = fps;
+            frames = 0;
+            lastTime = now;
+            updateStats();
+        }, 1000);
+
+        // Selection system
+        function selectActor(actor) {
+            if (selectedActor) {
+                selectedActor.set('frameColor', selectedActor._oldFrameColor || null);
+            }
+            selectedActor = actor;
+            if (actor) {
+                actor._oldFrameColor = actor.getFrameColor();
+                actor.set('frameColor', 'red');
+                actor.set('lineWidth', 3);
+            }
+            stage.setNeedsRender();
+        }
+
+        // Create initial scene
+        function createInitialScene() {
+            // Welcome text
+            const title = new SK8Text();
+            title.set('text', 'Welcome to SK8 TypeScript v0.2!');
+            title.set('left', 250);
+            title.set('top', 50);
+            title.set('fontSize', 32);
+            title.set('fillColor', '#667eea');
+            stage.addActor(title);
+
+            // Animated rainbow rectangles
+            for (let i = 0; i < 5; i++) {
+                const rect = new SK8Rectangle();
+                rect.set('boundsRect', {
+                    left: 100 + i * 180,
+                    top: 150,
+                    right: 250 + i * 180,
+                    bottom: 250
+                });
+                const hue = i * 72;
+                rect.set('fillColor', `hsl(${hue}, 70%, 60%)`);
+                rect.set('frameColor', `hsl(${hue}, 70%, 40%)`);
+                rect.set('lineWidth', 2);
+
+                rect.addHandler('click', function() {
+                    selectActor(this);
+                    AnimationHelpers.pulse(this, 1.3, 500);
+                });
+
+                stage.addActor(rect);
+
+                // Stagger animation
+                setTimeout(() => {
+                    animations.animate(rect, 'top', 200 + Math.sin(i) * 50, 2000, {
+                        easing: Easing.easeInOutCubic
+                    });
+                }, i * 100);
+            }
+
+            // Rotating star
+            const star = createStar(500, 500, 7, 80, 40);
+            star.set('fillColor', '#FFD700');
+            star.set('frameColor', '#FFA500');
+            star.set('lineWidth', 3);
+            star.addHandler('click', function() {
+                selectActor(this);
+                AnimationHelpers.shake(this, 15, 400);
+            });
+            stage.addActor(star);
+        }
+
+        // Button handlers
+        window.addRectangle = function() {
+            const rect = new SK8Rectangle();
+            const x = Math.random() * 800 + 50;
+            const y = Math.random() * 500 + 50;
+            rect.set('boundsRect', { left: x, top: y, right: x + 120, bottom: y + 80 });
+            rect.set('fillColor', `hsl(${Math.random() * 360}, 70%, 60%)`);
+            rect.set('frameColor', 'black');
+
+            rect.addHandler('click', function() {
+                selectActor(this);
+            });
+
+            stage.addActor(rect);
+            AnimationHelpers.fadeIn(rect, 500);
+            stage.setNeedsRender();
+        };
+
+        window.addCircle = function() {
+            const circle = new SK8Circle();
+            const x = Math.random() * 800 + 50;
+            const y = Math.random() * 500 + 50;
+            const size = Math.random() * 80 + 60;
+            circle.set('boundsRect', { left: x, top: y, right: x + size, bottom: y + size });
+            circle.set('fillColor', `hsl(${Math.random() * 360}, 70%, 60%)`);
+            circle.set('frameColor', 'white');
+            circle.set('lineWidth', 3);
+
+            circle.addHandler('click', function() {
+                selectActor(this);
+                AnimationHelpers.scaleTo(this, 1.5, 500);
+                setTimeout(() => AnimationHelpers.scaleTo(this, 1, 500), 500);
+            });
+
+            stage.addActor(circle);
+            stage.setNeedsRender();
+        };
+
+        window.addStar = function() {
+            const x = Math.random() * 800 + 100;
+            const y = Math.random() * 500 + 100;
+            const star = createStar(x, y, 5, 50, 25);
+            star.set('fillColor', `hsl(${Math.random() * 360}, 70%, 60%)`);
+            star.set('frameColor', 'black');
+            star.set('lineWidth', 2);
+
+            star.addHandler('click', function() {
+                selectActor(this);
+            });
+
+            stage.addActor(star);
+            AnimationHelpers.pulse(star, 1.3, 400);
+            stage.setNeedsRender();
+        };
+
+        window.addPolygon = function() {
+            const x = Math.random() * 800 + 100;
+            const y = Math.random() * 500 + 100;
+            const sides = Math.floor(Math.random() * 5) + 5; // 5-9 sides
+            const poly = createRegularPolygon(x, y, sides, 50);
+            poly.set('fillColor', `hsl(${Math.random() * 360}, 70%, 60%)`);
+            poly.set('frameColor', 'black');
+            poly.set('lineWidth', 2);
+
+            poly.addHandler('click', function() {
+                selectActor(this);
+            });
+
+            stage.addActor(poly);
+            stage.setNeedsRender();
+        };
+
+        window.addText = function() {
+            const text = new SK8Text();
+            const x = Math.random() * 700 + 50;
+            const y = Math.random() * 600 + 50;
+            const messages = ['Hello SK8!', 'TypeScript!', 'Animations!', 'Collections!', 'Awesome!'];
+            text.set('text', messages[Math.floor(Math.random() * messages.length)]);
+            text.set('left', x);
+            text.set('top', y);
+            text.set('fontSize', 24);
+            text.set('fillColor', `hsl(${Math.random() * 360}, 70%, 50%)`);
+
+            text.addHandler('click', function() {
+                selectActor(this);
+                this.set('text', messages[Math.floor(Math.random() * messages.length)]);
+                stage.setNeedsRender();
+            });
+
+            stage.addActor(text);
+            stage.setNeedsRender();
+        };
+
+        window.addImage = function() {
+            const img = new SK8Image();
+            const x = Math.random() * 700 + 50;
+            const y = Math.random() * 500 + 50;
+            img.set('boundsRect', { left: x, top: y, right: x + 150, bottom: y + 150 });
+            // Using a placeholder image service
+            img.setSource('https://picsum.photos/150/150?random=' + Math.random());
+            img.set('frameColor', 'black');
+            img.set('lineWidth', 3);
+
+            img.addHandler('click', function() {
+                selectActor(this);
+            });
+
+            stage.addActor(img);
+            stage.setNeedsRender();
+        };
+
+        window.animateAll = function() {
+            const actors = stage.getActors();
+            actors.forEach(actor => {
+                const targetX = Math.random() * 800 + 50;
+                const targetY = Math.random() * 500 + 50;
+                AnimationHelpers.moveTo(actor, targetX, targetY, 1500);
+            });
+        };
+
+        window.pulseAll = function() {
+            const actors = stage.getActors();
+            actors.forEach((actor, i) => {
+                setTimeout(() => {
+                    AnimationHelpers.pulse(actor, 1.4, 500);
+                }, i * 50);
+            });
+        };
+
+        window.shakeAll = function() {
+            const actors = stage.getActors();
+            actors.forEach((actor, i) => {
+                setTimeout(() => {
+                    AnimationHelpers.shake(actor, 15, 600);
+                }, i * 30);
+            });
+        };
+
+        window.fadeAll = function() {
+            const actors = stage.getActors();
+            const visible = actors.filter(a => a.getVisible());
+
+            if (visible.length > 0) {
+                // Fade out
+                actors.forEach((actor, i) => {
+                    setTimeout(() => {
+                        actor.setVisible(false);
+                        stage.setNeedsRender();
+                    }, i * 50);
+                });
+
+                // Fade back in
+                setTimeout(() => {
+                    actors.forEach((actor, i) => {
+                        setTimeout(() => {
+                            actor.setVisible(true);
+                            stage.setNeedsRender();
+                        }, i * 50);
+                    });
+                }, 1000);
+            }
+        };
+
+        window.demoList = function() {
+            console.clear();
+            console.log('=== SK8 List Demo ===');
+
+            const list = newList(1, 2, 3, 4, 5);
+            console.log('Created list:', list.toArray());
+
+            list.add(6);
+            console.log('After add(6):', list.toArray());
+
+            const doubled = list.map(x => x * 2);
+            console.log('Doubled:', doubled.toArray());
+
+            const filtered = doubled.filter(x => x > 5);
+            console.log('Filtered (> 5):', filtered.toArray());
+
+            const sum = list.reduce((acc, x) => acc + x, 0);
+            console.log('Sum:', sum);
+
+            console.log('Contains 3?', list.contains(3));
+            console.log('Index of 4:', list.indexOf(4));
+            console.log('First:', list.first(), 'Last:', list.last());
+        };
+
+        window.demoTable = function() {
+            console.clear();
+            console.log('=== SK8 Table Demo ===');
+
+            const table = newTable({ name: 'SK8', version: '0.2', language: 'TypeScript' });
+            console.log('Created table:', table.toArray());
+
+            table.setItem('author', 'Apple Research Labs');
+            console.log('After adding author:', table.toArray());
+
+            console.log('Keys:', table.keys());
+            console.log('Values:', table.values());
+
+            console.log('Has key "version"?', table.hasKey('version'));
+            console.log('Get "name":', table.item('name'));
+
+            const mapped = table.map((v, k) => `${k}=${v}`);
+            console.log('Mapped:', mapped.toArray());
+
+            table.forEach((value, key) => {
+                console.log(`  ${key}: ${value}`);
+            });
+        };
+
+        window.groupActors = function() {
+            const actors = stage.getActors().filter(a => a.getVisible());
+            if (actors.length < 2) {
+                console.log('Need at least 2 actors to group!');
+                return;
+            }
+
+            const group = new SK8Group();
+            actors.slice(0, Math.min(3, actors.length)).forEach(actor => {
+                stage.removeActor(actor);
+                group.addChild(actor);
+            });
+
+            group.set('frameColor', 'blue');
+            group.set('lineWidth', 3);
+
+            group.addHandler('click', function() {
+                selectActor(this);
+                AnimationHelpers.pulse(this, 1.2, 400);
+            });
+
+            stage.addActor(group);
+            stage.setNeedsRender();
+
+            console.log('Created group with', group.getChildren().length, 'actors');
+        };
+
+        window.selectRandom = function() {
+            const actors = stage.getActors();
+            if (actors.length > 0) {
+                const random = actors[Math.floor(Math.random() * actors.length)];
+                selectActor(random);
+                AnimationHelpers.pulse(random, 1.3, 400);
+            }
+        };
+
+        window.clearStage = function() {
+            stage.clearActors();
+            stage.setNeedsRender();
+            selectedActor = null;
+        };
+
+        window.createScene = function() {
+            clearStage();
+            createInitialScene();
+            stage.setNeedsRender();
+        };
+
+        // Initialize
+        createInitialScene();
+        stage.startRendering();
+
+        // Frame counter
+        setInterval(() => { frames++; }, 16);
+
+        console.log('SK8 TypeScript v0.2 loaded!');
+        console.log('Try: demoList(), demoTable(), stage.getActors()');
+    </script>
+</body>
+</html>

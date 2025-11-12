@@ -15,10 +15,13 @@ This is an early-stage implementation demonstrating core concepts:
 - Property system with getters/setters
 - Handler (method) system
 - SK8Actor base class for visual objects
-- Concrete shapes (Rectangle, Circle, RoundRect, Text, Line)
+- Basic shapes (Rectangle, Circle, RoundRect, Text, Line)
+- Advanced shapes (Polygon, Image, Group)
 - SK8Stage (canvas manager)
-- Basic event handling (click, mouse events)
-- Animation support
+- Event handling (click, mouse events)
+- Animation system with easing functions
+- Tweening and animation helpers
+- Collection system (SK8List and SK8Table)
 - HTML5 Canvas rendering
 
 ❌ **Not Yet Implemented:**
@@ -165,19 +168,71 @@ class SK8Stage extends SK8Object {
 }
 ```
 
-## Concrete Shapes
+## Shapes and Actors
 
+### Basic Shapes
 - **SK8Rectangle** - Rectangular shapes
 - **SK8RoundRect** - Rounded rectangles
 - **SK8Circle** - Circles and ovals
 - **SK8Text** - Text rendering
 - **SK8Line** - Lines
 
+### Advanced Shapes
+- **SK8Polygon** - Custom polygons with point-in-polygon hit testing
+- **SK8Image** - Image actors with loading support
+- **SK8Group** - Container for multiple actors with event propagation
+
 All shapes inherit from SK8Actor and support:
 - Position and bounds
 - Fill and frame colors
 - Event handling
 - Property system
+- Animation
+
+## Animation System
+
+SK8-TS includes a comprehensive animation and tweening system:
+
+```typescript
+import { animations, Easing, AnimationHelpers } from 'sk8-ts';
+
+// Animate a property
+animations.animate(myActor, 'left', 500, 1000, {
+  easing: Easing.easeInOutCubic,
+  onComplete: () => console.log('Done!')
+});
+
+// Use animation helpers
+AnimationHelpers.fadeIn(myActor, 300);
+AnimationHelpers.pulse(myActor, 1.2, 300);
+AnimationHelpers.shake(myActor, 10, 500);
+```
+
+**Easing functions:** linear, quad, cubic, quart, quint, sine, expo, elastic, bounce
+
+**Animation helpers:** fadeIn, fadeOut, moveTo, scaleTo, pulse, shake
+
+## Collections
+
+SK8-style collection classes for managing data:
+
+```typescript
+import { newList, newTable } from 'sk8-ts';
+
+// Lists (ordered collections)
+const list = newList(1, 2, 3);
+list.add(4);
+list.map(x => x * 2);
+list.filter(x => x > 3);
+
+// Tables (key-value collections)
+const table = newTable({ name: 'SK8', version: '0.2' });
+table.setItem('author', 'Apple');
+table.forEach((value, key) => console.log(key, value));
+```
+
+**SK8List:** add, remove, map, filter, reduce, sort, slice, and more
+**SK8Table:** keys, values, entries, merge, filter, map, find
 
 ## Comparison to Original SK8
 
@@ -206,16 +261,21 @@ All shapes inherit from SK8Actor and support:
 typescript/
 ├── src/
 │   ├── core/
-│   │   └── SK8Object.ts        # Core object system
+│   │   └── SK8Object.ts           # Core object system
 │   ├── graphics/
-│   │   ├── types.ts            # Rect, Color, etc.
-│   │   ├── SK8Actor.ts         # Base visual class
-│   │   ├── shapes.ts           # Concrete shapes
-│   │   └── SK8Stage.ts         # Canvas manager
-│   └── sk8.ts                  # Main exports
+│   │   ├── types.ts               # Rect, Color, etc.
+│   │   ├── SK8Actor.ts            # Base visual class
+│   │   ├── shapes.ts              # Basic shapes
+│   │   ├── advanced-shapes.ts     # Polygon, Image, Group
+│   │   └── SK8Stage.ts            # Canvas manager
+│   ├── runtime/
+│   │   ├── animation.ts           # Animation and tweening
+│   │   └── collections.ts         # List and Table
+│   └── sk8.ts                     # Main exports
 ├── demo/
-│   └── index.html              # Live demo
-├── dist/                       # Compiled output
+│   ├── index.html                 # Basic demo
+│   └── advanced.html              # Advanced features demo
+├── dist/                          # Compiled output
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -275,18 +335,26 @@ class MyActor extends SK8Actor {
 
 ## Roadmap
 
-Potential future enhancements:
+### Completed (v0.2.0)
+- [x] Core object system and inheritance
+- [x] Basic and advanced shapes
+- [x] Animation system with easing
+- [x] Collection classes (List, Table)
+- [x] Event handling
+- [x] Comprehensive demos
 
+### Potential Future Enhancements
 - [ ] SK8Script parser and interpreter
 - [ ] Visual development environment
 - [ ] Project system (save/load with JSON)
-- [ ] Media support (video, audio, images)
-- [ ] Animation timeline
-- [ ] More actors (buttons, sliders, etc.)
+- [ ] Media support (video, audio)
+- [ ] Animation timeline editor
+- [ ] UI components (buttons, sliders, dialogs)
 - [ ] Asset management
 - [ ] Hot reload during development
 - [ ] Export to standalone HTML
 - [ ] React/Vue component wrappers
+- [ ] WebGL renderer for better performance
 
 ## Why TypeScript?
 

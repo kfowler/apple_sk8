@@ -26,12 +26,40 @@ export {
   SK8Line
 } from './graphics/shapes.js';
 
+// Advanced shapes
+export {
+  SK8Polygon,
+  SK8Image,
+  SK8Group,
+  createStar,
+  createRegularPolygon
+} from './graphics/advanced-shapes.js';
+
 // Stage
 export { SK8Stage } from './graphics/SK8Stage.js';
 import { SK8Stage } from './graphics/SK8Stage.js';
 
+// Animation
+export {
+  animations,
+  AnimationManager,
+  Easing,
+  AnimationHelpers
+} from './runtime/animation.js';
+export type { Animation, EasingFunction } from './runtime/animation.js';
+
+// Collections
+export {
+  SK8Collection,
+  SK8List,
+  SK8Table,
+  newList,
+  newTable,
+  CollectionUtils
+} from './runtime/collections.js';
+
 // Version
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.0';
 
 /**
  * Helper function to initialize SK8 with a canvas

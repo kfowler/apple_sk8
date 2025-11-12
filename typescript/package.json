@@ -1,6 +1,6 @@
 {
   "name": "sk8-ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SK8 reimagined in TypeScript - A multimedia authoring environment for the web",
   "main": "dist/sk8.js",
   "types": "dist/sk8.d.ts",
