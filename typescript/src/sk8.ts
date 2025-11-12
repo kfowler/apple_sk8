@@ -9,22 +9,12 @@ export { SK8Object, newSK8Object } from './core/SK8Object.js';
 export type { PropertyValue, PropertyDescriptor } from './core/SK8Object.js';
 
 // Graphics types
-export {
-  RectUtils,
-  ColorUtils,
-  TransferMode
-} from './graphics/types.js';
+export { RectUtils, ColorUtils, TransferMode } from './graphics/types.js';
 export type { Rect, Point, Color } from './graphics/types.js';
 
 // Actors
 export { SK8Actor } from './graphics/SK8Actor.js';
-export {
-  SK8Rectangle,
-  SK8RoundRect,
-  SK8Circle,
-  SK8Text,
-  SK8Line
-} from './graphics/shapes.js';
+export { SK8Rectangle, SK8RoundRect, SK8Circle, SK8Text, SK8Line } from './graphics/shapes.js';
 
 // Advanced shapes
 export {
@@ -32,7 +22,7 @@ export {
   SK8Image,
   SK8Group,
   createStar,
-  createRegularPolygon
+  createRegularPolygon,
 } from './graphics/advanced-shapes.js';
 
 // Stage
@@ -40,12 +30,7 @@ export { SK8Stage } from './graphics/SK8Stage.js';
 import { SK8Stage } from './graphics/SK8Stage.js';
 
 // Animation
-export {
-  animations,
-  AnimationManager,
-  Easing,
-  AnimationHelpers
-} from './runtime/animation.js';
+export { animations, AnimationManager, Easing, AnimationHelpers } from './runtime/animation.js';
 export type { Animation, EasingFunction } from './runtime/animation.js';
 
 // Collections
@@ -55,7 +40,7 @@ export {
   SK8Table,
   newList,
   newTable,
-  CollectionUtils
+  CollectionUtils,
 } from './runtime/collections.js';
 
 // Version

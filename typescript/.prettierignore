@@ -1,0 +1,8 @@
+dist
+node_modules
+coverage
+*.html
+*.md
+package.json
+package-lock.json
+tsconfig.json

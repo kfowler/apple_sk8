@@ -41,7 +41,7 @@ export class SK8RoundRect extends SK8Actor {
 
     this.defineProperty('cornerRadius', {
       getter: () => this.getCornerRadius(),
-      setter: (value: number) => this.setCornerRadius(value)
+      setter: (value: number) => this.setCornerRadius(value),
     });
   }
 
@@ -122,17 +122,17 @@ export class SK8Text extends SK8Actor {
     // Define text properties
     this.defineProperty('text', {
       getter: () => this.getText(),
-      setter: (value: string) => this.setText(value)
+      setter: (value: string) => this.setText(value),
     });
 
     this.defineProperty('fontSize', {
       getter: () => this.getFontSize(),
-      setter: (value: number) => this.setFontSize(value)
+      setter: (value: number) => this.setFontSize(value),
     });
 
     this.defineProperty('fontFamily', {
       getter: () => this.getFontFamily(),
-      setter: (value: string) => this.setFontFamily(value)
+      setter: (value: string) => this.setFontFamily(value),
     });
   }
 
@@ -202,36 +202,56 @@ export class SK8Line extends SK8Actor {
 
     this.defineProperty('startX', {
       getter: () => this.getStartX(),
-      setter: (value: number) => this.setStartX(value)
+      setter: (value: number) => this.setStartX(value),
     });
 
     this.defineProperty('startY', {
       getter: () => this.getStartY(),
-      setter: (value: number) => this.setStartY(value)
+      setter: (value: number) => this.setStartY(value),
     });
 
     this.defineProperty('endX', {
       getter: () => this.getEndX(),
-      setter: (value: number) => this.setEndX(value)
+      setter: (value: number) => this.setEndX(value),
     });
 
     this.defineProperty('endY', {
       getter: () => this.getEndY(),
-      setter: (value: number) => this.setEndY(value)
+      setter: (value: number) => this.setEndY(value),
     });
   }
 
-  getStartX(): number { return this.startX; }
-  setStartX(value: number): void { this.startX = value; this.setNeedsDraw(); }
+  getStartX(): number {
+    return this.startX;
+  }
+  setStartX(value: number): void {
+    this.startX = value;
+    this.setNeedsDraw();
+  }
 
-  getStartY(): number { return this.startY; }
-  setStartY(value: number): void { this.startY = value; this.setNeedsDraw(); }
+  getStartY(): number {
+    return this.startY;
+  }
+  setStartY(value: number): void {
+    this.startY = value;
+    this.setNeedsDraw();
+  }
 
-  getEndX(): number { return this.endX; }
-  setEndX(value: number): void { this.endX = value; this.setNeedsDraw(); }
+  getEndX(): number {
+    return this.endX;
+  }
+  setEndX(value: number): void {
+    this.endX = value;
+    this.setNeedsDraw();
+  }
 
-  getEndY(): number { return this.endY; }
-  setEndY(value: number): void { this.endY = value; this.setNeedsDraw(); }
+  getEndY(): number {
+    return this.endY;
+  }
+  setEndY(value: number): void {
+    this.endY = value;
+    this.setNeedsDraw();
+  }
 
   render(ctx: CanvasRenderingContext2D): void {
     if (!this.getVisible()) return;

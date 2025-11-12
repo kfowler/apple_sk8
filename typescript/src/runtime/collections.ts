@@ -51,7 +51,7 @@ export class SK8List extends SK8Collection {
 
     // Define properties
     this.defineProperty('length', {
-      getter: () => this.length()
+      getter: () => this.length(),
     });
   }
 
@@ -240,7 +240,7 @@ export class SK8Table extends SK8Collection {
 
     // Define properties
     this.defineProperty('length', {
-      getter: () => this.length()
+      getter: () => this.length(),
     });
   }
 

@@ -22,22 +22,22 @@ export abstract class SK8Actor extends SK8Object {
     // Set up default properties using the property system
     this.defineProperty('boundsRect', {
       getter: () => this.getBoundsRect(),
-      setter: (value: Rect) => this.setBoundsRect(value)
+      setter: (value: Rect) => this.setBoundsRect(value),
     });
 
     this.defineProperty('visible', {
       getter: () => this.getVisible(),
-      setter: (value: boolean) => this.setVisible(value)
+      setter: (value: boolean) => this.setVisible(value),
     });
 
     this.defineProperty('fillColor', {
       getter: () => this.getFillColor(),
-      setter: (value: Color) => this.setFillColor(value)
+      setter: (value: Color) => this.setFillColor(value),
     });
 
     this.defineProperty('frameColor', {
       getter: () => this.getFrameColor(),
-      setter: (value: Color) => this.setFrameColor(value)
+      setter: (value: Color) => this.setFrameColor(value),
     });
   }
 
@@ -52,13 +52,25 @@ export abstract class SK8Actor extends SK8Object {
     this.setNeedsDraw();
   }
 
-  getLeft(): number { return this.bounds.left; }
-  getTop(): number { return this.bounds.top; }
-  getRight(): number { return this.bounds.right; }
-  getBottom(): number { return this.bounds.bottom; }
+  getLeft(): number {
+    return this.bounds.left;
+  }
+  getTop(): number {
+    return this.bounds.top;
+  }
+  getRight(): number {
+    return this.bounds.right;
+  }
+  getBottom(): number {
+    return this.bounds.bottom;
+  }
 
-  getWidth(): number { return RectUtils.width(this.bounds); }
-  getHeight(): number { return RectUtils.height(this.bounds); }
+  getWidth(): number {
+    return RectUtils.width(this.bounds);
+  }
+  getHeight(): number {
+    return RectUtils.height(this.bounds);
+  }
 
   setLeft(value: number): void {
     const width = this.getWidth();

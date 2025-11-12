@@ -17,12 +17,12 @@ export class SK8Polygon extends SK8Actor {
 
     this.defineProperty('points', {
       getter: () => this.getPoints(),
-      setter: (value: Point[]) => this.setPoints(value)
+      setter: (value: Point[]) => this.setPoints(value),
     });
 
     this.defineProperty('closed', {
       getter: () => this.getClosed(),
-      setter: (value: boolean) => this.setClosed(value)
+      setter: (value: boolean) => this.setClosed(value),
     });
   }
 
@@ -85,7 +85,7 @@ export class SK8Polygon extends SK8Actor {
       left: minX,
       top: minY,
       right: maxX,
-      bottom: maxY
+      bottom: maxY,
     });
   }
 
@@ -121,8 +121,7 @@ export class SK8Polygon extends SK8Actor {
       const xj = this.points[j].x;
       const yj = this.points[j].y;
 
-      const intersect = ((yi > y) !== (yj > y)) &&
-        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
 
       if (intersect) inside = !inside;
     }
@@ -144,11 +143,11 @@ export class SK8Image extends SK8Actor {
 
     this.defineProperty('src', {
       getter: () => this.getSource(),
-      setter: (value: string) => this.setSource(value)
+      setter: (value: string) => this.setSource(value),
     });
 
     this.defineProperty('loaded', {
-      getter: () => this.isLoaded()
+      getter: () => this.isLoaded(),
     });
   }
 
@@ -239,7 +238,7 @@ export class SK8Group extends SK8Actor {
     super(parent, name || 'Group');
 
     this.defineProperty('children', {
-      getter: () => this.getChildren()
+      getter: () => this.getChildren(),
     });
   }
 
@@ -291,7 +290,7 @@ export class SK8Group extends SK8Actor {
       left: minX,
       top: minY,
       right: maxX,
-      bottom: maxY
+      bottom: maxY,
     });
   }
 
@@ -311,9 +310,7 @@ export class SK8Group extends SK8Actor {
     if (this.getFrameColor()) {
       const bounds = this.getBoundsRect();
       ctx.beginPath();
-      ctx.rect(bounds.left, bounds.top,
-               RectUtils.width(bounds),
-               RectUtils.height(bounds));
+      ctx.rect(bounds.left, bounds.top, RectUtils.width(bounds), RectUtils.height(bounds));
       this.drawFrame(ctx);
     }
   }
@@ -384,7 +381,7 @@ export function createStar(
   const angleStep = (Math.PI * 2) / points;
 
   for (let i = 0; i < points * 2; i++) {
-    const angle = i * angleStep / 2 - Math.PI / 2;
+    const angle = (i * angleStep) / 2 - Math.PI / 2;
     const radius = i % 2 === 0 ? outerRadius : innerRadius;
     const x = centerX + Math.cos(angle) * radius;
     const y = centerY + Math.sin(angle) * radius;

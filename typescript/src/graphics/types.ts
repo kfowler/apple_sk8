@@ -38,7 +38,7 @@ export class RectUtils {
       left: x,
       top: y,
       right: x + width,
-      bottom: y + height
+      bottom: y + height,
     };
   }
 
@@ -59,15 +59,11 @@ export class RectUtils {
   }
 
   static contains(rect: Rect, x: number, y: number): boolean {
-    return x >= rect.left && x <= rect.right &&
-           y >= rect.top && y <= rect.bottom;
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
   }
 
   static intersects(a: Rect, b: Rect): boolean {
-    return !(b.left > a.right ||
-             b.right < a.left ||
-             b.top > a.bottom ||
-             b.bottom < a.top);
+    return !(b.left > a.right || b.right < a.left || b.top > a.bottom || b.bottom < a.top);
   }
 
   static union(a: Rect, b: Rect): Rect {
@@ -75,7 +71,7 @@ export class RectUtils {
       left: Math.min(a.left, b.left),
       top: Math.min(a.top, b.top),
       right: Math.max(a.right, b.right),
-      bottom: Math.max(a.bottom, b.bottom)
+      bottom: Math.max(a.bottom, b.bottom),
     };
   }
 
@@ -122,5 +118,5 @@ export enum TransferMode {
   Or = 'lighter',
   Xor = 'xor',
   Blend = 'multiply',
-  Transparent = 'destination-over'
+  Transparent = 'destination-over',
 }

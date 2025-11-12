@@ -44,7 +44,7 @@ export class SK8Stage extends SK8Object {
     // Define properties
     this.defineProperty('backgroundColor', {
       getter: () => this.getBackgroundColor(),
-      setter: (value: Color) => this.setBackgroundColor(value)
+      setter: (value: Color) => this.setBackgroundColor(value),
     });
   }
 
@@ -173,7 +173,7 @@ export class SK8Stage extends SK8Object {
     const rect = this.canvas.getBoundingClientRect();
     return {
       x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      y: e.clientY - rect.top,
     };
   }
 

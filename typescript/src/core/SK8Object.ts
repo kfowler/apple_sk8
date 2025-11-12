@@ -7,6 +7,8 @@
 
 export type PropertyValue = any;
 
+export type HandlerFunction = (...args: any[]) => any;
+
 export interface PropertyDescriptor {
   value?: PropertyValue;
   getter?: () => PropertyValue;
@@ -26,10 +28,10 @@ export interface PropertyDescriptor {
 export class SK8Object {
   private parent: SK8Object | null = null;
   private properties = new Map<string, PropertyDescriptor>();
-  private handlers = new Map<string, Function>();
+  private handlers = new Map<string, HandlerFunction>();
   protected objectName: string;
 
-  constructor(parent?: SK8Object, name?: string) {
+  constructor(parent?: SK8Object | null, name?: string) {
     this.parent = parent || null;
     this.objectName = name || this.constructor.name;
   }
@@ -85,7 +87,7 @@ export class SK8Object {
       // Store the value
       this.properties.set(propertyName, {
         value,
-        propagate
+        propagate,
       });
     }
 
@@ -119,10 +121,7 @@ export class SK8Object {
   /**
    * Define a property with a getter/setter
    */
-  defineProperty(
-    propertyName: string,
-    descriptor: PropertyDescriptor
-  ): void {
+  defineProperty(propertyName: string, descriptor: PropertyDescriptor): void {
     this.properties.set(propertyName, descriptor);
   }
 
@@ -140,7 +139,7 @@ export class SK8Object {
     const names = new Set<string>(this.getOwnPropertyNames());
 
     if (this.parent) {
-      this.parent.getPropertyNames().forEach(name => names.add(name));
+      this.parent.getPropertyNames().forEach((name) => names.add(name));
     }
 
     return Array.from(names);
@@ -149,7 +148,7 @@ export class SK8Object {
   /**
    * Add a handler (method)
    */
-  addHandler(name: string, handler: Function): void {
+  addHandler(name: string, handler: HandlerFunction): void {
     this.handlers.set(name, handler);
   }
 
@@ -220,12 +219,9 @@ export class SK8Object {
       name: this.objectName,
       parent: this.parent?.getName(),
       properties: Object.fromEntries(
-        Array.from(this.properties.entries()).map(([k, v]) => [
-          k,
-          v.value ?? '<computed>'
-        ])
+        Array.from(this.properties.entries()).map(([k, v]) => [k, v.value ?? '<computed>'])
       ),
-      handlers: Array.from(this.handlers.keys())
+      handlers: Array.from(this.handlers.keys()),
     };
   }
 }

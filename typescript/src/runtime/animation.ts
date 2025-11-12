@@ -31,7 +31,7 @@ export class Easing {
   }
 
   static easeOutCubic(t: number): number {
-    return (--t) * t * t + 1;
+    return --t * t * t + 1;
   }
 
   static easeInOutCubic(t: number): number {
@@ -39,11 +39,19 @@ export class Easing {
   }
 
   static easeInElastic(t: number): number {
-    return t === 0 ? 0 : t === 1 ? 1 : -Math.pow(2, 10 * t - 10) * Math.sin((t * 10 - 10.75) * (2 * Math.PI) / 3);
+    return t === 0
+      ? 0
+      : t === 1
+        ? 1
+        : -Math.pow(2, 10 * t - 10) * Math.sin(((t * 10 - 10.75) * (2 * Math.PI)) / 3);
   }
 
   static easeOutElastic(t: number): number {
-    return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * (2 * Math.PI) / 3) + 1;
+    return t === 0
+      ? 0
+      : t === 1
+        ? 1
+        : Math.pow(2, -10 * t) * Math.sin(((t * 10 - 0.75) * (2 * Math.PI)) / 3) + 1;
   }
 
   static easeInBounce(t: number): number {
@@ -101,9 +109,7 @@ export class AnimationManager {
       onUpdate?: (value: number) => void;
     } = {}
   ): number {
-    const startValue = typeof target.get === 'function'
-      ? target.get(property)
-      : target[property];
+    const startValue = typeof target.get === 'function' ? target.get(property) : target[property];
 
     const animation: Animation = {
       id: this.nextId++,
@@ -115,7 +121,7 @@ export class AnimationManager {
       easing: options.easing || Easing.easeInOutQuad,
       startTime: Date.now(),
       onComplete: options.onComplete,
-      onUpdate: options.onUpdate
+      onUpdate: options.onUpdate,
     };
 
     this.animations.set(animation.id, animation);
@@ -151,7 +157,7 @@ export class AnimationManager {
       }
     });
 
-    toRemove.forEach(id => this.cancel(id));
+    toRemove.forEach((id) => this.cancel(id));
   }
 
   /**
@@ -216,7 +222,7 @@ export class AnimationManager {
     });
 
     // Remove completed animations
-    completed.forEach(id => this.animations.delete(id));
+    completed.forEach((id) => this.animations.delete(id));
   }
 }
 
@@ -240,7 +246,7 @@ export class AnimationHelpers {
     // Animate opacity if supported, otherwise just show
     if (typeof actor.set === 'function' && actor.hasProperty?.('opacity')) {
       return animations.animate(actor, 'opacity', 1, duration, {
-        easing: Easing.easeOutQuad
+        easing: Easing.easeOutQuad,
       });
     } else {
       if (!wasVisible) {
@@ -257,7 +263,7 @@ export class AnimationHelpers {
     if (typeof actor.set === 'function' && actor.hasProperty?.('opacity')) {
       return animations.animate(actor, 'opacity', 0, duration, {
         easing: Easing.easeInQuad,
-        onComplete: () => actor.setVisible(false)
+        onComplete: () => actor.setVisible(false),
       });
     } else {
       actor.setVisible(false);
@@ -270,10 +276,10 @@ export class AnimationHelpers {
    */
   static moveTo(actor: any, x: number, y: number, duration: number = 500): void {
     animations.animate(actor, 'left', x, duration, {
-      easing: Easing.easeInOutQuad
+      easing: Easing.easeInOutQuad,
     });
     animations.animate(actor, 'top', y, duration, {
-      easing: Easing.easeInOutQuad
+      easing: Easing.easeInOutQuad,
     });
   }
 
@@ -290,16 +296,16 @@ export class AnimationHelpers {
     const newHeight = currentHeight * scale;
 
     animations.animate(actor, 'left', centerX - newWidth / 2, duration, {
-      easing: Easing.easeInOutCubic
+      easing: Easing.easeInOutCubic,
     });
     animations.animate(actor, 'top', centerY - newHeight / 2, duration, {
-      easing: Easing.easeInOutCubic
+      easing: Easing.easeInOutCubic,
     });
     animations.animate(actor, 'width', newWidth, duration, {
-      easing: Easing.easeInOutCubic
+      easing: Easing.easeInOutCubic,
     });
     animations.animate(actor, 'height', newHeight, duration, {
-      easing: Easing.easeInOutCubic
+      easing: Easing.easeInOutCubic,
     });
   }
 
@@ -321,27 +327,27 @@ export class AnimationHelpers {
       onComplete: () => {
         // Scale back down
         animations.animate(actor, 'width', currentWidth, duration / 2, {
-          easing: Easing.easeInQuad
+          easing: Easing.easeInQuad,
         });
         animations.animate(actor, 'height', currentHeight, duration / 2, {
-          easing: Easing.easeInQuad
+          easing: Easing.easeInQuad,
         });
         animations.animate(actor, 'left', centerX - currentWidth / 2, duration / 2, {
-          easing: Easing.easeInQuad
+          easing: Easing.easeInQuad,
         });
         animations.animate(actor, 'top', centerY - currentHeight / 2, duration / 2, {
-          easing: Easing.easeInQuad
+          easing: Easing.easeInQuad,
         });
-      }
+      },
     });
     animations.animate(actor, 'height', newHeight, duration / 2, {
-      easing: Easing.easeOutQuad
+      easing: Easing.easeOutQuad,
     });
     animations.animate(actor, 'left', centerX - newWidth / 2, duration / 2, {
-      easing: Easing.easeOutQuad
+      easing: Easing.easeOutQuad,
     });
     animations.animate(actor, 'top', centerY - newHeight / 2, duration / 2, {
-      easing: Easing.easeOutQuad
+      easing: Easing.easeOutQuad,
     });
   }
 
@@ -370,10 +376,10 @@ export class AnimationHelpers {
         onComplete: () => {
           currentShake++;
           doShake();
-        }
+        },
       });
       animations.animate(actor, 'top', originalY + offsetY, shakeDuration, {
-        easing: Easing.linear
+        easing: Easing.linear,
       });
     };
 
