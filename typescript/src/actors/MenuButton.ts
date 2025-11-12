@@ -227,7 +227,8 @@ export class SK8MenuButton extends SK8Actor {
 
     // Check button hover
     const wasHovering = this.buttonHover;
-    this.buttonHover = x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
+    this.buttonHover =
+      x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
 
     // Check menu item hover
     const wasHoveredIndex = this.hoveredItemIndex;

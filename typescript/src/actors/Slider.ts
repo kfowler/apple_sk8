@@ -294,7 +294,8 @@ export class SK8Slider extends SK8Actor {
     ctx.fillStyle = ColorUtils.toCSS(this.enabled ? this.thumbColor : this.disabledColor);
     ctx.fill();
 
-    const borderColor = this.isHovering || this.isDragging ? this.thumbHoverColor : this.thumbBorderColor;
+    const borderColor =
+      this.isHovering || this.isDragging ? this.thumbHoverColor : this.thumbBorderColor;
     ctx.strokeStyle = ColorUtils.toCSS(this.enabled ? borderColor : this.disabledColor);
     ctx.lineWidth = this.isHovering || this.isDragging ? 2 : 1;
     ctx.stroke();

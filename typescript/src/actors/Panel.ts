@@ -291,9 +291,15 @@ export class SK8Panel extends SK8Actor {
 
       // Draw button background
       if (this.closeButtonHover) {
-        const hoverColor: Color = typeof this.closeButtonColor === 'string'
-          ? this.closeButtonColor
-          : { r: this.closeButtonColor.r, g: this.closeButtonColor.g, b: this.closeButtonColor.b, a: 0.2 };
+        const hoverColor: Color =
+          typeof this.closeButtonColor === 'string'
+            ? this.closeButtonColor
+            : {
+                r: this.closeButtonColor.r,
+                g: this.closeButtonColor.g,
+                b: this.closeButtonColor.b,
+                a: 0.2,
+              };
         ctx.fillStyle = ColorUtils.toCSS(hoverColor);
         ctx.fillRect(btn.x - 2, btn.y - 2, btn.size + 4, btn.size + 4);
       }

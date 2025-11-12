@@ -14,13 +14,7 @@ import { TouchPoint } from './SK8Event.js';
 /**
  * Gesture types
  */
-export type GestureType =
-  | 'tap'
-  | 'doubletap'
-  | 'longpress'
-  | 'swipe'
-  | 'pinch'
-  | 'rotate';
+export type GestureType = 'tap' | 'doubletap' | 'longpress' | 'swipe' | 'pinch' | 'rotate';
 
 /**
  * Swipe direction
@@ -55,10 +49,7 @@ export class GestureRecognizer {
   private lastTapY: number = 0;
 
   // Touch tracking
-  private touchStartData: Map<
-    number,
-    { x: number; y: number; time: number }
-  > = new Map();
+  private touchStartData: Map<number, { x: number; y: number; time: number }> = new Map();
   private initialPinchDistance: number = 0;
   private initialRotation: number = 0;
 
@@ -187,16 +178,8 @@ export class GestureRecognizer {
       const velocity = distance / duration;
 
       // Check for swipe
-      if (
-        distance > this.SWIPE_THRESHOLD &&
-        velocity > this.SWIPE_VELOCITY_THRESHOLD
-      ) {
-        const direction = this.getSwipeDirection(
-          start.x,
-          start.y,
-          touch.x,
-          touch.y
-        );
+      if (distance > this.SWIPE_THRESHOLD && velocity > this.SWIPE_VELOCITY_THRESHOLD) {
+        const direction = this.getSwipeDirection(start.x, start.y, touch.x, touch.y);
         this.emitGesture({
           type: 'swipe',
           x: touch.x,
@@ -207,16 +190,10 @@ export class GestureRecognizer {
         });
       }
       // Check for tap
-      else if (
-        duration < this.TAP_THRESHOLD &&
-        distance < this.TAP_MOVE_THRESHOLD
-      ) {
+      else if (duration < this.TAP_THRESHOLD && distance < this.TAP_MOVE_THRESHOLD) {
         // Check for double tap
         const timeSinceLastTap = now - this.lastTapTime;
-        const distanceFromLastTap = Math.hypot(
-          touch.x - this.lastTapX,
-          touch.y - this.lastTapY
-        );
+        const distanceFromLastTap = Math.hypot(touch.x - this.lastTapX, touch.y - this.lastTapY);
 
         if (
           timeSinceLastTap < this.DOUBLE_TAP_THRESHOLD &&
@@ -292,12 +269,7 @@ export class GestureRecognizer {
   /**
    * Get swipe direction
    */
-  private getSwipeDirection(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-  ): SwipeDirection {
+  private getSwipeDirection(x1: number, y1: number, x2: number, y2: number): SwipeDirection {
     const dx = x2 - x1;
     const dy = y2 - y1;
 

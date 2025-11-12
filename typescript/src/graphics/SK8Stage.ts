@@ -8,12 +8,7 @@
 import { SK8Object } from '../core/SK8Object.js';
 import { SK8Actor } from './SK8Actor.js';
 import { Color, ColorUtils, Rect, RectUtils } from './types.js';
-import {
-  SK8MouseEvent,
-  SK8KeyboardEvent,
-  SK8TouchEvent,
-  TouchPoint,
-} from '../events/SK8Event.js';
+import { SK8MouseEvent, SK8KeyboardEvent, SK8TouchEvent, TouchPoint } from '../events/SK8Event.js';
 import { DragDropManager, DragConstraints } from '../events/drag-drop.js';
 import { GestureRecognizer, GestureData } from '../events/gestures.js';
 
@@ -201,7 +196,14 @@ export class SK8Stage extends SK8Object {
         // Apply actor's transform (if any)
         const transform = actor.getTransformMatrix?.();
         if (transform) {
-          this.ctx.transform(transform.a, transform.b, transform.c, transform.d, transform.e, transform.f);
+          this.ctx.transform(
+            transform.a,
+            transform.b,
+            transform.c,
+            transform.d,
+            transform.e,
+            transform.f
+          );
         }
         actor.render(this.ctx);
         this.ctx.restore();
@@ -247,7 +249,14 @@ export class SK8Stage extends SK8Object {
             this.ctx.save();
             const transform = actor.getTransformMatrix?.();
             if (transform) {
-              this.ctx.transform(transform.a, transform.b, transform.c, transform.d, transform.e, transform.f);
+              this.ctx.transform(
+                transform.a,
+                transform.b,
+                transform.c,
+                transform.d,
+                transform.e,
+                transform.f
+              );
             }
             actor.render(this.ctx);
             this.ctx.restore();
@@ -368,15 +377,9 @@ export class SK8Stage extends SK8Object {
     this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
     this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
     this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    this.canvas.addEventListener('mouseenter', (e) =>
-      this.handleMouseEnter(e)
-    );
-    this.canvas.addEventListener('mouseleave', (e) =>
-      this.handleMouseLeave(e)
-    );
-    this.canvas.addEventListener('contextmenu', (e) =>
-      this.handleContextMenu(e)
-    );
+    this.canvas.addEventListener('mouseenter', (e) => this.handleMouseEnter(e));
+    this.canvas.addEventListener('mouseleave', (e) => this.handleMouseLeave(e));
+    this.canvas.addEventListener('contextmenu', (e) => this.handleContextMenu(e));
 
     // Keyboard events - need tabindex to receive keyboard events
     this.canvas.tabIndex = 0;
@@ -385,14 +388,10 @@ export class SK8Stage extends SK8Object {
     this.canvas.addEventListener('keypress', (e) => this.handleKeyPress(e));
 
     // Touch events
-    this.canvas.addEventListener('touchstart', (e) =>
-      this.handleTouchStart(e)
-    );
+    this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
     this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
     this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
-    this.canvas.addEventListener('touchcancel', (e) =>
-      this.handleTouchCancel(e)
-    );
+    this.canvas.addEventListener('touchcancel', (e) => this.handleTouchCancel(e));
 
     // Set up gesture recognizer
     this.gestureRecognizer.onGesture((gesture: GestureData) => {

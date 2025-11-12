@@ -133,7 +133,9 @@ export class SK8CheckBox extends SK8Actor {
     const boxY = y + (height - this.boxSize) / 2;
 
     // Draw checkbox box
-    ctx.fillStyle = ColorUtils.toCSS(this.enabled ? this.boxColor : { r: 245, g: 245, b: 245, a: 1.0 });
+    ctx.fillStyle = ColorUtils.toCSS(
+      this.enabled ? this.boxColor : { r: 245, g: 245, b: 245, a: 1.0 }
+    );
     ctx.fillRect(x, boxY, this.boxSize, this.boxSize);
 
     // Draw border

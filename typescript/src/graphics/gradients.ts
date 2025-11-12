@@ -77,10 +77,10 @@ export abstract class Gradient {
  * Linear gradient
  */
 export class LinearGradient extends Gradient {
-  private x0Ratio: number = 0;  // Start X as ratio of width
-  private y0Ratio: number = 0;  // Start Y as ratio of height
-  private x1Ratio: number = 1;  // End X as ratio of width
-  private y1Ratio: number = 0;  // End Y as ratio of height
+  private x0Ratio: number = 0; // Start X as ratio of width
+  private y0Ratio: number = 0; // Start Y as ratio of height
+  private x1Ratio: number = 1; // End X as ratio of width
+  private y1Ratio: number = 0; // End Y as ratio of height
 
   /**
    * Create a linear gradient
@@ -149,12 +149,12 @@ export class LinearGradient extends Gradient {
  * Radial gradient
  */
 export class RadialGradient extends Gradient {
-  private x0Ratio: number = 0.5;  // Center X as ratio of width
-  private y0Ratio: number = 0.5;  // Center Y as ratio of height
-  private r0Ratio: number = 0;    // Inner radius as ratio of bounds
-  private x1Ratio: number = 0.5;  // Outer center X as ratio of width
-  private y1Ratio: number = 0.5;  // Outer center Y as ratio of height
-  private r1Ratio: number = 0.5;  // Outer radius as ratio of bounds
+  private x0Ratio: number = 0.5; // Center X as ratio of width
+  private y0Ratio: number = 0.5; // Center Y as ratio of height
+  private r0Ratio: number = 0; // Inner radius as ratio of bounds
+  private x1Ratio: number = 0.5; // Outer center X as ratio of width
+  private y1Ratio: number = 0.5; // Outer center Y as ratio of height
+  private r1Ratio: number = 0.5; // Outer radius as ratio of bounds
 
   /**
    * Create a radial gradient
@@ -185,14 +185,7 @@ export class RadialGradient extends Gradient {
   /**
    * Set the gradient parameters
    */
-  setParameters(
-    x0: number,
-    y0: number,
-    r0: number,
-    x1: number,
-    y1: number,
-    r1: number
-  ): this {
+  setParameters(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): this {
     this.x0Ratio = x0;
     this.y0Ratio = y0;
     this.r0Ratio = r0;

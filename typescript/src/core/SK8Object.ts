@@ -78,9 +78,7 @@ export class SK8Object {
       if (descriptor.computed && descriptor.getter) {
         // Check for circular dependencies
         if (this.isComputingProperty.has(propertyName)) {
-          throw new Error(
-            `Circular dependency detected in computed property '${propertyName}'`
-          );
+          throw new Error(`Circular dependency detected in computed property '${propertyName}'`);
         }
 
         // Check if we have a cached value

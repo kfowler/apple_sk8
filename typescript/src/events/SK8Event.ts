@@ -107,12 +107,7 @@ export class SK8MouseEvent extends SK8Event {
   readonly altKey: boolean;
   readonly metaKey: boolean;
 
-  constructor(
-    type: string,
-    x: number,
-    y: number,
-    nativeEvent?: MouseEvent
-  ) {
+  constructor(type: string, x: number, y: number, nativeEvent?: MouseEvent) {
     super(type);
     this.x = x;
     this.y = y;

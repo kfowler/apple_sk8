@@ -27,15 +27,13 @@ export function debounce<T extends (...args: any[]) => any>(
 ): (...args: Parameters<T>) => void {
   let timeout: number | null = null;
 
-  return function (this: any, ...args: Parameters<T>) {
-    const context = this;
-
+  return (...args: Parameters<T>) => {
     if (timeout !== null) {
       clearTimeout(timeout);
     }
 
     timeout = window.setTimeout(() => {
-      func.apply(context, args);
+      func(...args);
       timeout = null;
     }, wait);
   };
@@ -47,16 +45,14 @@ export function debounce<T extends (...args: any[]) => any>(
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
-): (...args: Parameters<T>) => void {
+): (...args: Parameters<T>) => ReturnType<T> | undefined {
   let inThrottle = false;
-  let lastResult: ReturnType<T>;
+  let lastResult: ReturnType<T> | undefined;
 
-  return function (this: any, ...args: Parameters<T>) {
-    const context = this;
-
+  return (...args: Parameters<T>) => {
     if (!inThrottle) {
       inThrottle = true;
-      lastResult = func.apply(context, args);
+      lastResult = func(...args);
 
       setTimeout(() => {
         inThrottle = false;
@@ -88,12 +84,7 @@ export class EventSimulator {
   /**
    * Simulate a mouse event
    */
-  static simulateMouseEvent(
-    type: string,
-    x: number,
-    y: number,
-    button: number = 0
-  ): SK8MouseEvent {
+  static simulateMouseEvent(type: string, x: number, y: number, button: number = 0): SK8MouseEvent {
     const nativeEvent = new MouseEvent(type, {
       clientX: x,
       clientY: y,
@@ -273,10 +264,7 @@ export class EventSimulator {
 /**
  * Create a custom event
  */
-export function createCustomEvent<T = any>(
-  type: string,
-  detail: T
-): SK8CustomEvent<T> {
+export function createCustomEvent<T = any>(type: string, detail: T): SK8CustomEvent<T> {
   return new SK8CustomEvent(type, detail);
 }
 

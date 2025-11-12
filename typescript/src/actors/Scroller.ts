@@ -186,7 +186,12 @@ export class SK8Scroller extends SK8Actor {
     };
   }
 
-  private getHorizontalThumbBounds(): { x: number; y: number; width: number; height: number } | null {
+  private getHorizontalThumbBounds(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
     if (!this.showHorizontalScrollbar || this.contentWidth <= this.getViewportWidth()) {
       return null;
     }
@@ -210,7 +215,13 @@ export class SK8Scroller extends SK8Actor {
   override onMouseDown(x: number, y: number): void {
     // Check vertical scrollbar thumb
     const vThumb = this.getVerticalThumbBounds();
-    if (vThumb && x >= vThumb.x && x <= vThumb.x + vThumb.width && y >= vThumb.y && y <= vThumb.y + vThumb.height) {
+    if (
+      vThumb &&
+      x >= vThumb.x &&
+      x <= vThumb.x + vThumb.width &&
+      y >= vThumb.y &&
+      y <= vThumb.y + vThumb.height
+    ) {
       this.isDraggingVertical = true;
       this.dragStartY = y;
       this.dragStartScrollY = this.scrollY;
@@ -219,7 +230,13 @@ export class SK8Scroller extends SK8Actor {
 
     // Check horizontal scrollbar thumb
     const hThumb = this.getHorizontalThumbBounds();
-    if (hThumb && x >= hThumb.x && x <= hThumb.x + hThumb.width && y >= hThumb.y && y <= hThumb.y + hThumb.height) {
+    if (
+      hThumb &&
+      x >= hThumb.x &&
+      x <= hThumb.x + hThumb.width &&
+      y >= hThumb.y &&
+      y <= hThumb.y + hThumb.height
+    ) {
       this.isDraggingHorizontal = true;
       this.dragStartX = x;
       this.dragStartScrollX = this.scrollX;
@@ -267,11 +284,21 @@ export class SK8Scroller extends SK8Actor {
     // Check hover states
     const vThumb = this.getVerticalThumbBounds();
     const wasVHovering = this.verticalThumbHover;
-    this.verticalThumbHover = vThumb !== null && x >= vThumb.x && x <= vThumb.x + vThumb.width && y >= vThumb.y && y <= vThumb.y + vThumb.height;
+    this.verticalThumbHover =
+      vThumb !== null &&
+      x >= vThumb.x &&
+      x <= vThumb.x + vThumb.width &&
+      y >= vThumb.y &&
+      y <= vThumb.y + vThumb.height;
 
     const hThumb = this.getHorizontalThumbBounds();
     const wasHHovering = this.horizontalThumbHover;
-    this.horizontalThumbHover = hThumb !== null && x >= hThumb.x && x <= hThumb.x + hThumb.width && y >= hThumb.y && y <= hThumb.y + hThumb.height;
+    this.horizontalThumbHover =
+      hThumb !== null &&
+      x >= hThumb.x &&
+      x <= hThumb.x + hThumb.width &&
+      y >= hThumb.y &&
+      y <= hThumb.y + hThumb.height;
 
     if (wasVHovering !== this.verticalThumbHover || wasHHovering !== this.horizontalThumbHover) {
       this.setNeedsDraw();
@@ -324,7 +351,10 @@ export class SK8Scroller extends SK8Actor {
       ctx.fillRect(vThumb.x, y, vThumb.width, this.getViewportHeight());
 
       // Draw thumb
-      const thumbColor = this.verticalThumbHover || this.isDraggingVertical ? this.scrollbarHoverColor : this.scrollbarThumbColor;
+      const thumbColor =
+        this.verticalThumbHover || this.isDraggingVertical
+          ? this.scrollbarHoverColor
+          : this.scrollbarThumbColor;
       ctx.fillStyle = ColorUtils.toCSS(thumbColor);
       ctx.fillRect(vThumb.x, vThumb.y, vThumb.width, vThumb.height);
     }
@@ -337,7 +367,10 @@ export class SK8Scroller extends SK8Actor {
       ctx.fillRect(x, hThumb.y, this.getViewportWidth(), hThumb.height);
 
       // Draw thumb
-      const thumbColor = this.horizontalThumbHover || this.isDraggingHorizontal ? this.scrollbarHoverColor : this.scrollbarThumbColor;
+      const thumbColor =
+        this.horizontalThumbHover || this.isDraggingHorizontal
+          ? this.scrollbarHoverColor
+          : this.scrollbarThumbColor;
       ctx.fillStyle = ColorUtils.toCSS(thumbColor);
       ctx.fillRect(hThumb.x, hThumb.y, hThumb.width, hThumb.height);
     }

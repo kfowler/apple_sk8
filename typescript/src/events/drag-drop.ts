@@ -47,12 +47,7 @@ export class DragDropManager {
   /**
    * Start dragging an actor
    */
-  startDrag(
-    actor: SK8Actor,
-    x: number,
-    y: number,
-    constraints?: DragConstraints
-  ): void {
+  startDrag(actor: SK8Actor, x: number, y: number, constraints?: DragConstraints): void {
     if (!actor.getDraggable()) return;
 
     const bounds = actor.getBoundsRect();
@@ -139,27 +134,13 @@ export class DragDropManager {
     const deltaY = y - drag.startY;
 
     // Dispatch dragEnd event
-    const dragEndEvent = new SK8DragEvent(
-      'dragend',
-      x,
-      y,
-      deltaX,
-      deltaY,
-      drag.actor
-    );
+    const dragEndEvent = new SK8DragEvent('dragend', x, y, deltaX, deltaY, drag.actor);
     drag.actor.dispatchEvent(dragEndEvent);
 
     // Check if dropped on a drop target
     const dropTarget = this.findDropTarget(x, y);
     if (dropTarget) {
-      const dropEvent = new SK8DragEvent(
-        'drop',
-        x,
-        y,
-        deltaX,
-        deltaY,
-        drag.actor
-      );
+      const dropEvent = new SK8DragEvent('drop', x, y, deltaX, deltaY, drag.actor);
       dropTarget.dispatchEvent(dropEvent);
     }
 
@@ -178,14 +159,7 @@ export class DragDropManager {
     drag.actor.moveTo(drag.originalLeft, drag.originalTop);
 
     // Dispatch dragEnd with canceled flag
-    const event = new SK8DragEvent(
-      'dragend',
-      drag.currentX,
-      drag.currentY,
-      0,
-      0,
-      drag.actor
-    );
+    const event = new SK8DragEvent('dragend', drag.currentX, drag.currentY, 0, 0, drag.actor);
     event.preventDefault(); // Mark as canceled
     drag.actor.dispatchEvent(event);
 
@@ -227,11 +201,7 @@ export class DragDropManager {
    */
   private findDropTarget(x: number, y: number): SK8Actor | null {
     for (const target of this.dropTargets) {
-      if (
-        target.getVisible() &&
-        target.getDroppable() &&
-        target.containsPoint(x, y)
-      ) {
+      if (target.getVisible() && target.getDroppable() && target.containsPoint(x, y)) {
         return target;
       }
     }
@@ -250,40 +220,19 @@ export class DragDropManager {
 
     // Handle dragLeave
     if (this.previousDropTarget && this.previousDropTarget !== currentTarget) {
-      const leaveEvent = new SK8DragEvent(
-        'dragleave',
-        x,
-        y,
-        0,
-        0,
-        this.currentDrag.actor
-      );
+      const leaveEvent = new SK8DragEvent('dragleave', x, y, 0, 0, this.currentDrag.actor);
       this.previousDropTarget.dispatchEvent(leaveEvent);
     }
 
     // Handle dragEnter
     if (currentTarget && currentTarget !== this.previousDropTarget) {
-      const enterEvent = new SK8DragEvent(
-        'dragenter',
-        x,
-        y,
-        0,
-        0,
-        this.currentDrag.actor
-      );
+      const enterEvent = new SK8DragEvent('dragenter', x, y, 0, 0, this.currentDrag.actor);
       currentTarget.dispatchEvent(enterEvent);
     }
 
     // Handle dragOver
     if (currentTarget) {
-      const overEvent = new SK8DragEvent(
-        'dragover',
-        x,
-        y,
-        0,
-        0,
-        this.currentDrag.actor
-      );
+      const overEvent = new SK8DragEvent('dragover', x, y, 0, 0, this.currentDrag.actor);
       currentTarget.dispatchEvent(overEvent);
     }
 

@@ -148,7 +148,11 @@ export class SK8EditText extends SK8Actor {
   }
 
   private hasSelection(): boolean {
-    return this.selectionStart >= 0 && this.selectionEnd >= 0 && this.selectionStart !== this.selectionEnd;
+    return (
+      this.selectionStart >= 0 &&
+      this.selectionEnd >= 0 &&
+      this.selectionStart !== this.selectionEnd
+    );
   }
 
   private deleteSelection(): void {
@@ -184,7 +188,9 @@ export class SK8EditText extends SK8Actor {
         if (this.hasSelection()) {
           this.deleteSelection();
         } else if (this.cursorPosition > 0) {
-          this.text = this.text.substring(0, this.cursorPosition - 1) + this.text.substring(this.cursorPosition);
+          this.text =
+            this.text.substring(0, this.cursorPosition - 1) +
+            this.text.substring(this.cursorPosition);
           this.cursorPosition--;
           this.setNeedsDraw();
           if (this.hasHandler('change')) {
@@ -196,7 +202,9 @@ export class SK8EditText extends SK8Actor {
         if (this.hasSelection()) {
           this.deleteSelection();
         } else if (this.cursorPosition < this.text.length) {
-          this.text = this.text.substring(0, this.cursorPosition) + this.text.substring(this.cursorPosition + 1);
+          this.text =
+            this.text.substring(0, this.cursorPosition) +
+            this.text.substring(this.cursorPosition + 1);
           this.setNeedsDraw();
           if (this.hasHandler('change')) {
             this.callHandler('change', this.text);
@@ -242,7 +250,10 @@ export class SK8EditText extends SK8Actor {
           this.deleteSelection();
         }
         if (this.maxLength < 0 || this.text.length < this.maxLength) {
-          this.text = this.text.substring(0, this.cursorPosition) + e.key + this.text.substring(this.cursorPosition);
+          this.text =
+            this.text.substring(0, this.cursorPosition) +
+            e.key +
+            this.text.substring(this.cursorPosition);
           this.cursorPosition++;
           this.cursorVisible = true;
           this.setNeedsDraw();

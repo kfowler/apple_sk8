@@ -20,11 +20,7 @@ import {
  * Event target interface - objects that can handle events
  */
 export interface EventTarget {
-  addEventListener(
-    type: string,
-    listener: EventListener,
-    options?: EventListenerOptions
-  ): void;
+  addEventListener(type: string, listener: EventListener, options?: EventListenerOptions): void;
   removeEventListener(type: string, listener: EventListener): void;
   dispatchEvent(event: SK8Event): boolean;
 }
@@ -119,11 +115,7 @@ export class EventDispatcher {
   /**
    * Invoke listeners on a specific target
    */
-  private invokeListeners(
-    target: any,
-    event: SK8Event,
-    capturePhase: boolean
-  ): void {
+  private invokeListeners(target: any, event: SK8Event, capturePhase: boolean): void {
     if (!target.eventListeners) return;
 
     const listeners = target.eventListeners.get(event.type);

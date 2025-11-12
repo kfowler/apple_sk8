@@ -276,11 +276,7 @@ export class TextMeasure {
   /**
    * Measure the width of text with a given style
    */
-  static measureWidth(
-    ctx: CanvasRenderingContext2D,
-    text: string,
-    style: TextStyle
-  ): number {
+  static measureWidth(ctx: CanvasRenderingContext2D, text: string, style: TextStyle): number {
     const metrics = style.measureText(ctx, text);
     return metrics.width;
   }
@@ -336,9 +332,7 @@ export class TextMeasure {
     style: TextStyle,
     maxWidth?: number
   ): { width: number; height: number } {
-    const lines = maxWidth
-      ? this.wrapText(ctx, text, maxWidth, style)
-      : text.split('\n');
+    const lines = maxWidth ? this.wrapText(ctx, text, maxWidth, style) : text.split('\n');
 
     let maxLineWidth = 0;
     for (const line of lines) {
@@ -367,9 +361,10 @@ export function renderMultilineText(
   style.applyToContext(ctx);
 
   const maxWidth = style.getMaxWidth();
-  const lines = style.getWordWrap() && maxWidth !== undefined
-    ? TextMeasure.wrapText(ctx, text, maxWidth, style)
-    : text.split('\n');
+  const lines =
+    style.getWordWrap() && maxWidth !== undefined
+      ? TextMeasure.wrapText(ctx, text, maxWidth, style)
+      : text.split('\n');
 
   const lineHeight = style.getLineHeightPixels();
 

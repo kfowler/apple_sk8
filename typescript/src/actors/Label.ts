@@ -219,7 +219,13 @@ export class SK8Label extends SK8Actor {
     }
   }
 
-  private drawWrappedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number): void {
+  private drawWrappedText(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number
+  ): void {
     const words = text.split(' ');
     const lines: string[] = [];
     let currentLine = '';

@@ -201,7 +201,9 @@ export class SK8RadioButton extends SK8Actor {
     // Draw outer circle
     ctx.beginPath();
     ctx.arc(circleX, circleY, radius, 0, Math.PI * 2);
-    ctx.fillStyle = ColorUtils.toCSS(this.enabled ? this.circleColor : { r: 245, g: 245, b: 245, a: 1.0 });
+    ctx.fillStyle = ColorUtils.toCSS(
+      this.enabled ? this.circleColor : { r: 245, g: 245, b: 245, a: 1.0 }
+    );
     ctx.fill();
 
     // Draw border
