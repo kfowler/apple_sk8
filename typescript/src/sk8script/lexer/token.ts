@@ -32,10 +32,21 @@ export enum TokenType {
   REPEAT = 'REPEAT',
   WHILE = 'WHILE',
   WITH = 'WITH',
+  FROM = 'FROM',
+  TIMES = 'TIMES',
+  FOREVER = 'FOREVER',
   ITEM = 'ITEM',
   NOT = 'NOT',
   AND = 'AND',
   OR = 'OR',
+  TRY = 'TRY',
+  CATCH = 'CATCH',
+  BREAK = 'BREAK',
+  CONTINUE = 'CONTINUE',
+  RETURN = 'RETURN',
+  ON = 'ON',
+  CALL = 'CALL',
+  FUNCTION = 'FUNCTION',
 
   // Operators
   PLUS = 'PLUS', // +
@@ -110,10 +121,21 @@ export class Token {
       this.type === TokenType.REPEAT ||
       this.type === TokenType.WHILE ||
       this.type === TokenType.WITH ||
+      this.type === TokenType.FROM ||
+      this.type === TokenType.TIMES ||
+      this.type === TokenType.FOREVER ||
       this.type === TokenType.ITEM ||
       this.type === TokenType.NOT ||
       this.type === TokenType.AND ||
-      this.type === TokenType.OR
+      this.type === TokenType.OR ||
+      this.type === TokenType.TRY ||
+      this.type === TokenType.CATCH ||
+      this.type === TokenType.BREAK ||
+      this.type === TokenType.CONTINUE ||
+      this.type === TokenType.RETURN ||
+      this.type === TokenType.ON ||
+      this.type === TokenType.CALL ||
+      this.type === TokenType.FUNCTION
     );
   }
 
@@ -181,10 +203,21 @@ export const KEYWORDS: Map<string, TokenType> = new Map([
   ['repeat', TokenType.REPEAT],
   ['while', TokenType.WHILE],
   ['with', TokenType.WITH],
+  ['from', TokenType.FROM],
+  ['times', TokenType.TIMES],
+  ['forever', TokenType.FOREVER],
   ['item', TokenType.ITEM],
   ['not', TokenType.NOT],
   ['and', TokenType.AND],
   ['or', TokenType.OR],
+  ['try', TokenType.TRY],
+  ['catch', TokenType.CATCH],
+  ['break', TokenType.BREAK],
+  ['continue', TokenType.CONTINUE],
+  ['return', TokenType.RETURN],
+  ['on', TokenType.ON],
+  ['call', TokenType.CALL],
+  ['function', TokenType.FUNCTION],
   ['true', TokenType.TRUE],
   ['false', TokenType.FALSE],
   ['null', TokenType.NULL],

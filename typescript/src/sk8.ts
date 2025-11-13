@@ -154,6 +154,10 @@ export {
 export type { AudioPlayer, Audio3DOptions } from './media/audio-utils.js';
 
 // SK8Script - Scripting Language (Phase 2.1)
+import { tokenize as _tokenize } from './sk8script/lexer/lexer.js';
+import { parse as _parse } from './sk8script/parser/parser.js';
+import { Evaluator as _Evaluator } from './sk8script/evaluator/evaluator.js';
+
 export { tokenize, Lexer, LexerError } from './sk8script/lexer/lexer.js';
 export { Token, TokenType, KEYWORDS, getOperatorPrecedence } from './sk8script/lexer/token.js';
 export { parse, Parser, ParserError } from './sk8script/parser/parser.js';
@@ -188,7 +192,32 @@ export type {
   AssignmentNode,
 } from './sk8script/parser/ast.js';
 export { evaluate, Evaluator, EvaluatorError } from './sk8script/evaluator/evaluator.js';
-export type { EvaluationContext } from './sk8script/evaluator/evaluator.js';
+export type { EvaluationContext, BuiltInFunction } from './sk8script/evaluator/evaluator.js';
+
+// SK8Script Standard Library (Phase 2.4)
+import {
+  allStdLibFunctions as _allStdLibFunctions,
+  getFunctionCount as _getFunctionCount,
+} from './sk8script/stdlib/index.js';
+
+export {
+  stdlib,
+  StdLibRegistry,
+  StdLibError,
+  typeValidators,
+  allStdLibFunctions,
+  registerAllStdLib,
+  getFunctionsByCategory,
+  getFunctionCount,
+  printAllFunctions,
+} from './sk8script/stdlib/index.js';
+export type { FunctionMetadata } from './sk8script/stdlib/index.js';
+export { mathFunctions } from './sk8script/stdlib/math.js';
+export { stringFunctions } from './sk8script/stdlib/string.js';
+export { collectionFunctions } from './sk8script/stdlib/collection.js';
+export { typeFunctions } from './sk8script/stdlib/types.js';
+export { ioFunctions } from './sk8script/stdlib/io.js';
+export { objectFunctions } from './sk8script/stdlib/object.js';
 
 // Project System (Phase 3.2)
 export {
@@ -262,8 +291,38 @@ export type {
   ProjectManagerOptions,
 } from './project/project-manager.js';
 
+// Editor System (Phase 4)
+export {
+  SK8Editor,
+  SetPropertyCommand,
+  MoveActorsCommand,
+  ResizeActorCommand,
+  DeleteActorsCommand,
+  AddActorCommand,
+  BaseCommand,
+} from './editor/editor.js';
+export type {
+  EditorCommand,
+  ToolType,
+  EditorTool,
+  EditorEventType,
+  EditorEventListener,
+} from './editor/editor.js';
+
+export { SK8PropertyInspector } from './editor/property-inspector.js';
+export type { PropertyDefinition, PropertyType, PropertyGroup } from './editor/property-inspector.js';
+
+export { SK8ObjectTree } from './editor/object-tree.js';
+export type { TreeNode } from './editor/object-tree.js';
+
+export { SK8Toolbar } from './editor/toolbar.js';
+export type { ToolButton } from './editor/toolbar.js';
+
+export { SK8SelectionHandles } from './editor/selection-handles.js';
+export type { HandleType, Handle } from './editor/selection-handles.js';
+
 // Version
-export const VERSION = '0.3.1';
+export const VERSION = '0.4.1';
 
 /**
  * Helper function to initialize SK8 with a canvas
@@ -273,10 +332,32 @@ export function createStage(canvas: HTMLCanvasElement | string): SK8Stage {
 }
 
 /**
+ * Create an SK8Script evaluator with all standard library functions registered
+ */
+export function createEvaluator(): _Evaluator {
+  const evaluator = new _Evaluator();
+  evaluator.registerFunctions(_allStdLibFunctions);
+  return evaluator;
+}
+
+/**
+ * Evaluate SK8Script code with standard library
+ */
+export function evaluateScript(code: string): any {
+  const tokens = _tokenize(code);
+  const ast = _parse(tokens);
+  const evaluator = createEvaluator();
+  return evaluator.evaluate(ast);
+}
+
+/**
  * Log SK8 info
  */
 export function info(): void {
   console.log(`SK8 TypeScript Port v${VERSION}`);
   console.log('A multimedia authoring environment for the web');
   console.log('Based on the original SK8 by Apple Computer, Inc.');
+  console.log();
+  console.log(`SK8Script Standard Library: ${_getFunctionCount()} functions`);
+  console.log('Use printAllFunctions() to see all available functions');
 }

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SK8 Visual Editor - Phase 4 Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        overflow: hidden;
+      }
+
+      /* Main layout */
+      .sk8-editor-container {
+        display: grid;
+        grid-template-rows: 50px 1fr 30px;
+        grid-template-columns: 250px 1fr 300px;
+        height: 100vh;
+        gap: 1px;
+        background: #000;
+      }
+
+      /* Toolbar */
+      .sk8-toolbar {
+        grid-column: 1 / -1;
+        background: #2d2d30;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        gap: 5px;
+        border-bottom: 1px solid #3e3e42;
+      }
+
+      .sk8-toolbar-button {
+        width: 40px;
+        height: 40px;
+        background: #3e3e42;
+        border: none;
+        border-radius: 4px;
+        color: #d4d4d4;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sk8-toolbar-button:hover {
+        background: #505053;
+      }
+
+      .sk8-toolbar-button-active {
+        background: #0e639c;
+        color: white;
+      }
+
+      .sk8-toolbar-divider {
+        width: 1px;
+        height: 30px;
+        background: #3e3e42;
+        margin: 0 5px;
+      }
+
+      .sk8-toolbar-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-left: 10px;
+        margin-right: auto;
+      }
+
+      .sk8-toolbar-actions {
+        display: flex;
+        gap: 5px;
+      }
+
+      .sk8-toolbar-action {
+        padding: 8px 12px;
+        background: #3e3e42;
+        border: none;
+        border-radius: 4px;
+        color: #d4d4d4;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .sk8-toolbar-action:hover {
+        background: #505053;
+      }
+
+      .sk8-toolbar-action:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Object Tree */
+      .sk8-object-tree {
+        background: #252526;
+        overflow-y: auto;
+        padding: 10px;
+      }
+
+      .sk8-tree-header {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #969696;
+        padding: 5px 10px;
+        border-bottom: 1px solid #3e3e42;
+        margin-bottom: 10px;
+      }
+
+      .sk8-tree-node {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .sk8-tree-node-label {
+        display: flex;
+        align-items: center;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        gap: 8px;
+        transition: background 0.1s;
+      }
+
+      .sk8-tree-node-label:hover {
+        background: #2a2d2e;
+      }
+
+      .sk8-tree-node-selected .sk8-tree-node-label {
+        background: #094771;
+      }
+
+      .sk8-tree-icon {
+        font-size: 14px;
+        width: 16px;
+        text-align: center;
+      }
+
+      .sk8-tree-name {
+        flex: 1;
+      }
+
+      .sk8-tree-type {
+        font-size: 10px;
+        color: #969696;
+      }
+
+      .sk8-tree-visibility-btn {
+        background: none;
+        border: none;
+        color: #969696;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 0;
+        opacity: 0.5;
+      }
+
+      .sk8-tree-visibility-btn:hover {
+        opacity: 1;
+      }
+
+      .sk8-tree-stage {
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      /* Stage Area */
+      .sk8-stage-area {
+        background: #1e1e1e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #canvas {
+        border: 1px solid #3e3e42;
+        background: white;
+        cursor: default;
+      }
+
+      /* Property Inspector */
+      .sk8-property-inspector {
+        background: #252526;
+        overflow-y: auto;
+        padding: 10px;
+      }
+
+      .sk8-inspector-header {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 10px;
+        border-bottom: 1px solid #3e3e42;
+        margin-bottom: 10px;
+      }
+
+      .sk8-inspector-empty {
+        padding: 20px;
+        text-align: center;
+        color: #969696;
+        font-size: 13px;
+      }
+
+      .sk8-inspector-group {
+        margin-bottom: 10px;
+      }
+
+      .sk8-inspector-group-header {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #969696;
+        padding: 8px 10px;
+        background: #2d2d30;
+        border-radius: 4px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .sk8-inspector-group-header:hover {
+        background: #37373d;
+      }
+
+      .sk8-inspector-group-content {
+        padding: 10px 5px;
+      }
+
+      .sk8-inspector-property {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 5px;
+      }
+
+      .sk8-inspector-property-label {
+        font-size: 12px;
+        color: #cccccc;
+      }
+
+      .sk8-inspector-input,
+      .sk8-inspector-select {
+        background: #3c3c3c;
+        border: 1px solid #3e3e42;
+        color: #cccccc;
+        padding: 6px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        width: 100%;
+      }
+
+      .sk8-inspector-input:focus,
+      .sk8-inspector-select:focus {
+        outline: none;
+        border-color: #007acc;
+      }
+
+      .sk8-inspector-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+
+      .sk8-inspector-color-editor {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .sk8-inspector-color-input {
+        width: 60px;
+        height: 32px;
+        border: 1px solid #3e3e42;
+        border-radius: 3px;
+        cursor: pointer;
+        background: #3c3c3c;
+      }
+
+      /* Status Bar */
+      .sk8-status-bar {
+        grid-column: 1 / -1;
+        background: #007acc;
+        color: white;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        font-size: 12px;
+        gap: 20px;
+      }
+
+      .sk8-status-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      /* Scrollbars */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #1e1e1e;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #424242;
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #4e4e4e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sk8-editor-container">
+      <!-- Toolbar -->
+      <div id="toolbar" class="sk8-toolbar">
+        <span class="sk8-toolbar-title">SK8 Visual Editor</span>
+        <div class="sk8-toolbar-actions">
+          <button id="undoBtn" class="sk8-toolbar-action" disabled>Undo</button>
+          <button id="redoBtn" class="sk8-toolbar-action" disabled>Redo</button>
+          <div class="sk8-toolbar-divider"></div>
+          <button id="clearBtn" class="sk8-toolbar-action">Clear Stage</button>
+        </div>
+      </div>
+
+      <!-- Object Tree -->
+      <div class="sk8-object-tree">
+        <div class="sk8-tree-header">Objects</div>
+        <div id="objectTree"></div>
+      </div>
+
+      <!-- Stage Area -->
+      <div class="sk8-stage-area">
+        <canvas id="canvas" width="800" height="600"></canvas>
+      </div>
+
+      <!-- Property Inspector -->
+      <div class="sk8-property-inspector">
+        <div class="sk8-tree-header">Properties</div>
+        <div id="propertyInspector"></div>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="sk8-status-bar">
+        <div class="sk8-status-item">
+          <span id="statusText">Ready</span>
+        </div>
+        <div class="sk8-status-item">
+          <span id="selectionInfo">No selection</span>
+        </div>
+        <div class="sk8-status-item">
+          <span id="toolInfo">Tool: Select</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        SK8Stage,
+        SK8Rectangle,
+        SK8Circle,
+        SK8Text,
+        ColorUtils,
+      } from '../dist/sk8.js';
+      import { SK8Editor } from '../dist/editor/editor.js';
+      import { SK8PropertyInspector } from '../dist/editor/property-inspector.js';
+      import { SK8ObjectTree } from '../dist/editor/object-tree.js';
+      import { SK8Toolbar } from '../dist/editor/toolbar.js';
+      import { SK8SelectionHandles } from '../dist/editor/selection-handles.js';
+
+      // Initialize
+      const canvas = document.getElementById('canvas');
+      const stage = new SK8Stage(canvas);
+      const editor = new SK8Editor(stage);
+
+      // Setup UI components
+      const toolbar = new SK8Toolbar(editor, document.getElementById('toolbar'));
+      const propertyInspector = new SK8PropertyInspector(
+        editor,
+        document.getElementById('propertyInspector')
+      );
+      const objectTree = new SK8ObjectTree(editor, document.getElementById('objectTree'));
+      const selectionHandles = new SK8SelectionHandles(editor, canvas);
+
+      // Setup undo/redo buttons
+      const undoBtn = document.getElementById('undoBtn');
+      const redoBtn = document.getElementById('redoBtn');
+
+      function updateUndoRedoButtons() {
+        undoBtn.disabled = !editor.canUndo();
+        redoBtn.disabled = !editor.canRedo();
+
+        const undoDesc = editor.getUndoDescription();
+        const redoDesc = editor.getRedoDescription();
+
+        undoBtn.textContent = undoDesc ? `Undo: ${undoDesc}` : 'Undo';
+        redoBtn.textContent = redoDesc ? `Redo: ${redoDesc}` : 'Redo';
+      }
+
+      undoBtn.addEventListener('click', () => {
+        editor.undo();
+        updateUndoRedoButtons();
+      });
+
+      redoBtn.addEventListener('click', () => {
+        editor.redo();
+        updateUndoRedoButtons();
+      });
+
+      editor.on('command-executed', updateUndoRedoButtons);
+      editor.on('command-undone', updateUndoRedoButtons);
+      editor.on('command-redone', updateUndoRedoButtons);
+
+      // Clear button
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        if (confirm('Clear all objects from the stage?')) {
+          stage.clearActors();
+          editor.clearSelection();
+          objectTree.refresh();
+        }
+      });
+
+      // Status bar updates
+      editor.on('selection-change', (actors) => {
+        const selectionInfo = document.getElementById('selectionInfo');
+        if (actors.length === 0) {
+          selectionInfo.textContent = 'No selection';
+        } else if (actors.length === 1) {
+          selectionInfo.textContent = `Selected: ${actors[0].constructor.name}`;
+        } else {
+          selectionInfo.textContent = `Selected: ${actors.length} actors`;
+        }
+      });
+
+      editor.on('tool-change', (tool) => {
+        const toolInfo = document.getElementById('toolInfo');
+        const toolName = tool.charAt(0).toUpperCase() + tool.slice(1);
+        toolInfo.textContent = `Tool: ${toolName}`;
+      });
+
+      // Handle canvas interactions
+      canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const currentTool = editor.getCurrentTool();
+
+        if (currentTool === 'select') {
+          // Select tool - check if clicking on actor
+          const actor = stage.actorAtPoint(x, y);
+          if (actor) {
+            if (e.shiftKey || e.metaKey || e.ctrlKey) {
+              editor.select(actor, true);
+            } else {
+              editor.select(actor, false);
+            }
+          } else {
+            editor.clearSelection();
+          }
+        } else {
+          // Drawing tool - delegate to tool handler
+          const tool = editor.getTool(currentTool);
+          if (tool?.onMouseDown) {
+            tool.onMouseDown(editor, x, y);
+            objectTree.refresh();
+          }
+        }
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const currentTool = editor.getCurrentTool();
+        const tool = editor.getTool(currentTool);
+        if (tool?.onMouseMove) {
+          tool.onMouseMove(editor, x, y);
+        }
+      });
+
+      canvas.addEventListener('mouseup', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const currentTool = editor.getCurrentTool();
+        const tool = editor.getTool(currentTool);
+        if (tool?.onMouseUp) {
+          tool.onMouseUp(editor, x, y);
+          objectTree.refresh();
+        }
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        editor.handleKeyDown(e);
+      });
+
+      // Render loop
+      function renderLoop() {
+        const ctx = canvas.getContext('2d');
+        stage.render();
+        selectionHandles.render(ctx);
+        requestAnimationFrame(renderLoop);
+      }
+
+      stage.startRendering();
+      renderLoop();
+
+      // Add some demo objects
+      const rect1 = new SK8Rectangle();
+      rect1.setBoundsRect({ left: 50, top: 50, right: 200, bottom: 150 });
+      rect1.setFillColor(ColorUtils.fromRGB(100, 150, 255));
+      rect1.setFrameColor(ColorUtils.Black);
+      rect1.setProperty('name', 'Blue Rectangle');
+      stage.addActor(rect1);
+
+      const circle1 = new SK8Circle();
+      circle1.setBoundsRect({ left: 250, top: 50, right: 400, bottom: 200 });
+      circle1.setFillColor(ColorUtils.fromRGB(255, 100, 150));
+      circle1.setFrameColor(ColorUtils.Black);
+      circle1.setProperty('name', 'Pink Circle');
+      stage.addActor(circle1);
+
+      const text1 = new SK8Text();
+      text1.setBoundsRect({ left: 50, top: 200, right: 400, bottom: 250 });
+      text1.setText('Welcome to SK8 Editor!');
+      text1.setFillColor(ColorUtils.Black);
+      text1.setProperty('name', 'Welcome Text');
+      stage.addActor(text1);
+
+      objectTree.refresh();
+      updateUndoRedoButtons();
+
+      document.getElementById('statusText').textContent = 'Ready - Phase 4 Complete!';
+
+      console.log('SK8 Visual Editor initialized!');
+      console.log('Available keyboard shortcuts:');
+      console.log('  V - Select tool');
+      console.log('  R - Rectangle tool');
+      console.log('  C - Circle tool');
+      console.log('  T - Text tool');
+      console.log('  Ctrl+Z - Undo');
+      console.log('  Ctrl+Shift+Z - Redo');
+      console.log('  Delete - Delete selection');
+      console.log('  Ctrl+A - Select all');
+    </script>
+  </body>
+</html>

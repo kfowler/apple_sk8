@@ -95,6 +95,10 @@ export class RectUtils {
   static isEmpty(rect: Rect): boolean {
     return rect.right <= rect.left || rect.bottom <= rect.top;
   }
+
+  static equals(a: Rect, b: Rect): boolean {
+    return a.left === b.left && a.top === b.top && a.right === b.right && a.bottom === b.bottom;
+  }
 }
 
 /**
@@ -111,6 +115,30 @@ export class ColorUtils {
 
   static fromRGB(r: number, g: number, b: number, a: number = 1): Color {
     return { r, g, b, a };
+  }
+
+  static toHex(color: Color): string {
+    if (typeof color === 'string') {
+      return color;
+    }
+    const { r, g, b } = color;
+    const toHex = (n: number) => {
+      const hex = Math.round(n).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+
+  static fromHex(hex: string): Color {
+    // Remove # if present
+    hex = hex.replace(/^#/, '');
+
+    // Parse hex values
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return { r, g, b, a: 1 };
   }
 
   // Named colors (like SK8's color constants)

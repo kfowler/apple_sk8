@@ -300,6 +300,25 @@
           </div>
         </div>
 
+        <div class="examples">
+          <h3>Control Flow Examples</h3>
+          <div class="example-item" onclick="loadExample('if 5 > 3 then 100 else 200 end')">
+            <code>if 5 > 3 then 100 else 200 end</code> → Simple if/else
+          </div>
+          <div class="example-item" onclick="loadExample('repeat 5 times set x to x + 1 end')">
+            <code>repeat 5 times ...</code> → Repeat N times loop
+          </div>
+          <div class="example-item" onclick="loadExample('repeat with i from 1 to 5 set sum to sum + i end')">
+            <code>repeat with i from 1 to 5 ...</code> → For loop
+          </div>
+          <div class="example-item" onclick="loadExample('while x < 100 set x to x * 2 end')">
+            <code>while x < 100 ...</code> → While loop
+          </div>
+          <div class="example-item" onclick="loadExample('try set x to y catch set x to 0 end')">
+            <code>try ... catch ...</code> → Error handling
+          </div>
+        </div>
+
         <div class="features">
           <div class="feature-card">
             <h4>Natural Language Syntax</h4>

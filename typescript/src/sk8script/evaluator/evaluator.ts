@@ -7,6 +7,7 @@
 import { TokenType } from '../lexer/token.js';
 import {
   ASTNode,
+  FunctionParameter,
   isLiteral,
   isIdentifier,
   isBinaryOp,
@@ -15,13 +16,48 @@ import {
   isIndexAccess,
   isGrouping,
   isAssignment,
+  isFunctionCall,
+  isListLiteral,
+  isTableLiteral,
+  isBlock,
+  isIfStatement,
+  isWhileStatement,
+  isRepeatTimes,
+  isRepeatWith,
+  isRepeatForever,
+  isTryStatement,
+  isBreakStatement,
+  isContinueStatement,
+  isReturnStatement,
+  isFunctionDeclaration,
+  isLambdaFunction,
 } from '../parser/ast.js';
+
+/**
+ * Built-in function type
+ */
+export type BuiltInFunction = (...args: any[]) => any;
+
+/**
+ * User-defined function representation (supports closures)
+ */
+export class UserDefinedFunction {
+  constructor(
+    public name: string,
+    public parameters: FunctionParameter[],
+    public body: ASTNode[],
+    public closure: EvaluationContext,
+    public returnsValue: boolean = true
+  ) {}
+}
 
 /**
  * Evaluation context for variable and property lookup
  */
 export interface EvaluationContext {
   variables: Map<string, any>;
+  functions: Map<string, BuiltInFunction | UserDefinedFunction>;
+  parent?: EvaluationContext; // For nested scopes and closures
   [key: string]: any;
 }
 
@@ -36,12 +72,44 @@ export class EvaluatorError extends Error {
 }
 
 /**
+ * Break exception for loop control
+ */
+class BreakException extends Error {
+  constructor() {
+    super('Break statement');
+    this.name = 'BreakException';
+  }
+}
+
+/**
+ * Continue exception for loop control
+ */
+class ContinueException extends Error {
+  constructor() {
+    super('Continue statement');
+    this.name = 'ContinueException';
+  }
+}
+
+/**
+ * Return exception for function control
+ */
+class ReturnException extends Error {
+  constructor(public value: any) {
+    super('Return statement');
+    this.name = 'ReturnException';
+  }
+}
+
+/**
  * Evaluator class for executing AST nodes
  */
 export class Evaluator {
   private context: EvaluationContext;
+  private callStack: string[] = [];
+  private readonly MAX_CALL_STACK_SIZE = 1000;
 
-  constructor(context: EvaluationContext = { variables: new Map() }) {
+  constructor(context: EvaluationContext = { variables: new Map(), functions: new Map() }) {
     this.context = context;
   }
 
@@ -56,11 +124,15 @@ export class Evaluator {
 
     // Identifier (variable lookup)
     if (isIdentifier(node)) {
-      const value = this.context.variables.get(node.name);
-      if (value === undefined) {
-        throw new EvaluatorError(`Undefined variable: ${node.name}`);
+      // Look up in current context and parent contexts (closure chain)
+      let context: EvaluationContext | undefined = this.context;
+      while (context) {
+        if (context.variables.has(node.name)) {
+          return context.variables.get(node.name);
+        }
+        context = context.parent;
       }
-      return value;
+      throw new EvaluatorError(`Undefined variable: ${node.name}`);
     }
 
     // Binary operation
@@ -91,6 +163,82 @@ export class Evaluator {
     // Assignment
     if (isAssignment(node)) {
       return this.evaluateAssignment(node);
+    }
+
+    // Function call
+    if (isFunctionCall(node)) {
+      return this.evaluateFunctionCall(node);
+    }
+
+    // List literal
+    if (isListLiteral(node)) {
+      return this.evaluateListLiteral(node);
+    }
+
+    // Table literal
+    if (isTableLiteral(node)) {
+      return this.evaluateTableLiteral(node);
+    }
+
+    // Block
+    if (isBlock(node)) {
+      return this.evaluateBlock(node);
+    }
+
+    // If statement
+    if (isIfStatement(node)) {
+      return this.evaluateIfStatement(node);
+    }
+
+    // While statement
+    if (isWhileStatement(node)) {
+      return this.evaluateWhileStatement(node);
+    }
+
+    // Repeat times
+    if (isRepeatTimes(node)) {
+      return this.evaluateRepeatTimes(node);
+    }
+
+    // Repeat with
+    if (isRepeatWith(node)) {
+      return this.evaluateRepeatWith(node);
+    }
+
+    // Repeat forever
+    if (isRepeatForever(node)) {
+      return this.evaluateRepeatForever(node);
+    }
+
+    // Try/catch
+    if (isTryStatement(node)) {
+      return this.evaluateTryStatement(node);
+    }
+
+    // Break
+    if (isBreakStatement(node)) {
+      throw new BreakException();
+    }
+
+    // Continue
+    if (isContinueStatement(node)) {
+      throw new ContinueException();
+    }
+
+    // Return
+    if (isReturnStatement(node)) {
+      const value = node.value ? this.evaluate(node.value) : undefined;
+      throw new ReturnException(value);
+    }
+
+    // Function declaration
+    if (isFunctionDeclaration(node)) {
+      return this.evaluateFunctionDeclaration(node);
+    }
+
+    // Lambda function
+    if (isLambdaFunction(node)) {
+      return this.evaluateLambdaFunction(node);
     }
 
     throw new EvaluatorError(`Unknown node type: ${node.kind}`);
@@ -125,10 +273,7 @@ export class Evaluator {
 
       case TokenType.SLASH:
         if (typeof left === 'number' && typeof right === 'number') {
-          if (right === 0) {
-            throw new EvaluatorError('Division by zero');
-          }
-          return left / right;
+          return left / right; // JavaScript returns Infinity for division by zero
         }
         throw new EvaluatorError(`Cannot divide ${typeof left} and ${typeof right}`);
 
@@ -312,6 +457,340 @@ export class Evaluator {
   }
 
   /**
+   * Evaluate a function declaration
+   * TODO: This will be used in future phase for function support
+   */
+  // @ts-ignore - Will be used in future phase
+  private evaluateFunctionDeclaration(node: any): any {
+    // Create a user-defined function with closure
+    const func = new UserDefinedFunction(
+      node.name,
+      node.parameters,
+      node.body,
+      this.context, // Capture current context as closure
+      node.returnsValue
+    );
+
+    // Register the function in the current context
+    this.context.functions.set(node.name, func);
+
+    // Return undefined (function declarations don't produce values)
+    return undefined;
+  }
+
+  /**
+   * Evaluate a lambda function
+   * TODO: This will be used in future phase for function support
+   */
+  // @ts-ignore - Will be used in future phase
+  private evaluateLambdaFunction(node: any): any {
+    // Create an anonymous user-defined function with closure
+    return new UserDefinedFunction(
+      '<lambda>', // Anonymous
+      node.parameters,
+      node.body,
+      this.context, // Capture current context as closure
+      true // Lambdas always return values
+    );
+  }
+
+  /**
+   * Evaluate a function call
+   */
+  private evaluateFunctionCall(node: any): any {
+    const func = this.context.functions.get(node.name);
+    if (!func) {
+      throw new EvaluatorError(`Undefined function: ${node.name}`);
+    }
+
+    // Evaluate all arguments
+    const args = node.args.map((arg: ASTNode) => this.evaluate(arg));
+
+    // Check if it's a user-defined function
+    if (func instanceof UserDefinedFunction) {
+      return this.callUserDefinedFunction(func, args);
+    }
+
+    // Otherwise it's a built-in function
+    return func(...args);
+  }
+
+  /**
+   * Call a user-defined function with arguments
+   */
+  private callUserDefinedFunction(func: UserDefinedFunction, args: any[]): any {
+    // Check stack overflow
+    if (this.callStack.length >= this.MAX_CALL_STACK_SIZE) {
+      throw new EvaluatorError(
+        `Stack overflow: Maximum call stack size (${this.MAX_CALL_STACK_SIZE}) exceeded`
+      );
+    }
+
+    // Push function name onto call stack
+    this.callStack.push(func.name);
+
+    try {
+      // Create a new context for function execution
+      const functionContext: EvaluationContext = {
+        variables: new Map(),
+        functions: func.closure.functions, // Share functions from closure
+        parent: func.closure, // Link to closure for variable lookup
+      };
+
+      // Bind parameters
+      for (let i = 0; i < func.parameters.length; i++) {
+        const param = func.parameters[i];
+        let value: any;
+
+        if (i < args.length) {
+          // Use provided argument
+          value = args[i];
+        } else if (param.defaultValue) {
+          // Use default value
+          value = this.evaluate(param.defaultValue);
+        } else {
+          // Missing required parameter
+          throw new EvaluatorError(
+            `Missing required parameter '${param.name}' for function '${func.name}'`
+          );
+        }
+
+        functionContext.variables.set(param.name, value);
+      }
+
+      // Save current context and switch to function context
+      const savedContext = this.context;
+      this.context = functionContext;
+
+      try {
+        // Execute function body
+        let result: any;
+        for (const statement of func.body) {
+          result = this.evaluate(statement);
+        }
+
+        // For handlers (on), always return undefined unless there's an explicit return
+        // For functions (to), return the last evaluated value
+        if (!func.returnsValue) {
+          return undefined;
+        }
+
+        return result;
+      } catch (e) {
+        if (e instanceof ReturnException) {
+          return e.value;
+        }
+        throw e;
+      } finally {
+        // Restore original context
+        this.context = savedContext;
+      }
+    } finally {
+      // Pop function from call stack
+      this.callStack.pop();
+    }
+  }
+
+  /**
+   * Evaluate a list literal
+   */
+  private evaluateListLiteral(node: any): any {
+    return node.elements.map((el: ASTNode) => this.evaluate(el));
+  }
+
+  /**
+   * Evaluate a table literal
+   */
+  private evaluateTableLiteral(node: any): any {
+    const table: Record<string, any> = {};
+    for (const entry of node.entries) {
+      table[entry.key] = this.evaluate(entry.value);
+    }
+    return table;
+  }
+
+  /**
+   * Evaluate a block of statements
+   */
+  private evaluateBlock(node: any): any {
+    let result: any;
+    for (const statement of node.statements) {
+      result = this.evaluate(statement);
+    }
+    return result;
+  }
+
+  /**
+   * Evaluate an if statement
+   */
+  private evaluateIfStatement(node: any): any {
+    const condition = this.evaluate(node.condition);
+
+    if (this.isTruthy(condition)) {
+      return this.evaluate(node.thenBranch);
+    } else if (node.elseBranch) {
+      return this.evaluate(node.elseBranch);
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Evaluate a while statement
+   */
+  private evaluateWhileStatement(node: any): any {
+    let result: any;
+
+    try {
+      while (this.isTruthy(this.evaluate(node.condition))) {
+        try {
+          result = this.evaluate(node.body);
+        } catch (error) {
+          if (error instanceof ContinueException) {
+            continue;
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      if (error instanceof BreakException) {
+        return result;
+      }
+      throw error;
+    }
+
+    return result;
+  }
+
+  /**
+   * Evaluate a repeat times statement
+   */
+  private evaluateRepeatTimes(node: any): any {
+    const count = this.evaluate(node.count);
+
+    if (typeof count !== 'number') {
+      throw new EvaluatorError(`Repeat count must be a number, got ${typeof count}`);
+    }
+
+    let result: any;
+
+    try {
+      for (let i = 0; i < count; i++) {
+        try {
+          result = this.evaluate(node.body);
+        } catch (error) {
+          if (error instanceof ContinueException) {
+            continue;
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      if (error instanceof BreakException) {
+        return result;
+      }
+      throw error;
+    }
+
+    return result;
+  }
+
+  /**
+   * Evaluate a repeat with statement
+   */
+  private evaluateRepeatWith(node: any): any {
+    const start = this.evaluate(node.start);
+    const end = this.evaluate(node.end);
+
+    if (typeof start !== 'number') {
+      throw new EvaluatorError(`Repeat start must be a number, got ${typeof start}`);
+    }
+
+    if (typeof end !== 'number') {
+      throw new EvaluatorError(`Repeat end must be a number, got ${typeof end}`);
+    }
+
+    let result: any;
+
+    try {
+      for (let i = start; i <= end; i++) {
+        // Set loop variable
+        this.context.variables.set(node.variable, i);
+
+        try {
+          result = this.evaluate(node.body);
+        } catch (error) {
+          if (error instanceof ContinueException) {
+            continue;
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      if (error instanceof BreakException) {
+        return result;
+      }
+      throw error;
+    }
+
+    return result;
+  }
+
+  /**
+   * Evaluate a repeat forever statement
+   */
+  private evaluateRepeatForever(node: any): any {
+    let result: any;
+
+    try {
+      while (true) {
+        try {
+          result = this.evaluate(node.body);
+        } catch (error) {
+          if (error instanceof ContinueException) {
+            continue;
+          }
+          throw error;
+        }
+      }
+    } catch (error) {
+      if (error instanceof BreakException) {
+        return result;
+      }
+      throw error;
+    }
+
+    // This should never be reached
+    return result;
+  }
+
+  /**
+   * Evaluate a try/catch statement
+   */
+  private evaluateTryStatement(node: any): any {
+    try {
+      return this.evaluate(node.tryBranch);
+    } catch (error) {
+      // Don't catch control flow exceptions
+      if (
+        error instanceof BreakException ||
+        error instanceof ContinueException ||
+        error instanceof ReturnException
+      ) {
+        throw error;
+      }
+
+      // Set catch variable if specified
+      if (node.catchVariable) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.context.variables.set(node.catchVariable, errorMessage);
+      }
+
+      return this.evaluate(node.catchBranch);
+    }
+  }
+
+  /**
    * Check if a value is truthy
    */
   private isTruthy(value: any): boolean {
@@ -343,6 +822,29 @@ export class Evaluator {
    */
   getVariable(name: string): any {
     return this.context.variables.get(name);
+  }
+
+  /**
+   * Register a built-in function
+   */
+  registerFunction(name: string, func: BuiltInFunction): void {
+    this.context.functions.set(name, func);
+  }
+
+  /**
+   * Get a function from the context
+   */
+  getFunction(name: string): BuiltInFunction | UserDefinedFunction | undefined {
+    return this.context.functions.get(name);
+  }
+
+  /**
+   * Register multiple functions at once
+   */
+  registerFunctions(functions: Record<string, BuiltInFunction>): void {
+    for (const [name, func] of Object.entries(functions)) {
+      this.registerFunction(name, func);
+    }
   }
 }
 
