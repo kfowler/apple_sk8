@@ -358,7 +358,7 @@ class MyActor extends SK8Actor {
 
 ## Why TypeScript?
 
-See `../TYPESCRIPT_PORT.md` for detailed analysis, but briefly:
+See `../archive/TYPESCRIPT_PORT.md` for detailed analysis, but briefly:
 
 **Advantages:**
 - HTML5 multimedia easier than emulating Mac Toolbox
@@ -393,10 +393,15 @@ This TypeScript implementation is provided as-is for educational and historical 
 
 ## Related Files
 
-- `../TYPESCRIPT_PORT.md` - Detailed porting analysis
+**Current Documentation:**
 - `../SK8_DEEP_DIVE.md` - Technical deep dive on original SK8
-- `../PORTING_ANALYSIS.md` - Common Lisp port analysis
 - `../README.md` - Main repository README
+
+**Legacy Analysis (Archived):**
+- `../archive/TYPESCRIPT_PORT.md` - Detailed porting analysis
+- `../archive/PORTING_ANALYSIS.md` - Common Lisp port analysis
+- `../archive/IMPLEMENTATION_ROADMAP.md` - Original development roadmap
+- `../archive/README.md` - About the archived documents
 
 ## Contributing
 

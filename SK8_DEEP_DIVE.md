@@ -464,8 +464,17 @@ For anyone interested in:
 
 ## Further Reading
 
-- `PORTING_ANALYSIS.md` - Technical feasibility of modernizing SK8
-- `PORTING_EXAMPLE.md` - Concrete porting examples with code
+**Current Documentation:**
+- `README.md` - Project overview and getting started
+- `typescript/README.md` - TypeScript implementation guide
+
+**Legacy Analysis (Archived):**
+- `archive/PORTING_ANALYSIS.md` - Technical feasibility of modernizing SK8
+- `archive/PORTING_EXAMPLE.md` - Concrete porting examples with code
+- `archive/TYPESCRIPT_PORT.md` - TypeScript reimplementation analysis
+- `archive/README.md` - About the archived documents
+
+**Original SK8 Resources:**
 - `Sources/SK8's Build Procedure` - Original build documentation
 - `SK8_UserGuide.pdf` - Complete user documentation
 

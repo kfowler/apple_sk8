@@ -1,0 +1,3 @@
+# Exclude archive directory from GitHub language statistics
+# These are historical planning documents, not active code
+archive/ linguist-documentation
