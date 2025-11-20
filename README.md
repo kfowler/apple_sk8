@@ -1,8 +1,12 @@
 # SK8 - Modern Multimedia Authoring for the Web
 
+[![CI](https://github.com/apple/sk8/workflows/CI/badge.svg)](https://github.com/apple/sk8/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![codecov](https://codecov.io/gh/apple/sk8/branch/main/graph/badge.svg)](https://codecov.io/gh/apple/sk8)
+[![npm version](https://badge.fury.io/js/sk8-ts.svg)](https://www.npmjs.com/package/sk8-ts)
 [![License](https://img.shields.io/badge/License-SK8-green.svg)](./sk8_license.pdf)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![Documentation](https://img.shields.io/badge/docs-online-blue.svg)](https://apple.github.io/sk8)
+[![Dependencies](https://img.shields.io/librariesio/release/npm/sk8-ts)](https://www.npmjs.com/package/sk8-ts)
 
 > A modern reimplementation of Apple's revolutionary SK8 multimedia authoring environment, bringing visual programming and interactive media creation to the web.
 

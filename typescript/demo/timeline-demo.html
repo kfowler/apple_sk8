@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SK8 Timeline Editor Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background: #2c2c2c;
+      padding: 15px 20px;
+      border-bottom: 1px solid #444;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .canvas-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #444;
+    }
+
+    .canvas-header {
+      background: #252525;
+      padding: 10px 15px;
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .canvas-header h2 {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .canvas-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      background: #333;
+      border: 1px solid #555;
+      color: #e0e0e0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #444;
+    }
+
+    .btn-primary {
+      background: #4A90E2;
+      border-color: #4A90E2;
+    }
+
+    .btn-primary:hover {
+      background: #5AA0F2;
+    }
+
+    .canvas-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1e1e1e;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #preview-canvas {
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .timeline-area {
+      height: 300px;
+      border-top: 1px solid #444;
+      background: #1e1e1e;
+    }
+
+    #timeline-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .info-panel {
+      width: 300px;
+      background: #252525;
+      border-left: 1px solid #444;
+      overflow-y: auto;
+      padding: 15px;
+    }
+
+    .info-section {
+      margin-bottom: 20px;
+    }
+
+    .info-section h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-item {
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .info-item strong {
+      color: #4A90E2;
+    }
+
+    .code-snippet {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    .stats {
+      background: #1a1a1a;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .stats div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .stats div:last-child {
+      margin-bottom: 0;
+    }
+
+    .stats .label {
+      color: #aaa;
+    }
+
+    .stats .value {
+      color: #4A90E2;
+      font-weight: 600;
+    }
+
+    /* Timeline-specific styles */
+    .playback-controls {
+      background: #2c2c2c;
+      border-bottom: 1px solid #444;
+    }
+
+    .keyframe-editor-empty,
+    .keyframe-editor-header,
+    .keyframe-editor-content {
+      font-size: 13px;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <h1>SK8 Timeline Editor Demo</h1>
+      <p>Interactive animation timeline with multi-track support, easing curves, and real-time preview</p>
+    </div>
+
+    <!-- Main Area -->
+    <div class="main">
+      <!-- Canvas Area -->
+      <div class="canvas-area">
+        <div class="canvas-header">
+          <h2>Preview</h2>
+          <div class="canvas-controls">
+            <button class="btn" id="add-position-track">+ Position Track</button>
+            <button class="btn" id="add-rotation-track">+ Rotation Track</button>
+            <button class="btn" id="add-scale-track">+ Scale Track</button>
+            <button class="btn" id="add-opacity-track">+ Opacity Track</button>
+            <button class="btn btn-primary" id="reset-demo">Reset Demo</button>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="preview-canvas" width="600" height="400"></canvas>
+        </div>
+
+        <!-- Timeline Area -->
+        <div class="timeline-area">
+          <div id="timeline-container"></div>
+        </div>
+      </div>
+
+      <!-- Info Panel -->
+      <div class="info-panel">
+        <div class="info-section">
+          <h3>About</h3>
+          <div class="info-item">
+            This demo showcases the SK8 Timeline Editor - a powerful animation sequencer for creating complex multi-track animations.
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Features</h3>
+          <div class="info-item">✓ Multi-track animation</div>
+          <div class="info-item">✓ Keyframe-based timeline</div>
+          <div class="info-item">✓ Multiple easing curves</div>
+          <div class="info-item">✓ Real-time preview</div>
+          <div class="info-item">✓ Export to code</div>
+          <div class="info-item">✓ Undo/Redo support</div>
+        </div>
+
+        <div class="info-section">
+          <h3>Keyboard Shortcuts</h3>
+          <div class="info-item"><strong>Space:</strong> Play/Pause</div>
+          <div class="info-item"><strong>Left/Right:</strong> Step frame</div>
+          <div class="info-item"><strong>Delete:</strong> Delete keyframe</div>
+          <div class="info-item"><strong>Ctrl+Z:</strong> Undo</div>
+          <div class="info-item"><strong>Ctrl+Shift+Z:</strong> Redo</div>
+        </div>
+
+        <div class="info-section">
+          <h3>How to Use</h3>
+          <div class="info-item">
+            1. <strong>Add Tracks:</strong> Click the buttons above to add animation tracks
+          </div>
+          <div class="info-item">
+            2. <strong>Add Keyframes:</strong> Double-click on the timeline
+          </div>
+          <div class="info-item">
+            3. <strong>Edit Keyframes:</strong> Click to select, drag to move
+          </div>
+          <div class="info-item">
+            4. <strong>Change Easing:</strong> Select a keyframe to edit easing curve
+          </div>
+          <div class="info-item">
+            5. <strong>Play:</strong> Click play button or press Space
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Timeline Stats</h3>
+          <div class="stats">
+            <div>
+              <span class="label">Tracks:</span>
+              <span class="value" id="stat-tracks">0</span>
+            </div>
+            <div>
+              <span class="label">Keyframes:</span>
+              <span class="value" id="stat-keyframes">0</span>
+            </div>
+            <div>
+              <span class="label">Duration:</span>
+              <span class="value" id="stat-duration">0.0s</span>
+            </div>
+            <div>
+              <span class="label">Current Time:</span>
+              <span class="value" id="stat-time">0.0s</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Example Animation</h3>
+          <div class="info-item">
+            This demo includes a pre-configured animation that demonstrates:
+          </div>
+          <div class="code-snippet">
+- Position animation (left, top)
+- Rotation animation (0° to 360°)
+- Scale animation (1.0 to 1.5)
+- Opacity animation (1.0 to 0.5)
+- Multiple easing curves
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { TimelinePanel, Timeline, Track, Keyframe } from '../dist/editor/timeline/index.js';
+    import { Easing } from '../dist/runtime/animation.js';
+
+    // Mock actor for demo
+    class DemoActor {
+      constructor() {
+        this.left = 100;
+        this.top = 150;
+        this.width = 100;
+        this.height = 100;
+        this.rotation = 0;
+        this.opacity = 1;
+        this.scale = 1;
+      }
+
+      setLeft(value) { this.left = value; }
+      setTop(value) { this.top = value; }
+      setWidth(value) { this.width = value; }
+      setHeight(value) { this.height = value; }
+      rotate(value) { this.rotation = value; }
+      setOpacity(value) { this.opacity = value; }
+      set(property, value) { this[property] = value; }
+    }
+
+    // Setup
+    const actor = new DemoActor();
+    const canvas = document.getElementById('preview-canvas');
+    const ctx = canvas.getContext('2d');
+    const timelineContainer = document.getElementById('timeline-container');
+
+    // Create timeline panel
+    const timeline = new Timeline(actor);
+    const timelinePanel = new TimelinePanel(timelineContainer, actor);
+
+    // Setup demo animation
+    function setupDemoAnimation() {
+      // Position track (left)
+      const leftTrack = new Track('left', 'position');
+      leftTrack.addKeyframe(new Keyframe(0, 100, Easing.linear, 'linear'));
+      leftTrack.addKeyframe(new Keyframe(1000, 300, Easing.easeInOutQuad, 'easeInOutQuad'));
+      leftTrack.addKeyframe(new Keyframe(2000, 500, Easing.easeOutBounce, 'easeOutBounce'));
+      leftTrack.addKeyframe(new Keyframe(3000, 100, Easing.easeInOutCubic, 'easeInOutCubic'));
+      timeline.addTrack(leftTrack);
+
+      // Position track (top)
+      const topTrack = new Track('top', 'position');
+      topTrack.addKeyframe(new Keyframe(0, 150, Easing.linear, 'linear'));
+      topTrack.addKeyframe(new Keyframe(1500, 50, Easing.easeInQuad, 'easeInQuad'));
+      topTrack.addKeyframe(new Keyframe(3000, 150, Easing.easeOutQuad, 'easeOutQuad'));
+      timeline.addTrack(topTrack);
+
+      // Rotation track
+      const rotationTrack = new Track('rotation', 'rotation');
+      rotationTrack.addKeyframe(new Keyframe(0, 0, Easing.linear, 'linear'));
+      rotationTrack.addKeyframe(new Keyframe(3000, 360, Easing.linear, 'linear'));
+      timeline.addTrack(rotationTrack);
+
+      // Opacity track
+      const opacityTrack = new Track('opacity', 'opacity');
+      opacityTrack.addKeyframe(new Keyframe(0, 1.0, Easing.linear, 'linear'));
+      opacityTrack.addKeyframe(new Keyframe(1500, 0.3, Easing.easeInOutQuad, 'easeInOutQuad'));
+      opacityTrack.addKeyframe(new Keyframe(3000, 1.0, Easing.easeInOutQuad, 'easeInOutQuad'));
+      timeline.addTrack(opacityTrack);
+
+      timelinePanel.setTimeline(timeline);
+    }
+
+    setupDemoAnimation();
+
+    // Render loop
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw background grid
+      ctx.strokeStyle = '#f0f0f0';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < canvas.width; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      for (let i = 0; i < canvas.height; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+
+      // Draw actor
+      ctx.save();
+      ctx.translate(actor.left + actor.width / 2, actor.top + actor.height / 2);
+      ctx.rotate((actor.rotation * Math.PI) / 180);
+      ctx.globalAlpha = actor.opacity;
+
+      // Rectangle
+      ctx.fillStyle = '#4A90E2';
+      ctx.strokeStyle = '#2c5f8d';
+      ctx.lineWidth = 2;
+      ctx.fillRect(-actor.width / 2, -actor.height / 2, actor.width, actor.height);
+      ctx.strokeRect(-actor.width / 2, -actor.height / 2, actor.width, actor.height);
+
+      // Label
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SK8', 0, 0);
+
+      ctx.restore();
+
+      // Update stats
+      updateStats();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+
+    // Update stats
+    function updateStats() {
+      document.getElementById('stat-tracks').textContent = timeline.tracks.length;
+      document.getElementById('stat-keyframes').textContent = timeline.getAllKeyframes().length;
+      document.getElementById('stat-duration').textContent = (timeline.getDuration() / 1000).toFixed(1) + 's';
+      document.getElementById('stat-time').textContent = (timeline.currentTime / 1000).toFixed(1) + 's';
+    }
+
+    // Button handlers
+    document.getElementById('add-position-track').addEventListener('click', () => {
+      const track = new Track('left', 'position');
+      track.addKeyframe(new Keyframe(0, 100));
+      timeline.addTrack(track);
+      timelinePanel.setTimeline(timeline);
+    });
+
+    document.getElementById('add-rotation-track').addEventListener('click', () => {
+      const track = new Track('rotation', 'rotation');
+      track.addKeyframe(new Keyframe(0, 0));
+      timeline.addTrack(track);
+      timelinePanel.setTimeline(timeline);
+    });
+
+    document.getElementById('add-scale-track').addEventListener('click', () => {
+      const track = new Track('scale', 'scale');
+      track.addKeyframe(new Keyframe(0, 1.0));
+      timeline.addTrack(track);
+      timelinePanel.setTimeline(timeline);
+    });
+
+    document.getElementById('add-opacity-track').addEventListener('click', () => {
+      const track = new Track('opacity', 'opacity');
+      track.addKeyframe(new Keyframe(0, 1.0));
+      timeline.addTrack(track);
+      timelinePanel.setTimeline(timeline);
+    });
+
+    document.getElementById('reset-demo').addEventListener('click', () => {
+      timeline.tracks = [];
+      actor.left = 100;
+      actor.top = 150;
+      actor.rotation = 0;
+      actor.opacity = 1;
+      setupDemoAnimation();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      timelinePanel.handleKeyDown(e);
+    });
+  </script>
+</body>
+</html>

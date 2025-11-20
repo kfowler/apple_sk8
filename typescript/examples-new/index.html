@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Examples Gallery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; }
+
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 20px; text-align: center; }
+        .hero h1 { font-size: 56px; margin-bottom: 20px; }
+        .hero p { font-size: 24px; opacity: 0.95; margin-bottom: 40px; }
+        .hero-stats { display: flex; justify-content: center; gap: 40px; margin-top: 40px; }
+        .stat { text-align: center; }
+        .stat-number { font-size: 48px; font-weight: bold; }
+        .stat-label { font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Navigation */
+        .nav { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: sticky; top: 0; z-index: 100; }
+        .nav-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .filter-tabs { display: flex; gap: 15px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 25px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; }
+        .filter-btn:hover { background: #667eea; color: white; }
+        .filter-btn.active { background: #667eea; color: white; }
+        .search-box { padding: 10px 20px; border: 2px solid #e0e0e0; border-radius: 25px; font-size: 14px; width: 250px; }
+        .search-box:focus { outline: none; border-color: #667eea; }
+
+        /* Container */
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Section Headers */
+        .section { margin-bottom: 60px; }
+        .section h2 { font-size: 32px; margin-bottom: 10px; color: #333; }
+        .section p { color: #666; margin-bottom: 30px; font-size: 16px; }
+
+        /* Card Grid */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; }
+
+        /* Example Card */
+        .example-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); transition: all 0.3s; cursor: pointer; }
+        .example-card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .card-image { width: 100%; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative; display: flex; align-items: center; justify-content: center; font-size: 64px; }
+        .card-content { padding: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .card-title { font-size: 20px; font-weight: 600; color: #333; }
+        .card-difficulty { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .difficulty-beginner { background: #d4edda; color: #155724; }
+        .difficulty-intermediate { background: #fff3cd; color: #856404; }
+        .difficulty-advanced { background: #f8d7da; color: #721c24; }
+        .card-description { color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .card-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .tag { padding: 4px 10px; background: #f0f0f0; border-radius: 4px; font-size: 12px; color: #666; }
+        .card-stats { display: flex; gap: 20px; font-size: 13px; color: #999; margin-bottom: 15px; }
+        .card-actions { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-secondary:hover { background: #e0e0e0; }
+
+        /* Templates Section */
+        .template-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .template-card .card-title { color: white; }
+        .template-card .card-description { color: rgba(255,255,255,0.9); }
+        .template-card .tag { background: rgba(255,255,255,0.2); color: white; }
+        .template-card .card-stats { color: rgba(255,255,255,0.7); }
+
+        /* Footer */
+        .footer { background: #2d3748; color: white; padding: 40px 20px; text-align: center; margin-top: 80px; }
+        .footer a { color: #667eea; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>SK8 Examples Gallery</h1>
+        <p>Comprehensive collection of examples and templates</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-number">15</div>
+                <div class="stat-label">Examples</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Templates</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">~10K</div>
+                <div class="stat-label">Lines of Code</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <div class="nav-content">
+            <div class="filter-tabs">
+                <button class="filter-btn active" onclick="filterExamples('all')">All</button>
+                <button class="filter-btn" onclick="filterExamples('beginner')">Beginner</button>
+                <button class="filter-btn" onclick="filterExamples('intermediate')">Intermediate</button>
+                <button class="filter-btn" onclick="filterExamples('advanced')">Advanced</button>
+                <button class="filter-btn" onclick="filterExamples('templates')">Templates</button>
+            </div>
+            <input type="text" class="search-box" placeholder="Search examples..." onkeyup="searchExamples(this.value)">
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Beginner Examples -->
+        <div class="section" data-category="beginner">
+            <h2>Beginner Examples</h2>
+            <p>Perfect for learning SK8 fundamentals</p>
+            <div class="card-grid">
+                <div class="example-card" data-difficulty="beginner" data-tags="basics events">
+                    <div class="card-image">👋</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">01. Hello World</div>
+                            <span class="card-difficulty difficulty-beginner">Beginner</span>
+                        </div>
+                        <div class="card-description">Your first SK8 app! Create a stage, add an actor, and handle click events.</div>
+                        <div class="card-tags">
+                            <span class="tag">Stage</span>
+                            <span class="tag">Events</span>
+                            <span class="tag">Actors</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 15 min</span>
+                            <span>📝 ~50 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('01-hello-world')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('01-hello-world')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card" data-difficulty="beginner" data-tags="shapes drag-drop">
+                    <div class="card-image">🔷</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">02. Interactive Shapes</div>
+                            <span class="card-difficulty difficulty-beginner">Beginner</span>
+                        </div>
+                        <div class="card-description">Multiple actors, selection, drag-and-drop, and z-order management.</div>
+                        <div class="card-tags">
+                            <span class="tag">Shapes</span>
+                            <span class="tag">Drag & Drop</span>
+                            <span class="tag">Selection</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 30 min</span>
+                            <span>📝 ~150 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('02-interactive-shapes')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('02-interactive-shapes')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card" data-difficulty="beginner" data-tags="animation easing">
+                    <div class="card-image">🎬</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">03. Animation Basics</div>
+                            <span class="card-difficulty difficulty-beginner">Beginner</span>
+                        </div>
+                        <div class="card-description">Learn animation with position, scale, rotation, and easing functions.</div>
+                        <div class="card-tags">
+                            <span class="tag">Animation</span>
+                            <span class="tag">Easing</span>
+                            <span class="tag">Transforms</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 45 min</span>
+                            <span>📝 ~200 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('03-animation-basics')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('03-animation-basics')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card" data-difficulty="beginner" data-tags="ui components">
+                    <div class="card-image">🎛️</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">04. UI Components</div>
+                            <span class="card-difficulty difficulty-beginner">Beginner</span>
+                        </div>
+                        <div class="card-description">Build interfaces with buttons, sliders, checkboxes, and controls.</div>
+                        <div class="card-tags">
+                            <span class="tag">UI</span>
+                            <span class="tag">Components</span>
+                            <span class="tag">Forms</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 60 min</span>
+                            <span>📝 ~300 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('04-ui-components')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('04-ui-components')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card" data-difficulty="beginner" data-tags="scripting sk8script">
+                    <div class="card-image">📜</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">05. SK8Script Intro</div>
+                            <span class="card-difficulty difficulty-beginner">Beginner</span>
+                        </div>
+                        <div class="card-description">Learn SK8Script, the built-in scripting language for behaviors.</div>
+                        <div class="card-tags">
+                            <span class="tag">SK8Script</span>
+                            <span class="tag">Scripting</span>
+                            <span class="tag">Programming</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 60 min</span>
+                            <span>📝 ~200 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('05-sk8script-intro')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('05-sk8script-intro')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intermediate Examples -->
+        <div class="section" data-category="intermediate">
+            <h2>Intermediate Examples</h2>
+            <p>Build complete applications with multiple features</p>
+            <div class="card-grid">
+                <div class="example-card" data-difficulty="intermediate" data-tags="drawing tools">
+                    <div class="card-image">🎨</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">06. Drawing App</div>
+                            <span class="card-difficulty difficulty-intermediate">Intermediate</span>
+                        </div>
+                        <div class="card-description">Complete drawing app with tools, colors, undo/redo, and export.</div>
+                        <div class="card-tags">
+                            <span class="tag">Drawing</span>
+                            <span class="tag">Tools</span>
+                            <span class="tag">Export</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 2-3 hours</span>
+                            <span>📝 ~800 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('06-drawing-app')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('06-drawing-app')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card" data-difficulty="intermediate" data-tags="game physics">
+                    <div class="card-image">🎮</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">10. Platform Game</div>
+                            <span class="card-difficulty difficulty-intermediate">Intermediate</span>
+                        </div>
+                        <div class="card-description">Complete platformer with physics, enemies, collectibles, and scoring.</div>
+                        <div class="card-tags">
+                            <span class="tag">Game</span>
+                            <span class="tag">Physics</span>
+                            <span class="tag">Collision</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 3-4 hours</span>
+                            <span>📝 ~1200 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('10-game-platformer')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('10-game-platformer')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Examples -->
+        <div class="section" data-category="advanced">
+            <h2>Advanced Examples</h2>
+            <p>Complex applications with advanced patterns</p>
+            <div class="card-grid">
+                <div class="example-card" data-difficulty="advanced" data-tags="productivity crud">
+                    <div class="card-image">✅</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">12. Todo App</div>
+                            <span class="card-difficulty difficulty-advanced">Advanced</span>
+                        </div>
+                        <div class="card-description">Full task manager with priorities, filtering, and persistence.</div>
+                        <div class="card-tags">
+                            <span class="tag">CRUD</span>
+                            <span class="tag">Storage</span>
+                            <span class="tag">Filtering</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 2 hours</span>
+                            <span>📝 ~600 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('12-todo-app')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('12-todo-app')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card" data-difficulty="advanced" data-tags="particles effects">
+                    <div class="card-image">✨</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">15. Particle Effects</div>
+                            <span class="card-difficulty difficulty-advanced">Advanced</span>
+                        </div>
+                        <div class="card-description">Particle systems: fireworks, snow, rain, fire, and stars.</div>
+                        <div class="card-tags">
+                            <span class="tag">Particles</span>
+                            <span class="tag">Effects</span>
+                            <span class="tag">Performance</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⏱️ 2-3 hours</span>
+                            <span>📝 ~700 lines</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openExample('15-particle-effects')">Run Example</button>
+                            <button class="btn btn-secondary" onclick="viewCode('15-particle-effects')">View Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Templates -->
+        <div class="section" data-category="templates">
+            <h2>Project Templates</h2>
+            <p>Ready-to-use starting points for your projects</p>
+            <div class="card-grid">
+                <div class="example-card template-card" data-difficulty="template">
+                    <div class="card-image">📄</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Blank Project</div>
+                            <span class="card-difficulty difficulty-beginner">Template</span>
+                        </div>
+                        <div class="card-description">Minimal starting point with basic structure and canvas.</div>
+                        <div class="card-tags">
+                            <span class="tag">Minimal</span>
+                            <span class="tag">Starter</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⚡ Quick Start</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openTemplate('blank-project')">Open Template</button>
+                            <button class="btn btn-secondary" onclick="downloadTemplate('blank-project')">Download</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card template-card" data-difficulty="template">
+                    <div class="card-image">🖥️</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">UI Application</div>
+                            <span class="card-difficulty difficulty-intermediate">Template</span>
+                        </div>
+                        <div class="card-description">Full app UI with menu bar, toolbar, sidebar, and properties panel.</div>
+                        <div class="card-tags">
+                            <span class="tag">UI</span>
+                            <span class="tag">Application</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⚡ Professional UI</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openTemplate('ui-app-template')">Open Template</button>
+                            <button class="btn btn-secondary" onclick="downloadTemplate('ui-app-template')">Download</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card template-card" data-difficulty="template">
+                    <div class="card-image">🎮</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Game Template</div>
+                            <span class="card-difficulty difficulty-intermediate">Template</span>
+                        </div>
+                        <div class="card-description">Game boilerplate with loop, state, HUD, input, and game over screen.</div>
+                        <div class="card-tags">
+                            <span class="tag">Game</span>
+                            <span class="tag">Boilerplate</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⚡ Game Ready</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openTemplate('game-template')">Open Template</button>
+                            <button class="btn btn-secondary" onclick="downloadTemplate('game-template')">Download</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-card template-card" data-difficulty="template">
+                    <div class="card-image">📊</div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">Presentation</div>
+                            <span class="card-difficulty difficulty-intermediate">Template</span>
+                        </div>
+                        <div class="card-description">Slide-based app with navigation, thumbnails, and fullscreen mode.</div>
+                        <div class="card-tags">
+                            <span class="tag">Slides</span>
+                            <span class="tag">Presentation</span>
+                        </div>
+                        <div class="card-stats">
+                            <span>⚡ Slide Deck</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="openTemplate('presentation-template')">Open Template</button>
+                            <button class="btn btn-secondary" onclick="downloadTemplate('presentation-template')">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>SK8 TypeScript Examples Gallery</p>
+        <p style="margin-top: 10px;">
+            <a href="../API.md">API Documentation</a> •
+            <a href="../README.md">Getting Started</a> •
+            <a href="https://github.com/your-repo">GitHub</a>
+        </p>
+        <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">
+            All examples are open source and available under the SK8 license
+        </p>
+    </div>
+
+    <script>
+        function filterExamples(category) {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show/hide sections
+            document.querySelectorAll('.section').forEach(section => {
+                if (category === 'all') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = section.dataset.category === category ? 'block' : 'none';
+                }
+            });
+        }
+
+        function searchExamples(query) {
+            query = query.toLowerCase();
+            document.querySelectorAll('.example-card').forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-description').textContent.toLowerCase();
+                const tags = card.dataset.tags || '';
+                const matches = title.includes(query) || description.includes(query) || tags.includes(query);
+                card.style.display = matches ? 'block' : 'none';
+            });
+        }
+
+        function openExample(example) {
+            window.open(example + '/index.html', '_blank');
+        }
+
+        function viewCode(example) {
+            window.open(example + '/README.md', '_blank');
+        }
+
+        function openTemplate(template) {
+            window.open('../templates/' + template + '/index.html', '_blank');
+        }
+
+        function downloadTemplate(template) {
+            alert('To download: Clone the repository and navigate to templates/' + template);
+        }
+
+        console.log('SK8 Examples Gallery loaded!');
+        console.log('Explore 15 examples and 4 templates to master SK8.');
+    </script>
+</body>
+</html>

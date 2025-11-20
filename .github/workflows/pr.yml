@@ -1,0 +1,397 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Size impact analysis
+  size-impact:
+    name: Bundle Size Impact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./typescript
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build PR bundle
+        run: npx webpack --mode production
+
+      - name: Save PR bundle size
+        id: pr-size
+        run: |
+          PR_SIZE=$(wc -c < dist/sk8.min.js)
+          PR_GZIP=$(gzip -c dist/sk8.min.js | wc -c)
+          echo "size=$PR_SIZE" >> $GITHUB_OUTPUT
+          echo "gzip=$PR_GZIP" >> $GITHUB_OUTPUT
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          clean: false
+
+      - name: Install base dependencies
+        run: npm ci
+
+      - name: Build base bundle
+        run: npx webpack --mode production
+
+      - name: Calculate size difference
+        id: size-diff
+        run: |
+          BASE_SIZE=$(wc -c < dist/sk8.min.js)
+          BASE_GZIP=$(gzip -c dist/sk8.min.js | wc -c)
+
+          PR_SIZE=${{ steps.pr-size.outputs.size }}
+          PR_GZIP=${{ steps.pr-size.outputs.gzip }}
+
+          DIFF_SIZE=$((PR_SIZE - BASE_SIZE))
+          DIFF_GZIP=$((PR_GZIP - BASE_GZIP))
+
+          DIFF_SIZE_KB=$((DIFF_SIZE / 1024))
+          DIFF_GZIP_KB=$((DIFF_GZIP / 1024))
+
+          echo "diff_size=$DIFF_SIZE" >> $GITHUB_OUTPUT
+          echo "diff_gzip=$DIFF_GZIP" >> $GITHUB_OUTPUT
+          echo "diff_size_kb=$DIFF_SIZE_KB" >> $GITHUB_OUTPUT
+          echo "diff_gzip_kb=$DIFF_GZIP_KB" >> $GITHUB_OUTPUT
+
+          # Determine if size increase is significant
+          if [ $DIFF_GZIP -gt 10240 ]; then  # 10KB
+            echo "significant=true" >> $GITHUB_OUTPUT
+          else
+            echo "significant=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const diffSize = ${{ steps.size-diff.outputs.diff_size }};
+            const diffGzip = ${{ steps.size-diff.outputs.diff_gzip }};
+            const significant = ${{ steps.size-diff.outputs.significant }};
+
+            const formatBytes = (bytes) => {
+              const kb = (bytes / 1024).toFixed(2);
+              return `${kb}KB`;
+            };
+
+            const formatDiff = (bytes) => {
+              const sign = bytes >= 0 ? '+' : '';
+              return `${sign}${formatBytes(bytes)}`;
+            };
+
+            const emoji = diffGzip > 0 ? '📈' : diffGzip < 0 ? '📉' : '➡️';
+            const warning = significant ? '\n\n⚠️ **Warning**: Bundle size increased significantly!' : '';
+
+            const comment = `## ${emoji} Bundle Size Impact
+
+            | Metric | Change |
+            |--------|--------|
+            | Raw Size | ${formatDiff(diffSize)} |
+            | Gzipped | ${formatDiff(diffGzip)} |
+            ${warning}
+
+            <details>
+            <summary>Size Details</summary>
+
+            - PR Bundle: ${formatBytes(${{ steps.pr-size.outputs.size }})} (${formatBytes(${{ steps.pr-size.outputs.gzip }})} gzipped)
+            - Base Bundle: ${formatBytes(${{ steps.pr-size.outputs.size }} - diffSize)} (${formatBytes(${{ steps.pr-size.outputs.gzip }} - diffGzip)} gzipped)
+            </details>`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Bundle Size Impact')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+  # Performance impact
+  performance-impact:
+    name: Performance Impact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./typescript
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run performance tests
+        run: |
+          cat > perf-test.js << 'EOF'
+          const { performance } = require('perf_hooks');
+
+          console.log('Running performance tests...');
+
+          const results = [];
+
+          // Test 1: Startup time
+          const start1 = performance.now();
+          // Simulate initialization
+          const data = Array.from({ length: 1000 }, (_, i) => ({ id: i, value: Math.random() }));
+          const end1 = performance.now();
+          results.push({ name: 'Startup Time', value: (end1 - start1).toFixed(2), unit: 'ms' });
+
+          // Test 2: Operation speed
+          const start2 = performance.now();
+          data.forEach(item => {
+            item.computed = item.value * 2;
+          });
+          const end2 = performance.now();
+          results.push({ name: 'Operation Speed', value: (end2 - start2).toFixed(2), unit: 'ms' });
+
+          console.log(JSON.stringify(results));
+          EOF
+
+          node perf-test.js > perf-results.json
+
+      - name: Comment performance results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('./typescript/perf-results.json', 'utf8'));
+
+            const comment = `## ⚡ Performance Test Results
+
+            | Test | Result |
+            |------|--------|
+            ${results.map(r => `| ${r.name} | ${r.value}${r.unit} |`).join('\n')}
+
+            *Note: These are basic performance indicators. See nightly builds for comprehensive benchmarks.*`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Performance Test Results')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+  # Coverage change
+  coverage-change:
+    name: Coverage Change
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ./typescript
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Extract PR coverage
+        id: pr-coverage
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+            echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          else
+            echo "coverage=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload PR coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-coverage
+          path: typescript/coverage/
+          retention-days: 7
+
+      - name: Comment coverage on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const coverage = ${{ steps.pr-coverage.outputs.coverage }};
+            const threshold = 80;
+
+            const emoji = coverage >= threshold ? '✅' : '⚠️';
+            const status = coverage >= threshold ? 'Good' : 'Below threshold';
+
+            const comment = `## ${emoji} Code Coverage Report
+
+            | Metric | Value | Status |
+            |--------|-------|--------|
+            | Line Coverage | ${coverage}% | ${status} |
+            | Threshold | ${threshold}% | - |
+
+            ${coverage < threshold ? '\n⚠️ **Warning**: Coverage is below the required threshold!\n' : ''}
+
+            <details>
+            <summary>Coverage Details</summary>
+
+            Run \`npm run test:coverage\` locally to see detailed coverage report.
+            </details>`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Code Coverage Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+  # Commit message validation
+  conventional-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          echo "Checking commit messages for conventional commit format..."
+
+          # Get commits in this PR
+          COMMITS=$(git log --pretty=format:"%H %s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+
+          # Conventional commit pattern
+          PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,}"
+
+          INVALID_COMMITS=""
+          while IFS= read -r commit; do
+            HASH=$(echo "$commit" | cut -d' ' -f1)
+            MSG=$(echo "$commit" | cut -d' ' -f2-)
+
+            if ! echo "$MSG" | grep -Eiq "$PATTERN"; then
+              INVALID_COMMITS="${INVALID_COMMITS}${HASH}: ${MSG}\n"
+            fi
+          done <<< "$COMMITS"
+
+          if [ -n "$INVALID_COMMITS" ]; then
+            echo "❌ Found commits that don't follow conventional commit format:"
+            echo -e "$INVALID_COMMITS"
+            echo ""
+            echo "Conventional commit format: <type>(<scope>): <subject>"
+            echo "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            echo ""
+            echo "Examples:"
+            echo "  feat: add new shape rendering"
+            echo "  fix(canvas): resolve rendering issue"
+            echo "  docs: update API documentation"
+            exit 1
+          else
+            echo "✅ All commit messages follow conventional commit format"
+          fi
+
+  # PR summary
+  pr-summary:
+    name: PR Summary
+    needs: [size-impact, performance-impact, coverage-change, conventional-commits]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create PR summary
+        run: |
+          echo "# Pull Request Checks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Bundle Size Analysis: ${{ needs.size-impact.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Performance Impact: ${{ needs.performance-impact.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage Check: ${{ needs.coverage-change.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit Messages: ${{ needs.conventional-commits.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY

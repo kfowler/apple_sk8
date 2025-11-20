@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SK8 Example 05: SK8Script Introduction</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 16px; padding: 40px; }
+        h1 { margin: 0 0 10px; color: #333; }
+        .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        #canvas { border: 2px solid #e0e0e0; border-radius: 8px; display: block; width: 100%; }
+        textarea { width: 100%; height: 300px; font-family: 'Courier New', monospace; font-size: 13px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer; margin: 5px; }
+        button:hover { background: #764ba2; }
+        .output { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; min-height: 100px; font-family: 'Courier New', monospace; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>05. SK8Script Introduction</h1>
+        <p>Learn SK8Script, the built-in scripting language for interactive behaviors!</p>
+
+        <div class="layout">
+            <div>
+                <h3>SK8Script Code:</h3>
+                <textarea id="scriptInput">-- Click the button!
+set x to 100
+set y to 100
+
+repeat 4 times
+  set x to x + 50
+  set y to y + 30
+  print "Moving to: " & x & ", " & y
+end repeat
+
+print "Done!"</textarea>
+                <button onclick="runScript()">Run Script</button>
+                <button onclick="loadExample(1)">Example: Variables</button>
+                <button onclick="loadExample(2)">Example: Functions</button>
+                <button onclick="loadExample(3)">Example: Animation</button>
+            </div>
+            <div>
+                <h3>Canvas Output:</h3>
+                <canvas id="canvas" width="450" height="300"></canvas>
+                <h3>Console Output:</h3>
+                <div class="output" id="output">Ready to execute...</div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>SK8Script Features:</h3>
+            <p>✓ Simple, English-like syntax</p>
+            <p>✓ Variables: <code>set x to 42</code></p>
+            <p>✓ Control flow: <code>if...then...else, repeat</code></p>
+            <p>✓ Functions: <code>sqrt(16), random(1, 100)</code></p>
+            <p>✓ Actor manipulation: <code>setProperty(rect, "fillColor", red)</code></p>
+        </div>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const outputDiv = document.getElementById('output');
+        let logs = [];
+
+        // Simple SK8Script interpreter
+        class SK8ScriptInterpreter {
+            constructor() {
+                this.variables = {};
+                this.output = [];
+            }
+
+            execute(script) {
+                this.output = [];
+                const lines = script.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('--'));
+
+                try {
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+
+                        if (line.startsWith('set ')) {
+                            this.executeSet(line);
+                        } else if (line.startsWith('print ')) {
+                            this.executePrint(line);
+                        } else if (line.startsWith('repeat ')) {
+                            const times = parseInt(line.match(/\d+/)[0]);
+                            const repeatBlock = [];
+                            i++;
+                            while (i < lines.length && lines[i] !== 'end repeat') {
+                                repeatBlock.push(lines[i]);
+                                i++;
+                            }
+                            for (let r = 0; r < times; r++) {
+                                this.execute(repeatBlock.join('\n'));
+                            }
+                        }
+                    }
+                    return this.output;
+                } catch (error) {
+                    return [`Error: ${error.message}`];
+                }
+            }
+
+            executeSet(line) {
+                const match = line.match(/set (\w+) to (.+)/);
+                if (match) {
+                    const varName = match[1];
+                    const expression = match[2];
+                    this.variables[varName] = this.evaluateExpression(expression);
+                }
+            }
+
+            executePrint(line) {
+                const match = line.match(/print (.+)/);
+                if (match) {
+                    const expression = match[1];
+                    const value = this.evaluateExpression(expression);
+                    this.output.push(value);
+                }
+            }
+
+            evaluateExpression(expr) {
+                // Handle string concatenation
+                if (expr.includes('&')) {
+                    const parts = expr.split('&').map(p => this.evaluateExpression(p.trim()));
+                    return parts.join('');
+                }
+
+                // Handle quoted strings
+                if (expr.startsWith('"') && expr.endsWith('"')) {
+                    return expr.slice(1, -1);
+                }
+
+                // Handle variables
+                if (this.variables[expr] !== undefined) {
+                    return this.variables[expr];
+                }
+
+                // Handle arithmetic
+                try {
+                    // Replace variables in expression
+                    let evalExpr = expr;
+                    for (const [name, value] of Object.entries(this.variables)) {
+                        evalExpr = evalExpr.replace(new RegExp(`\\b${name}\\b`, 'g'), value);
+                    }
+                    return eval(evalExpr);
+                } catch {
+                    return expr;
+                }
+            }
+        }
+
+        const interpreter = new SK8ScriptInterpreter();
+
+        window.runScript = function() {
+            const script = document.getElementById('scriptInput').value;
+            const result = interpreter.execute(script);
+
+            // Display output
+            outputDiv.innerHTML = result.join('<br>');
+
+            // Draw something on canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Visual representation
+            ctx.fillStyle = '#667eea';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Script Executed!', canvas.width / 2, 50);
+
+            // Draw a simple visualization
+            if (interpreter.variables.x && interpreter.variables.y) {
+                ctx.fillStyle = '#FF6B6B';
+                ctx.beginPath();
+                ctx.arc(interpreter.variables.x, interpreter.variables.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        };
+
+        window.loadExample = function(num) {
+            const examples = {
+                1: `-- Variables and arithmetic
+set width to 100
+set height to 50
+set area to width * height
+print "Area: " & area
+
+set name to "SK8"
+print "Hello, " & name & "!"`,
+                2: `-- Using built-in functions
+set num to 16
+set result to sqrt(num)
+print "Square root of " & num & " is " & result
+
+set randomNum to random(1, 100)
+print "Random number: " & randomNum`,
+                3: `-- Animation-like behavior
+print "Creating animation path..."
+
+set x to 50
+repeat 5 times
+  set x to x + 70
+  set y to 150
+  print "Point: (" & x & ", " & y & ")"
+end repeat
+
+print "Animation complete!"`
+            };
+
+            document.getElementById('scriptInput').value = examples[num];
+        };
+
+        // Helper functions for scripts
+        window.sqrt = Math.sqrt;
+        window.random = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        console.log('SK8Script example loaded!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+# Shared CI/CD Configuration
+# This file documents shared configuration and reusable workflow components
+
+name: Shared Config
+
+# This workflow doesn't run directly but serves as documentation
+# and potentially for reusable workflow definitions
+
+on:
+  workflow_call:
+
+# Shared environment variables
+env:
+  NODE_VERSION: '20'
+  TYPESCRIPT_DIR: './typescript'
+  CACHE_DEPENDENCY_PATH: 'typescript/package-lock.json'
+
+# Reusable job definitions can be added here
+jobs:
+  # Example reusable job (not used in this config but shows the pattern)
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.CACHE_DEPENDENCY_PATH }}
+
+      - name: Install dependencies
+        working-directory: ${{ env.TYPESCRIPT_DIR }}
+        run: npm ci
+
+# Shared configuration notes:
+#
+# Node versions tested: 16, 18, 20
+# OS platforms: ubuntu-latest, windows-latest, macos-latest
+# Bundle size limit: 200KB gzipped
+# Coverage threshold: 80%
+# CI timeout: 5 minutes (typical)
+# Full test timeout: 15 minutes
+#
+# Required Secrets (optional):
+# - NPM_TOKEN: For npm publishing
+# - CODECOV_TOKEN: For coverage reporting
+#
+# Branch protection recommendations:
+# - Require CI to pass
+# - Require 1 review for PRs
+# - No force push to main
+# - Require linear history

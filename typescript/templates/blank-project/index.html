@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Blank Project</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #canvas {
+            border: 1px solid #ccc;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script type="module">
+        // TODO: Import SK8 library
+        // import { SK8Stage, SK8Rectangle } from 'sk8-ts';
+
+        // Initialize canvas
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Clear canvas
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Your SK8 code here
+        console.log('SK8 project ready!');
+
+        // Example: Create a stage and add an actor
+        // const stage = new SK8Stage(canvas);
+        // const rect = new SK8Rectangle();
+        // rect.setBoundsRect({ left: 100, top: 100, right: 300, bottom: 200 });
+        // rect.setFillColor({ r: 100, g: 150, b: 255, a: 1 });
+        // stage.addActor(rect);
+        // stage.startRendering();
+    </script>
+</body>
+</html>

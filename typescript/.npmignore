@@ -1,0 +1,81 @@
+# Development files
+.git/
+.github/
+.vscode/
+node_modules/
+
+# Source maps (include only in dist)
+*.map
+
+# Build artifacts (temporary)
+dist-demo/
+
+# Tests
+tests/
+*.test.ts
+*.spec.ts
+**/__tests__/
+**/__mocks__/
+coverage/
+
+# Configuration files
+.eslintrc.json
+.prettierrc.json
+.prettierignore
+jest.config.js
+tsconfig.json
+webpack.config.js
+rollup.config.js
+
+# Scripts
+scripts/
+
+# Documentation (except README and CHANGELOG)
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+
+# Demo files
+demo/
+demos/
+examples/
+
+# Summaries and guides
+*_SUMMARY.md
+*_GUIDE.md
+*_EXAMPLES.md
+PROJECT_FORMAT.md
+IMPLEMENTATION_ROADMAP.md
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

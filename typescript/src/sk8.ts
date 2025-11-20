@@ -322,7 +322,7 @@ export { SK8SelectionHandles } from './editor/selection-handles.js';
 export type { HandleType, Handle } from './editor/selection-handles.js';
 
 // Version
-export const VERSION = '0.4.1';
+export const VERSION = '1.0.0';
 
 /**
  * Helper function to initialize SK8 with a canvas

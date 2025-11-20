@@ -591,6 +591,7 @@ describe('SK8Script Evaluator', () => {
     it('should look up variables', () => {
       const context: EvaluationContext = {
         variables: new Map([['x', 42]]),
+        functions: new Map(),
       };
       const result = evaluate(parse(tokenize('x')), context);
       expect(result).toBe(42);
@@ -602,6 +603,7 @@ describe('SK8Script Evaluator', () => {
           ['x', 5],
           ['y', 3],
         ]),
+        functions: new Map(),
       };
       const result = evaluate(parse(tokenize('x + y * 2')), context);
       expect(result).toBe(11);
@@ -612,6 +614,7 @@ describe('SK8Script Evaluator', () => {
     it('should access object properties', () => {
       const context: EvaluationContext = {
         variables: new Map([['obj', { left: 100, top: 50 }]]),
+        functions: new Map(),
       };
       const result = evaluate(parse(tokenize('the left of obj')), context);
       expect(result).toBe(100);
@@ -620,6 +623,7 @@ describe('SK8Script Evaluator', () => {
     it('should access properties with dot notation', () => {
       const context: EvaluationContext = {
         variables: new Map([['obj', { width: 200 }]]),
+        functions: new Map(),
       };
       const result = evaluate(parse(tokenize('obj.width')), context);
       expect(result).toBe(200);
@@ -630,6 +634,7 @@ describe('SK8Script Evaluator', () => {
     it('should access array elements (1-based)', () => {
       const context: EvaluationContext = {
         variables: new Map([['myList', [10, 20, 30]]]),
+        functions: new Map(),
       };
       const result = evaluate(parse(tokenize('item 1 of myList')), context);
       expect(result).toBe(10);
@@ -638,6 +643,7 @@ describe('SK8Script Evaluator', () => {
     it('should access array elements with bracket notation', () => {
       const context: EvaluationContext = {
         variables: new Map([['myList', [10, 20, 30]]]),
+        functions: new Map(),
       };
       const result = evaluate(parse(tokenize('myList[2]')), context);
       expect(result).toBe(20); // SK8 uses 1-based indexing
@@ -687,6 +693,7 @@ describe('SK8Script Integration', () => {
           },
         ],
       ]),
+      functions: new Map(),
     };
 
     const result = evaluate(parse(tokenize('the left of myActor')), context);
@@ -696,6 +703,7 @@ describe('SK8Script Integration', () => {
   it('should handle list operations', () => {
     const context: EvaluationContext = {
       variables: new Map([['myList', [10, 20, 30, 40, 50]]]),
+      functions: new Map(),
     };
 
     const result = evaluate(parse(tokenize('item 3 of myList')), context);
@@ -709,6 +717,7 @@ describe('SK8Script Integration', () => {
         ['b', 5],
         ['c', 2],
       ]),
+      functions: new Map(),
     };
 
     const result = evaluate(parse(tokenize('(a + b) * c - 3')), context);

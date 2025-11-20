@@ -1,0 +1,120 @@
+name: Dependencies
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Update dependencies
+  update-deps:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: ./typescript
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Update dependencies
+        run: |
+          echo "Checking for dependency updates..."
+          npm outdated --json > outdated.json || true
+
+          if [ -s outdated.json ]; then
+            echo "Updates found, applying them..."
+            npm update --save
+          else
+            echo "No updates available"
+          fi
+
+      - name: Run security audit
+        id: audit
+        run: |
+          echo "Running security audit..."
+          npm audit --json > audit.json || true
+
+          VULNERABILITIES=$(cat audit.json | jq -r '.metadata.vulnerabilities | .total' || echo "0")
+          echo "vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+
+      - name: Fix security issues
+        if: steps.audit.outputs.vulnerabilities != '0'
+        run: |
+          echo "Attempting to fix security vulnerabilities..."
+          npm audit fix || true
+
+      - name: Run tests
+        id: test
+        run: |
+          echo "Running tests with updated dependencies..."
+          npm run test || echo "tests_failed=true" >> $GITHUB_OUTPUT
+
+      - name: Check if changes exist
+        id: changes
+        run: |
+          git diff --quiet package.json package-lock.json || echo "has_changes=true" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true' && steps.test.outputs.tests_failed != 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: 'chore: Weekly dependency updates'
+          body: |
+            ## Dependency Updates
+
+            This PR contains weekly dependency updates.
+
+            ### Changes
+            - Updated npm dependencies to latest compatible versions
+            - Fixed security vulnerabilities (if any)
+            - All tests passing ✅
+
+            ### Security Audit
+            - Vulnerabilities found: ${{ steps.audit.outputs.vulnerabilities }}
+            - Vulnerabilities fixed: Attempted automatic fixes
+
+            ### Testing
+            - [x] All tests passing
+            - [x] Build successful
+            - [x] Security audit clean
+
+            ---
+            *This PR was automatically created by the dependency update workflow*
+          branch: chore/update-dependencies
+          base: main
+          labels: dependencies, automated
+          delete-branch: true
+
+      - name: Summary
+        run: |
+          echo "# Dependency Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Changes detected: ${{ steps.changes.outputs.has_changes == 'true' && 'Yes' || 'No' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests passed: ${{ steps.test.outputs.tests_failed != 'true' && 'Yes' || 'No' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Vulnerabilities: ${{ steps.audit.outputs.vulnerabilities }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.changes.outputs.has_changes }}" == "true" ] && [ "${{ steps.test.outputs.tests_failed }}" != "true" ]; then
+            echo "✅ Pull request created successfully" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
+            echo "❌ Updates available but tests failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No updates available" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SK8 Example 04: UI Components</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; padding: 40px; }
+        h1 { margin: 0 0 10px; color: #333; }
+        #canvas { border: 2px solid #e0e0e0; border-radius: 8px; display: block; margin: 20px auto; background: #f8f9fa; }
+        .info { background: #e8f4f8; padding: 15px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>04. UI Components</h1>
+        <p>Interactive UI elements: buttons, sliders, checkboxes, and text inputs.</p>
+        <canvas id="canvas" width="700" height="500"></canvas>
+        <div class="info">
+            <h3>Features Demonstrated:</h3>
+            <p>✓ Button actors with click handling</p>
+            <p>✓ Slider for value selection</p>
+            <p>✓ Checkbox for boolean input</p>
+            <p>✓ Text input field</p>
+            <p>✓ Property binding and form validation</p>
+        </div>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const components = [];
+        let mousePos = { x: 0, y: 0 };
+
+        class Button {
+            constructor(x, y, width, height, text, onClick) {
+                this.x = x; this.y = y; this.width = width; this.height = height;
+                this.text = text; this.onClick = onClick; this.hovering = false;
+            }
+
+            containsPoint(x, y) {
+                return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
+            }
+
+            render(ctx) {
+                ctx.fillStyle = this.hovering ? '#5568d3' : '#667eea';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.text, this.x + this.width / 2, this.y + this.height / 2);
+            }
+        }
+
+        class Slider {
+            constructor(x, y, width, min, max, value, label) {
+                this.x = x; this.y = y; this.width = width;
+                this.min = min; this.max = max; this.value = value; this.label = label;
+                this.dragging = false; this.height = 40;
+            }
+
+            containsPoint(x, y) {
+                const handleX = this.x + (this.value - this.min) / (this.max - this.min) * this.width;
+                return Math.abs(x - handleX) < 10 && Math.abs(y - this.y) < 10;
+            }
+
+            startDrag() { this.dragging = true; }
+            stopDrag() { this.dragging = false; }
+
+            updateValue(mouseX) {
+                if (this.dragging) {
+                    const ratio = Math.max(0, Math.min(1, (mouseX - this.x) / this.width));
+                    this.value = this.min + ratio * (this.max - this.min);
+                }
+            }
+
+            render(ctx) {
+                // Label
+                ctx.fillStyle = '#333';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${this.label}: ${Math.round(this.value)}`, this.x, this.y - 10);
+
+                // Track
+                ctx.fillStyle = '#ddd';
+                ctx.fillRect(this.x, this.y - 2, this.width, 4);
+
+                // Handle
+                const handleX = this.x + (this.value - this.min) / (this.max - this.min) * this.width;
+                ctx.fillStyle = '#667eea';
+                ctx.beginPath();
+                ctx.arc(handleX, this.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Checkbox {
+            constructor(x, y, label, checked) {
+                this.x = x; this.y = y; this.label = label; this.checked = checked;
+                this.size = 20; this.height = 30;
+            }
+
+            containsPoint(x, y) {
+                return x >= this.x && x <= this.x + this.size && y >= this.y && y <= this.y + this.size;
+            }
+
+            toggle() { this.checked = !this.checked; }
+
+            render(ctx) {
+                // Box
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x, this.y, this.size, this.size);
+
+                if (this.checked) {
+                    ctx.fillStyle = '#667eea';
+                    ctx.fillRect(this.x + 4, this.y + 4, this.size - 8, this.size - 8);
+                }
+
+                // Label
+                ctx.fillStyle = '#333';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.label, this.x + this.size + 10, this.y + this.size / 2);
+            }
+        }
+
+        // Create components
+        components.push(new Button(50, 50, 150, 40, 'Click Me!', () => alert('Button clicked!')));
+        components.push(new Button(220, 50, 150, 40, 'Submit', () => console.log('Form submitted')));
+
+        const slider1 = new Slider(50, 130, 300, 0, 100, 50, 'Volume');
+        const slider2 = new Slider(50, 190, 300, 0, 255, 128, 'Brightness');
+        components.push(slider1, slider2);
+
+        const checkbox1 = new Checkbox(50, 250, 'Enable notifications', true);
+        const checkbox2 = new Checkbox(50, 290, 'Dark mode', false);
+        components.push(checkbox1, checkbox2);
+
+        // Event handlers
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            components.forEach(comp => {
+                if (comp.containsPoint(x, y)) {
+                    if (comp instanceof Button) comp.onClick();
+                    if (comp instanceof Checkbox) comp.toggle();
+                    if (comp instanceof Slider) comp.startDrag();
+                }
+            });
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
+
+            components.forEach(comp => {
+                if (comp instanceof Button) comp.hovering = comp.containsPoint(mousePos.x, mousePos.y);
+                if (comp instanceof Slider) comp.updateValue(mousePos.x);
+            });
+
+            canvas.style.cursor = components.some(c => c.containsPoint(mousePos.x, mousePos.y)) ? 'pointer' : 'default';
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            components.forEach(comp => {
+                if (comp instanceof Slider) comp.stopDrag();
+            });
+        });
+
+        // Render loop
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            components.forEach(comp => comp.render(ctx));
+
+            // Show values
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Current Values:', 50, 360);
+            ctx.fillText(`Volume: ${Math.round(slider1.value)}`, 50, 385);
+            ctx.fillText(`Brightness: ${Math.round(slider2.value)}`, 50, 405);
+            ctx.fillText(`Notifications: ${checkbox1.checked}`, 50, 425);
+            ctx.fillText(`Dark Mode: ${checkbox2.checked}`, 50, 445);
+
+            requestAnimationFrame(render);
+        }
+        render();
+
+        console.log('UI Components example loaded!');
+    </script>
+</body>
+</html>

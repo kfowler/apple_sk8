@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SK8 Example 10: Platform Game</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; overflow: hidden; }
+        .game-container { max-width: 900px; margin: 20px auto; }
+        h1 { text-align: center; margin-bottom: 10px; color: #4ECDC4; }
+        #canvas { display: block; margin: 0 auto; background: #16213e; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+        .hud { display: flex; justify-content: space-between; padding: 15px; background: #0f3460; border-radius: 8px; margin-bottom: 15px; font-size: 18px; }
+        .instructions { background: #0f3460; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .instructions h3 { margin-bottom: 10px; color: #4ECDC4; }
+        .instructions p { margin: 5px 0; font-size: 14px; }
+        .game-over { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 40px; border-radius: 16px; text-align: center; display: none; }
+        .game-over h2 { color: #FF6B6B; margin-bottom: 20px; }
+        .game-over button { padding: 15px 30px; font-size: 18px; border: none; background: #4ECDC4; color: white; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Platform Game</h1>
+        <div class="hud">
+            <div>Score: <span id="score">0</span></div>
+            <div>Lives: <span id="lives">3</span></div>
+            <div>Time: <span id="time">0</span></div>
+        </div>
+        <canvas id="canvas" width="800" height="600"></canvas>
+        <div class="instructions">
+            <h3>Controls:</h3>
+            <p>⬅️ ➡️ Arrow Keys - Move left/right</p>
+            <p>⬆️ Space/Up Arrow - Jump</p>
+            <p>🎯 Collect coins, avoid enemies, reach the flag!</p>
+        </div>
+    </div>
+    <div class="game-over" id="gameOver">
+        <h2>Game Over!</h2>
+        <p style="font-size: 20px; margin-bottom: 20px;">Final Score: <span id="finalScore">0</span></p>
+        <button onclick="restart()">Play Again</button>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game state
+        let gameState = 'playing';
+        let score = 0;
+        let lives = 3;
+        let gameTime = 0;
+
+        // Player
+        const player = {
+            x: 50, y: 450, width: 30, height: 40,
+            vx: 0, vy: 0, speed: 5, jumpForce: 15,
+            onGround: false, color: '#4ECDC4'
+        };
+
+        // Physics
+        const gravity = 0.8;
+        const friction = 0.85;
+
+        // Platforms
+        const platforms = [
+            { x: 0, y: 550, width: 800, height: 50, color: '#0f3460' },
+            { x: 150, y: 450, width: 150, height: 20, color: '#533483' },
+            { x: 400, y: 350, width: 150, height: 20, color: '#533483' },
+            { x: 600, y: 250, width: 150, height: 20, color: '#533483' },
+            { x: 200, y: 200, width: 150, height: 20, color: '#533483' }
+        ];
+
+        // Coins
+        let coins = [
+            { x: 200, y: 400, radius: 15, collected: false },
+            { x: 450, y: 300, radius: 15, collected: false },
+            { x: 650, y: 200, radius: 15, collected: false },
+            { x: 250, y: 150, radius: 15, collected: false }
+        ];
+
+        // Enemies
+        const enemies = [
+            { x: 400, y: 510, width: 30, height: 40, vx: 2, color: '#FF6B6B' },
+            { x: 600, y: 210, width: 30, height: 40, vx: -2, color: '#FF6B6B' }
+        ];
+
+        // Input
+        const keys = {};
+        document.addEventListener('keydown', e => keys[e.key] = true);
+        document.addEventListener('keyup', e => keys[e.key] = false);
+
+        // Game loop
+        function update() {
+            if (gameState !== 'playing') return;
+
+            // Player movement
+            if (keys['ArrowLeft']) player.vx = -player.speed;
+            else if (keys['ArrowRight']) player.vx = player.speed;
+            else player.vx *= friction;
+
+            // Jump
+            if ((keys[' '] || keys['ArrowUp']) && player.onGround) {
+                player.vy = -player.jumpForce;
+                player.onGround = false;
+            }
+
+            // Apply gravity
+            player.vy += gravity;
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Collision with platforms
+            player.onGround = false;
+            platforms.forEach(platform => {
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y + player.height > platform.y &&
+                    player.y + player.height < platform.y + 20 &&
+                    player.vy > 0) {
+                    player.y = platform.y - player.height;
+                    player.vy = 0;
+                    player.onGround = true;
+                }
+            });
+
+            // Boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Fall off screen
+            if (player.y > canvas.height) {
+                lives--;
+                if (lives <= 0) {
+                    gameOver();
+                } else {
+                    player.x = 50;
+                    player.y = 450;
+                    player.vx = 0;
+                    player.vy = 0;
+                }
+            }
+
+            // Collect coins
+            coins.forEach(coin => {
+                if (!coin.collected) {
+                    const dx = (player.x + player.width / 2) - coin.x;
+                    const dy = (player.y + player.height / 2) - coin.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < coin.radius + player.width / 2) {
+                        coin.collected = true;
+                        score += 100;
+                        updateHUD();
+                    }
+                }
+            });
+
+            // Move enemies
+            enemies.forEach(enemy => {
+                enemy.x += enemy.vx;
+                if (enemy.x < 0 || enemy.x + enemy.width > canvas.width) {
+                    enemy.vx *= -1;
+                }
+
+                // Collision with player
+                if (player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y) {
+                    lives--;
+                    if (lives <= 0) {
+                        gameOver();
+                    } else {
+                        player.x = 50;
+                        player.y = 450;
+                    }
+                    updateHUD();
+                }
+            });
+
+            // Win condition (reach top)
+            if (player.y < 100 && player.x > 200 && player.x < 350) {
+                gameState = 'won';
+                alert('You Win! Score: ' + score);
+                restart();
+            }
+        }
+
+        function render() {
+            // Clear
+            ctx.fillStyle = '#16213e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Platforms
+            platforms.forEach(platform => {
+                ctx.fillStyle = platform.color;
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                ctx.strokeStyle = '#fff3';
+                ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+            });
+
+            // Coins
+            coins.forEach(coin => {
+                if (!coin.collected) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#FFA500';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+
+            // Enemies
+            enemies.forEach(enemy => {
+                ctx.fillStyle = enemy.color;
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(enemy.x + 5, enemy.y + 5, 8, 8);
+                ctx.fillRect(enemy.x + 17, enemy.y + 5, 8, 8);
+            });
+
+            // Player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(player.x + 7, player.y + 5, 6, 6);
+            ctx.fillRect(player.x + 17, player.y + 5, 6, 6);
+
+            // Goal
+            ctx.fillStyle = '#4ECDC4';
+            ctx.font = '20px Arial';
+            ctx.fillText('🏁 GOAL', 220, 180);
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateHUD() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('lives').textContent = lives;
+        }
+
+        function gameOver() {
+            gameState = 'gameover';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        window.restart = function() {
+            gameState = 'playing';
+            score = 0;
+            lives = 3;
+            gameTime = 0;
+            player.x = 50;
+            player.y = 450;
+            player.vx = 0;
+            player.vy = 0;
+            coins.forEach(coin => coin.collected = false);
+            updateHUD();
+            document.getElementById('gameOver').style.display = 'none';
+        };
+
+        // Timer
+        setInterval(() => {
+            if (gameState === 'playing') {
+                gameTime++;
+                document.getElementById('time').textContent = gameTime;
+                score += 1;
+                updateHUD();
+            }
+        }, 1000);
+
+        // Start
+        updateHUD();
+        gameLoop();
+        console.log('Platform game loaded! Use arrow keys to move, space to jump!');
+    </script>
+</body>
+</html>

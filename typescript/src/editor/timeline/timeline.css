@@ -1,0 +1,609 @@
+/**
+ * SK8 Timeline Editor Styles
+ *
+ * Comprehensive styles for the timeline editor components
+ */
+
+/* Timeline Panel */
+.sk8-timeline-panel {
+  display: flex;
+  flex-direction: column;
+  background: #1e1e1e;
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Playback Controls */
+.playback-controls {
+  padding: 10px;
+  background: #2c2c2c;
+  border-bottom: 1px solid #444;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.playback-controls button {
+  padding: 6px 12px;
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s, transform 0.1s;
+  line-height: 1;
+}
+
+.playback-controls button:hover {
+  background: #444;
+}
+
+.playback-controls button:active {
+  transform: scale(0.95);
+}
+
+.playback-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.playback-controls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.playback-controls input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.playback-controls select {
+  padding: 4px 8px;
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.playback-controls select:focus {
+  outline: none;
+  border-color: #4A90E2;
+}
+
+/* Timeline View Canvas */
+.timeline-view-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: #1e1e1e;
+}
+
+.timeline-view-container canvas {
+  display: block;
+  cursor: default;
+}
+
+.timeline-view-container canvas:active {
+  cursor: grabbing;
+}
+
+/* Keyframe Editor */
+.keyframe-editor {
+  background: #252525;
+  border-left: 1px solid #444;
+  width: 250px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.keyframe-editor-empty {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+}
+
+.keyframe-editor-header {
+  padding: 12px 15px;
+  background: #2c2c2c;
+  border-bottom: 1px solid #444;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.keyframe-editor-content {
+  padding: 15px;
+}
+
+.keyframe-editor-row {
+  margin-bottom: 12px;
+}
+
+.keyframe-editor-row label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.keyframe-editor-row input[type="number"],
+.keyframe-editor-row input[type="text"],
+.keyframe-editor-row input[type="color"],
+.keyframe-editor-row select {
+  width: 100%;
+  padding: 6px 8px;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.keyframe-editor-row input:focus,
+.keyframe-editor-row select:focus {
+  outline: none;
+  border-color: #4A90E2;
+}
+
+.keyframe-editor-row input[type="color"] {
+  height: 36px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.keyframe-editor-row canvas {
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: #1a1a1a;
+}
+
+.keyframe-editor-actions {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #444;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.keyframe-editor-actions button {
+  padding: 6px 12px;
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.keyframe-editor-actions button:hover {
+  background: #444;
+}
+
+.keyframe-editor-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Property Inspector Integration */
+.sk8-inspector-property .timeline-button {
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: #4A90E2;
+  border: none;
+  color: white;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.sk8-inspector-property .timeline-button:hover {
+  background: #5AA0F2;
+}
+
+/* Track Controls */
+.track-controls {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: #252525;
+  border-bottom: 1px solid #444;
+}
+
+.track-controls button {
+  padding: 6px 12px;
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.track-controls button:hover {
+  background: #444;
+}
+
+.track-controls button.add-track {
+  background: #4A90E2;
+  border-color: #4A90E2;
+}
+
+.track-controls button.add-track:hover {
+  background: #5AA0F2;
+}
+
+/* Timeline Grid Lines */
+.timeline-grid-line {
+  stroke: #3a3a3a;
+  stroke-width: 1;
+}
+
+.timeline-grid-line.major {
+  stroke: #4a4a4a;
+}
+
+/* Timeline Scrubber */
+.timeline-scrubber {
+  stroke: #e91e63;
+  stroke-width: 2;
+  cursor: ew-resize;
+}
+
+.timeline-scrubber-head {
+  fill: #e91e63;
+}
+
+/* Timeline Tracks */
+.timeline-track {
+  fill: #1e1e1e;
+}
+
+.timeline-track.even {
+  fill: #252525;
+}
+
+.timeline-track:hover {
+  fill: #2a2a2a;
+}
+
+.timeline-track.selected {
+  fill: #2c3e50;
+}
+
+/* Timeline Keyframes */
+.timeline-keyframe {
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.timeline-keyframe:hover {
+  transform: scale(1.2);
+}
+
+.timeline-keyframe.selected {
+  stroke-width: 2;
+  stroke: white;
+}
+
+/* Timeline Labels */
+.timeline-label {
+  font-size: 11px;
+  fill: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.timeline-time-marker {
+  font-size: 11px;
+  fill: #e0e0e0;
+  text-anchor: middle;
+  font-family: 'Courier New', monospace;
+}
+
+/* Context Menu */
+.timeline-context-menu {
+  position: absolute;
+  background: #2c2c2c;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  padding: 4px 0;
+  min-width: 150px;
+  z-index: 1000;
+}
+
+.timeline-context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e0e0e0;
+  transition: background 0.1s;
+}
+
+.timeline-context-menu-item:hover {
+  background: #3a3a3a;
+}
+
+.timeline-context-menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.timeline-context-menu-separator {
+  height: 1px;
+  background: #444;
+  margin: 4px 0;
+}
+
+/* Export Modal */
+.timeline-export-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.timeline-export-content {
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.timeline-export-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #e0e0e0;
+  font-size: 18px;
+}
+
+.timeline-export-content textarea {
+  width: 100%;
+  height: 300px;
+  background: #2c2c2c;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  padding: 12px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.timeline-export-buttons {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.timeline-export-buttons button {
+  padding: 8px 16px;
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.timeline-export-buttons button:hover {
+  background: #444;
+}
+
+.timeline-export-buttons button.primary {
+  background: #4A90E2;
+  border-color: #4A90E2;
+}
+
+.timeline-export-buttons button.primary:hover {
+  background: #5AA0F2;
+}
+
+/* Tooltips */
+.timeline-tooltip {
+  position: absolute;
+  background: #2c2c2c;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #e0e0e0;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading State */
+.timeline-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #888;
+  font-size: 13px;
+}
+
+.timeline-loading::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #444;
+  border-top-color: #4A90E2;
+  border-radius: 50%;
+  margin-right: 10px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Zoom Controls */
+.timeline-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #252525;
+  border-bottom: 1px solid #444;
+}
+
+.timeline-zoom-controls button {
+  padding: 4px 10px;
+  background: #333;
+  border: 1px solid #555;
+  color: #e0e0e0;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.timeline-zoom-controls button:hover {
+  background: #444;
+}
+
+.timeline-zoom-controls input[type="range"] {
+  flex: 1;
+  max-width: 150px;
+}
+
+.timeline-zoom-level {
+  font-size: 11px;
+  color: #aaa;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Snap Toggle */
+.timeline-snap-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.timeline-snap-toggle:hover {
+  background: #444;
+}
+
+.timeline-snap-toggle.active {
+  background: #4A90E2;
+  border-color: #4A90E2;
+}
+
+.timeline-snap-toggle input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Scrollbar Styling */
+.timeline-view-container::-webkit-scrollbar,
+.keyframe-editor::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.timeline-view-container::-webkit-scrollbar-track,
+.keyframe-editor::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.timeline-view-container::-webkit-scrollbar-thumb,
+.keyframe-editor::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 5px;
+}
+
+.timeline-view-container::-webkit-scrollbar-thumb:hover,
+.keyframe-editor::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .keyframe-editor {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .playback-controls {
+    flex-wrap: wrap;
+  }
+
+  .keyframe-editor {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #444;
+    max-height: 200px;
+  }
+}
+
+/* Accessibility */
+.timeline-panel button:focus,
+.timeline-panel input:focus,
+.timeline-panel select:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
+}
+
+.timeline-panel button:focus:not(:focus-visible),
+.timeline-panel input:focus:not(:focus-visible),
+.timeline-panel select:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Dark Theme Variants */
+.timeline-panel.light-theme {
+  background: #ffffff;
+  color: #333;
+}
+
+.timeline-panel.light-theme .playback-controls {
+  background: #f5f5f5;
+  border-bottom-color: #ddd;
+}
+
+.timeline-panel.light-theme button {
+  background: #fff;
+  border-color: #ccc;
+  color: #333;
+}
+
+.timeline-panel.light-theme button:hover {
+  background: #f0f0f0;
+}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Presentation Template</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #2d3748; overflow: hidden; }
+
+        .presentation-container { height: 100vh; display: flex; flex-direction: column; }
+
+        /* Slide Area */
+        .slide-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #slideCanvas { background: white; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
+
+        /* Controls */
+        .controls { background: #1a202c; color: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .controls button { padding: 10px 20px; border: none; background: #4a5568; color: white; border-radius: 6px; cursor: pointer; margin: 0 5px; }
+        .controls button:hover { background: #667eea; }
+        .slide-number { font-size: 18px; }
+
+        /* Thumbnail Strip */
+        .thumbnail-strip { background: #1a202c; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-top: 1px solid #4a5568; }
+        .thumbnail { width: 120px; height: 90px; background: white; border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .thumbnail:hover { border-color: #667eea; }
+        .thumbnail.active { border-color: #4ECDC4; }
+
+        /* Fullscreen Mode */
+        .fullscreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; display: none; align-items: center; justify-content: center; }
+        .fullscreen canvas { max-width: 100%; max-height: 100%; }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-area">
+            <canvas id="slideCanvas" width="960" height="720"></canvas>
+        </div>
+
+        <div class="controls">
+            <div>
+                <button onclick="presentation.addSlide()">+ Add Slide</button>
+                <button onclick="presentation.deleteSlide()">Delete Slide</button>
+            </div>
+            <div>
+                <button onclick="presentation.previousSlide()">◀ Previous</button>
+                <span class="slide-number">
+                    Slide <span id="currentSlide">1</span> of <span id="totalSlides">1</span>
+                </span>
+                <button onclick="presentation.nextSlide()">Next ▶</button>
+            </div>
+            <div>
+                <button onclick="presentation.toggleFullscreen()">⛶ Present</button>
+                <button onclick="presentation.exportPDF()">📄 Export PDF</button>
+            </div>
+        </div>
+
+        <div class="thumbnail-strip" id="thumbnailStrip"></div>
+    </div>
+
+    <div class="fullscreen" id="fullscreenMode">
+        <canvas id="fullscreenCanvas"></canvas>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('slideCanvas');
+        const ctx = canvas.getContext('2d');
+        const fullscreenCanvas = document.getElementById('fullscreenCanvas');
+        const fullscreenCtx = fullscreenCanvas.getContext('2d');
+
+        const presentation = {
+            slides: [],
+            currentSlideIndex: 0,
+            fullscreenMode: false,
+
+            init() {
+                // Create initial slide
+                this.addSlide();
+                this.renderCurrentSlide();
+                this.updateUI();
+            },
+
+            addSlide() {
+                const slide = {
+                    id: Date.now(),
+                    title: `Slide ${this.slides.length + 1}`,
+                    content: [],
+                    background: '#ffffff'
+                };
+
+                // Add default content
+                slide.content.push({
+                    type: 'text',
+                    text: `Slide ${this.slides.length + 1}`,
+                    x: 480,
+                    y: 360,
+                    fontSize: 48,
+                    color: '#333333'
+                });
+
+                this.slides.push(slide);
+                this.currentSlideIndex = this.slides.length - 1;
+                this.renderCurrentSlide();
+                this.updateUI();
+            },
+
+            deleteSlide() {
+                if (this.slides.length <= 1) {
+                    alert('Cannot delete the last slide');
+                    return;
+                }
+                this.slides.splice(this.currentSlideIndex, 1);
+                if (this.currentSlideIndex >= this.slides.length) {
+                    this.currentSlideIndex = this.slides.length - 1;
+                }
+                this.renderCurrentSlide();
+                this.updateUI();
+            },
+
+            nextSlide() {
+                if (this.currentSlideIndex < this.slides.length - 1) {
+                    this.currentSlideIndex++;
+                    this.renderCurrentSlide();
+                    this.updateUI();
+                }
+            },
+
+            previousSlide() {
+                if (this.currentSlideIndex > 0) {
+                    this.currentSlideIndex--;
+                    this.renderCurrentSlide();
+                    this.updateUI();
+                }
+            },
+
+            goToSlide(index) {
+                if (index >= 0 && index < this.slides.length) {
+                    this.currentSlideIndex = index;
+                    this.renderCurrentSlide();
+                    this.updateUI();
+                }
+            },
+
+            renderSlide(slide, targetCtx, targetCanvas) {
+                // Clear
+                targetCtx.fillStyle = slide.background;
+                targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+
+                // Render content
+                slide.content.forEach(item => {
+                    if (item.type === 'text') {
+                        targetCtx.fillStyle = item.color;
+                        targetCtx.font = `${item.fontSize}px Arial`;
+                        targetCtx.textAlign = 'center';
+                        targetCtx.textBaseline = 'middle';
+                        targetCtx.fillText(item.text, item.x, item.y);
+                    }
+                    // TODO: Add more content types (images, shapes, etc.)
+                });
+            },
+
+            renderCurrentSlide() {
+                const slide = this.slides[this.currentSlideIndex];
+                if (slide) {
+                    this.renderSlide(slide, ctx, canvas);
+                }
+            },
+
+            updateUI() {
+                document.getElementById('currentSlide').textContent = this.currentSlideIndex + 1;
+                document.getElementById('totalSlides').textContent = this.slides.length;
+                this.updateThumbnails();
+            },
+
+            updateThumbnails() {
+                const strip = document.getElementById('thumbnailStrip');
+                strip.innerHTML = '';
+
+                this.slides.forEach((slide, index) => {
+                    const thumb = document.createElement('canvas');
+                    thumb.width = 120;
+                    thumb.height = 90;
+                    thumb.className = 'thumbnail' + (index === this.currentSlideIndex ? ' active' : '');
+                    thumb.onclick = () => this.goToSlide(index);
+
+                    const thumbCtx = thumb.getContext('2d');
+                    thumbCtx.scale(0.125, 0.125);
+                    this.renderSlide(slide, thumbCtx, { width: 960, height: 720 });
+
+                    strip.appendChild(thumb);
+                });
+            },
+
+            toggleFullscreen() {
+                const fsDiv = document.getElementById('fullscreenMode');
+                this.fullscreenMode = !this.fullscreenMode;
+
+                if (this.fullscreenMode) {
+                    fsDiv.style.display = 'flex';
+                    fullscreenCanvas.width = window.innerWidth;
+                    fullscreenCanvas.height = window.innerHeight;
+                    this.renderSlide(this.slides[this.currentSlideIndex], fullscreenCtx, fullscreenCanvas);
+                    document.documentElement.requestFullscreen?.();
+                } else {
+                    fsDiv.style.display = 'none';
+                    document.exitFullscreen?.();
+                }
+            },
+
+            exportPDF() {
+                alert('PDF export would require jsPDF library');
+                console.log('TODO: Implement PDF export');
+            }
+        };
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                presentation.nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                presentation.previousSlide();
+            } else if (e.key === 'Escape' && presentation.fullscreenMode) {
+                presentation.toggleFullscreen();
+            }
+        });
+
+        // Fullscreen canvas navigation
+        fullscreenCanvas.addEventListener('click', (e) => {
+            const x = e.clientX;
+            if (x > window.innerWidth / 2) {
+                presentation.nextSlide();
+            } else {
+                presentation.previousSlide();
+            }
+            if (presentation.fullscreenMode) {
+                presentation.renderSlide(presentation.slides[presentation.currentSlideIndex], fullscreenCtx, fullscreenCanvas);
+            }
+        });
+
+        // Initialize
+        presentation.init();
+        window.presentation = presentation;
+
+        console.log('Presentation template loaded!');
+        console.log('Keyboard: Arrow keys or Space to navigate, Escape to exit fullscreen');
+    </script>
+</body>
+</html>

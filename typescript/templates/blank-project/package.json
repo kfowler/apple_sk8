@@ -1,0 +1,18 @@
+{
+  "name": "sk8-blank-project",
+  "version": "1.0.0",
+  "description": "Blank SK8 project template",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "sk8-ts": "file:../../dist"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.3.0"
+  }
+}

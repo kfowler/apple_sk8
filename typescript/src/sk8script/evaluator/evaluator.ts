@@ -2,9 +2,16 @@
  * SK8Script Evaluator
  *
  * Evaluates AST nodes to produce values.
+ *
+ * Optimizations:
+ * - Property lookup caching
+ * - Fast paths for common operations
+ * - Inline hot paths
+ * - Optimized closure creation
  */
 
 import { TokenType } from '../lexer/token.js';
+import { performanceMonitor } from '../../runtime/performance-monitor.js';
 import {
   ASTNode,
   FunctionParameter,
@@ -102,22 +109,48 @@ class ReturnException extends Error {
 }
 
 /**
- * Evaluator class for executing AST nodes
+ * Property lookup cache for optimization
+ */
+interface PropertyCache {
+  [key: string]: any;
+}
+
+/**
+ * Evaluator class for executing AST nodes (optimized)
  */
 export class Evaluator {
   private context: EvaluationContext;
   private callStack: string[] = [];
   private readonly MAX_CALL_STACK_SIZE = 1000;
 
+  // Optimization: property lookup cache
+  private propertyCache: Map<string, PropertyCache> = new Map();
+  private cacheHits: number = 0;
+  private cacheMisses: number = 0;
+  private usePropertyCache: boolean = true;
+
+  // Optimization: inline common operations
+  private fastMathOps: Map<TokenType, (a: number, b: number) => number> = new Map([
+    [TokenType.PLUS, (a, b) => a + b],
+    [TokenType.MINUS, (a, b) => a - b],
+    [TokenType.STAR, (a, b) => a * b],
+    [TokenType.SLASH, (a, b) => a / b],
+    [TokenType.PERCENT, (a, b) => a % b],
+    [TokenType.CARET, (a, b) => Math.pow(a, b)],
+  ]);
+
   constructor(context: EvaluationContext = { variables: new Map(), functions: new Map() }) {
     this.context = context;
   }
 
   /**
-   * Evaluate an AST node
+   * Evaluate an AST node (optimized)
    */
   evaluate(node: ASTNode): any {
-    // Literal
+    // Performance monitoring
+    performanceMonitor.incrementCounter('eval-calls');
+
+    // Fast path: Literal (most common)
     if (isLiteral(node)) {
       return node.value;
     }
@@ -245,14 +278,30 @@ export class Evaluator {
   }
 
   /**
-   * Evaluate a binary operation
+   * Evaluate a binary operation (optimized with fast paths)
    */
   private evaluateBinaryOp(node: any): any {
+    // Fast path for arithmetic operations on numbers
+    const fastOp = this.fastMathOps.get(node.operator);
+    if (fastOp) {
+      const left = this.evaluate(node.left);
+      const right = this.evaluate(node.right);
+
+      if (typeof left === 'number' && typeof right === 'number') {
+        return fastOp(left, right);
+      }
+
+      // Type error
+      const opName = this.getOperatorName(node.operator);
+      throw new EvaluatorError(`Cannot ${opName} ${typeof left} and ${typeof right}`);
+    }
+
+    // Other operations
     const left = this.evaluate(node.left);
     const right = this.evaluate(node.right);
 
     switch (node.operator) {
-      // Arithmetic
+      // Arithmetic (already handled above, but kept for completeness)
       case TokenType.PLUS:
         if (typeof left === 'number' && typeof right === 'number') {
           return left + right;
@@ -358,7 +407,7 @@ export class Evaluator {
   }
 
   /**
-   * Evaluate property access
+   * Evaluate property access (optimized with caching)
    */
   private evaluatePropertyAccess(node: any): any {
     const object = this.evaluate(node.object);
@@ -367,7 +416,32 @@ export class Evaluator {
       throw new EvaluatorError(`Cannot access property '${node.property}' of ${object}`);
     }
 
-    // Check if object is an SK8Object with getProperty method
+    // Use property cache for SK8Objects
+    if (this.usePropertyCache && typeof object === 'object' && typeof object.getProperty === 'function') {
+      const objectId = object.getId?.() || object;
+      const cacheKey = `${objectId}_${node.property}`;
+
+      // Check cache
+      if (this.propertyCache.has(cacheKey)) {
+        this.cacheHits++;
+        performanceMonitor.incrementCounter('property-cache-hits');
+        return this.propertyCache.get(cacheKey);
+      }
+
+      // Cache miss - get property and cache it
+      this.cacheMisses++;
+      performanceMonitor.incrementCounter('property-cache-misses');
+      const value = object.getProperty(node.property);
+
+      // Only cache immutable values
+      if (typeof value !== 'object' && typeof value !== 'function') {
+        this.propertyCache.set(cacheKey, value);
+      }
+
+      return value;
+    }
+
+    // Check if object is an SK8Object with getProperty method (non-cached)
     if (typeof object === 'object' && typeof object.getProperty === 'function') {
       return object.getProperty(node.property);
     }
@@ -844,6 +918,56 @@ export class Evaluator {
   registerFunctions(functions: Record<string, BuiltInFunction>): void {
     for (const [name, func] of Object.entries(functions)) {
       this.registerFunction(name, func);
+    }
+  }
+
+  /**
+   * Clear property cache
+   */
+  clearPropertyCache(): void {
+    this.propertyCache.clear();
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+  }
+
+  /**
+   * Enable/disable property cache
+   */
+  setUsePropertyCache(enabled: boolean): void {
+    this.usePropertyCache = enabled;
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): { hits: number; misses: number; hitRate: number } {
+    const total = this.cacheHits + this.cacheMisses;
+    return {
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
+      hitRate: total > 0 ? this.cacheHits / total : 0,
+    };
+  }
+
+  /**
+   * Get operator name for error messages
+   */
+  private getOperatorName(operator: TokenType): string {
+    switch (operator) {
+      case TokenType.PLUS:
+        return 'add';
+      case TokenType.MINUS:
+        return 'subtract';
+      case TokenType.STAR:
+        return 'multiply';
+      case TokenType.SLASH:
+        return 'divide';
+      case TokenType.PERCENT:
+        return 'modulo';
+      case TokenType.CARET:
+        return 'exponentiate';
+      default:
+        return 'operate on';
     }
   }
 }

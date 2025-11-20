@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Game Template</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; overflow: hidden; }
+
+        .game-container { max-width: 900px; margin: 20px auto; }
+
+        h1 { text-align: center; color: #4ECDC4; margin-bottom: 10px; }
+
+        .hud { display: flex; justify-content: space-between; padding: 15px; background: #0f3460; border-radius: 8px; margin-bottom: 15px; font-size: 18px; }
+
+        #canvas { display: block; margin: 0 auto; background: #16213e; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+
+        .controls { text-align: center; margin-top: 15px; background: #0f3460; padding: 15px; border-radius: 8px; }
+        .controls button { padding: 10px 20px; margin: 0 5px; border: none; background: #4ECDC4; color: #1a1a2e; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .controls button:hover { background: #45B7D1; }
+
+        .game-over-screen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.95); padding: 40px; border-radius: 16px; text-align: center; display: none; }
+        .game-over-screen h2 { color: #4ECDC4; margin-bottom: 20px; font-size: 36px; }
+        .game-over-screen button { padding: 15px 30px; margin: 10px; background: #4ECDC4; color: #1a1a2e; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        .game-over-screen button:hover { background: #45B7D1; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 My SK8 Game</h1>
+
+        <div class="hud">
+            <div>Score: <span id="score">0</span></div>
+            <div>Level: <span id="level">1</span></div>
+            <div>Lives: <span id="lives">3</span></div>
+            <div>Time: <span id="time">0</span></div>
+        </div>
+
+        <canvas id="canvas" width="800" height="600"></canvas>
+
+        <div class="controls">
+            <button onclick="game.start()">Start</button>
+            <button onclick="game.pause()">Pause</button>
+            <button onclick="game.restart()">Restart</button>
+        </div>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <h2>Game Over!</h2>
+        <p style="font-size: 24px; margin-bottom: 20px;">Final Score: <span id="finalScore">0</span></p>
+        <button onclick="game.restart()">Play Again</button>
+        <button onclick="game.mainMenu()">Main Menu</button>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game state
+        const game = {
+            state: 'menu', // menu, playing, paused, gameover
+            score: 0,
+            level: 1,
+            lives: 3,
+            time: 0,
+            entities: [],
+
+            start() {
+                if (this.state === 'playing') return;
+                this.state = 'playing';
+                this.score = 0;
+                this.level = 1;
+                this.lives = 3;
+                this.time = 0;
+                this.entities = [];
+                this.initEntities();
+                this.updateHUD();
+                console.log('Game started!');
+            },
+
+            pause() {
+                if (this.state === 'playing') {
+                    this.state = 'paused';
+                    console.log('Game paused');
+                } else if (this.state === 'paused') {
+                    this.state = 'playing';
+                    console.log('Game resumed');
+                }
+            },
+
+            restart() {
+                document.getElementById('gameOverScreen').style.display = 'none';
+                this.start();
+            },
+
+            mainMenu() {
+                this.state = 'menu';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                this.render();
+            },
+
+            gameOver() {
+                this.state = 'gameover';
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('gameOverScreen').style.display = 'block';
+                console.log('Game over! Final score:', this.score);
+            },
+
+            initEntities() {
+                // TODO: Initialize your game entities (player, enemies, etc.)
+                // Example:
+                // this.entities.push(new Player(100, 100));
+                // this.entities.push(new Enemy(300, 200));
+            },
+
+            update() {
+                if (this.state !== 'playing') return;
+
+                // Update all entities
+                this.entities.forEach(entity => {
+                    if (entity.update) entity.update();
+                });
+
+                // TODO: Add your game logic here
+                // - Check collisions
+                // - Update score
+                // - Check win/lose conditions
+
+                // Example: Game over condition
+                if (this.lives <= 0) {
+                    this.gameOver();
+                }
+            },
+
+            render() {
+                // Clear canvas
+                ctx.fillStyle = '#16213e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                if (this.state === 'menu') {
+                    // Render menu
+                    ctx.fillStyle = '#4ECDC4';
+                    ctx.font = 'bold 48px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('SK8 Game', canvas.width / 2, canvas.height / 2 - 50);
+                    ctx.font = '24px Arial';
+                    ctx.fillText('Click Start to begin', canvas.width / 2, canvas.height / 2 + 20);
+                } else if (this.state === 'paused') {
+                    // Render paused state
+                    this.entities.forEach(entity => {
+                        if (entity.render) entity.render(ctx);
+                    });
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#4ECDC4';
+                    ctx.font = 'bold 48px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+                } else {
+                    // Render entities
+                    this.entities.forEach(entity => {
+                        if (entity.render) entity.render(ctx);
+                    });
+                }
+            },
+
+            updateHUD() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('lives').textContent = this.lives;
+                document.getElementById('time').textContent = this.time;
+            }
+        };
+
+        // Input handling
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            // TODO: Add your keyboard controls
+        });
+        window.addEventListener('keyup', e => {
+            keys[e.key] = false;
+        });
+
+        // Game loop
+        function gameLoop() {
+            game.update();
+            game.render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Timer
+        setInterval(() => {
+            if (game.state === 'playing') {
+                game.time++;
+                game.updateHUD();
+            }
+        }, 1000);
+
+        // Start
+        game.render();
+        gameLoop();
+
+        // Make game accessible globally
+        window.game = game;
+        window.keys = keys;
+
+        console.log('Game template loaded!');
+        console.log('Add your game entities and logic in the TODO sections.');
+    </script>
+</body>
+</html>

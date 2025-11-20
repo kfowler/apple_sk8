@@ -11,6 +11,8 @@ import { Color, ColorUtils, Rect, RectUtils } from './types.js';
 import { SK8MouseEvent, SK8KeyboardEvent, SK8TouchEvent, TouchPoint } from '../events/SK8Event.js';
 import { DragDropManager, DragConstraints } from '../events/drag-drop.js';
 import { GestureRecognizer, GestureData } from '../events/gestures.js';
+import { RenderOptimizer } from './render-optimizer.js';
+import { performanceMonitor } from '../runtime/performance-monitor.js';
 
 export class SK8Stage extends SK8Object {
   private canvas: HTMLCanvasElement;
@@ -29,6 +31,17 @@ export class SK8Stage extends SK8Object {
   private frameCount: number = 0;
   private lastFpsUpdate: number = 0;
   private currentFps: number = 0;
+
+  // Render optimizer
+  private renderOptimizer: RenderOptimizer;
+  private useRenderOptimizer: boolean = true;
+  private spatialIndexDirty: boolean = true;
+
+  // Adaptive quality
+  private adaptiveQuality: boolean = false;
+  private qualityLevel: number = 1.0; // 1.0 = full quality, 0.5 = half quality
+  private lowFpsFrames: number = 0;
+  private lowFpsThreshold: number = 30;
 
   // Event management
   private dragDropManager = new DragDropManager();
@@ -60,6 +73,14 @@ export class SK8Stage extends SK8Object {
     // Set up event listeners
     this.setupEventListeners();
 
+    // Initialize render optimizer
+    this.renderOptimizer = new RenderOptimizer({
+      left: 0,
+      top: 0,
+      right: this.canvas.width,
+      bottom: this.canvas.height,
+    });
+
     // Define properties
     this.defineProperty('backgroundColor', {
       getter: () => this.getBackgroundColor(),
@@ -84,6 +105,7 @@ export class SK8Stage extends SK8Object {
     if (!this.actors.includes(actor)) {
       this.actors.push(actor);
       this.markActorDirty(actor);
+      this.spatialIndexDirty = true;
       this.setNeedsRender();
     }
   }
@@ -92,6 +114,7 @@ export class SK8Stage extends SK8Object {
     const index = this.actors.indexOf(actor);
     if (index !== -1) {
       this.actors.splice(index, 1);
+      this.spatialIndexDirty = true;
       this.setNeedsRender();
     }
   }
@@ -122,7 +145,17 @@ export class SK8Stage extends SK8Object {
   // Hit testing
 
   actorAtPoint(x: number, y: number): SK8Actor | null {
-    // Check actors in reverse order (front to back)
+    // Use render optimizer for efficient hit testing
+    if (this.useRenderOptimizer) {
+      // Rebuild spatial index if needed
+      if (this.spatialIndexDirty) {
+        this.renderOptimizer.rebuildSpatialIndex(this.actors);
+        this.spatialIndexDirty = false;
+      }
+      return this.renderOptimizer.actorAtPoint(this.actors, x, y);
+    }
+
+    // Fallback: check actors in reverse order (front to back)
     for (let i = this.actors.length - 1; i >= 0; i--) {
       const actor = this.actors[i];
       if (actor.getVisible() && actor.containsPoint(x, y)) {
@@ -165,8 +198,28 @@ export class SK8Stage extends SK8Object {
   }
 
   render(): void {
+    // Performance monitoring
+    performanceMonitor.mark('render-start');
+
     // Update FPS counter
     this.updateFPS();
+
+    // Record frame for performance monitoring
+    performanceMonitor.recordFrame();
+
+    // Rebuild spatial index if needed
+    if (this.spatialIndexDirty && this.useRenderOptimizer) {
+      performanceMonitor.mark('spatial-rebuild-start');
+      this.renderOptimizer.rebuildSpatialIndex(this.actors);
+      this.spatialIndexDirty = false;
+      performanceMonitor.mark('spatial-rebuild-end');
+      performanceMonitor.measure('spatial-rebuild', 'spatial-rebuild-start', 'spatial-rebuild-end');
+    }
+
+    // Adaptive quality adjustment
+    if (this.adaptiveQuality) {
+      this.adjustQuality();
+    }
 
     if (this.useDirtyRectOptimization && this.dirtyRects.length > 0) {
       // Render only dirty regions
@@ -179,6 +232,16 @@ export class SK8Stage extends SK8Object {
     this.needsRender = false;
     this.dirtyRects = [];
     this.dirtyActors.clear();
+
+    // Performance monitoring
+    performanceMonitor.mark('render-end');
+    performanceMonitor.measure('render', 'render-start', 'render-end');
+
+    // Update metrics
+    performanceMonitor.setMetric('actors', this.actors.length);
+    const stats = this.renderOptimizer.getStats();
+    performanceMonitor.setMetric('culled-actors', stats.culledActors);
+    performanceMonitor.setMetric('rendered-actors', stats.renderedActors);
   }
 
   /**
@@ -189,8 +252,27 @@ export class SK8Stage extends SK8Object {
     this.ctx.fillStyle = ColorUtils.toCSS(this.backgroundColor);
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Render all actors
-    for (const actor of this.actors) {
+    // Get viewport for culling
+    const viewport: Rect = {
+      left: 0,
+      top: 0,
+      right: this.canvas.width,
+      bottom: this.canvas.height,
+    };
+
+    // Cull off-screen actors if optimizer is enabled
+    let actorsToRender = this.actors;
+    if (this.useRenderOptimizer) {
+      actorsToRender = this.renderOptimizer.cullActors(this.actors, viewport);
+    }
+
+    // Apply quality scaling if needed
+    if (this.qualityLevel < 1.0) {
+      this.ctx.imageSmoothingEnabled = false;
+    }
+
+    // Render all visible actors
+    for (const actor of actorsToRender) {
       if (actor.getVisible()) {
         this.ctx.save();
         // Apply actor's transform (if any)
@@ -208,6 +290,11 @@ export class SK8Stage extends SK8Object {
         actor.render(this.ctx);
         this.ctx.restore();
       }
+    }
+
+    // Restore quality
+    if (this.qualityLevel < 1.0) {
+      this.ctx.imageSmoothingEnabled = true;
     }
   }
 
@@ -704,7 +791,61 @@ export class SK8Stage extends SK8Object {
   setSize(width: number, height: number): void {
     this.canvas.width = width;
     this.canvas.height = height;
+    this.spatialIndexDirty = true;
     this.setNeedsRender();
+  }
+
+  /**
+   * Enable/disable render optimizer
+   */
+  setUseRenderOptimizer(enabled: boolean): void {
+    this.useRenderOptimizer = enabled;
+    if (enabled) {
+      this.spatialIndexDirty = true;
+    }
+  }
+
+  /**
+   * Enable/disable adaptive quality
+   */
+  setAdaptiveQuality(enabled: boolean): void {
+    this.adaptiveQuality = enabled;
+  }
+
+  /**
+   * Adjust quality based on performance
+   */
+  private adjustQuality(): void {
+    const fps = performanceMonitor.getFPS();
+
+    if (fps < this.lowFpsThreshold) {
+      this.lowFpsFrames++;
+      // If we've had 10 consecutive low FPS frames, reduce quality
+      if (this.lowFpsFrames >= 10 && this.qualityLevel > 0.5) {
+        this.qualityLevel = Math.max(0.5, this.qualityLevel - 0.1);
+        console.warn(`Reduced quality to ${(this.qualityLevel * 100).toFixed(0)}% due to low FPS`);
+      }
+    } else if (fps >= 55) {
+      // If FPS is good, gradually restore quality
+      this.lowFpsFrames = 0;
+      if (this.qualityLevel < 1.0) {
+        this.qualityLevel = Math.min(1.0, this.qualityLevel + 0.05);
+      }
+    }
+  }
+
+  /**
+   * Get render optimizer statistics
+   */
+  getRenderStats(): any {
+    return this.renderOptimizer.getStats();
+  }
+
+  /**
+   * Get performance metrics
+   */
+  getPerformanceMetrics(): any {
+    return performanceMonitor.getMetrics();
   }
 
   // Cleanup

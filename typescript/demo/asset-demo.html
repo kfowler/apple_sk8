@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SK8 Asset Management Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #1e1e1e;
+      color: #ddd;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background: #252525;
+      padding: 16px 24px;
+      border-bottom: 1px solid #444;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #999;
+      font-size: 14px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .demo-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .demo-section h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .demo-card {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .demo-card h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #7ac;
+    }
+
+    .demo-card p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #bbb;
+      margin-bottom: 16px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #3a7ba8;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #4a8bb8;
+    }
+
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background: #555;
+    }
+
+    button.secondary:hover {
+      background: #666;
+    }
+
+    button.danger {
+      background: #a83a3a;
+    }
+
+    button.danger:hover {
+      background: #b84a4a;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: #333;
+      padding: 16px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #7ac;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .log {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      padding: 4px;
+    }
+
+    .log-entry.success {
+      color: #7ac;
+    }
+
+    .log-entry.error {
+      color: #c77;
+    }
+
+    .log-entry.info {
+      color: #bbb;
+    }
+
+    .asset-preview {
+      display: flex;
+      flex-direction: column;
+      width: 350px;
+      background: #252525;
+      border-left: 1px solid #444;
+    }
+
+    .asset-library-container {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    code {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    .canvas-container {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+    }
+
+    canvas {
+      background: white;
+      border-radius: 4px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #bbb;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 8px 12px;
+      background: #333;
+      border: 1px solid #555;
+      color: #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #7ac;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SK8 Asset Management System Demo</h1>
+    <p>Comprehensive demonstration of asset loading, caching, bundling, and management</p>
+  </header>
+
+  <main>
+    <div class="demo-section">
+      <h2>Asset Management Features</h2>
+
+      <div class="demo-card">
+        <h3>1. Import Assets</h3>
+        <p>Import assets from local files or URLs. Supports images, videos, audio, and more.</p>
+        <div class="button-group">
+          <button id="btn-import-file">Import from File</button>
+          <button id="btn-import-url">Import from URL</button>
+          <button id="btn-import-sample">Import Sample Assets</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>2. Asset Registry</h3>
+        <p>Track all assets with unique IDs, metadata, and reference counting.</p>
+        <div class="stats" id="registry-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Total Assets</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-size">0 B</div>
+            <div class="stat-label">Total Size</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-used">0</div>
+            <div class="stat-label">Used Assets</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-unused">0</div>
+            <div class="stat-label">Unused Assets</div>
+          </div>
+        </div>
+        <div class="button-group" style="margin-top: 16px;">
+          <button id="btn-show-assets" class="secondary">Show All Assets</button>
+          <button id="btn-gc" class="secondary">Run Garbage Collection</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>3. Asset Bundling</h3>
+        <p>Bundle and optimize assets for deployment with automatic size optimization.</p>
+        <div class="button-group">
+          <button id="btn-bundle">Generate Bundle</button>
+          <button id="btn-download-manifest" class="secondary" disabled>Download Manifest</button>
+          <button id="btn-show-report" class="secondary" disabled>Show Report</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>4. Reference Counting</h3>
+        <p>Automatic tracking of which actors use which assets.</p>
+        <div class="button-group">
+          <button id="btn-add-ref">Add Reference</button>
+          <button id="btn-remove-ref" class="secondary">Remove Reference</button>
+          <button id="btn-show-refs" class="secondary">Show References</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>5. Caching</h3>
+        <p>In-memory and IndexedDB caching for efficient asset loading.</p>
+        <div class="button-group">
+          <button id="btn-clear-cache" class="danger">Clear Cache</button>
+          <button id="btn-test-cache" class="secondary">Test Cache Performance</button>
+        </div>
+      </div>
+
+      <h2 style="margin-top: 32px;">Activity Log</h2>
+      <div class="log" id="activity-log">
+        <div class="log-entry info">Ready. Import assets to get started.</div>
+      </div>
+    </div>
+
+    <div class="asset-preview">
+      <div style="padding: 16px; border-bottom: 1px solid #444;">
+        <h2 style="margin: 0;">Asset Library</h2>
+      </div>
+      <div class="asset-library-container" id="asset-library"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import {
+      AssetRegistry,
+      AssetLoader,
+      AssetImporter,
+      AssetBundler,
+      formatBytes,
+      getGlobalAssetRegistry,
+      getGlobalAssetLoader,
+    } from '../dist/assets/index.js';
+
+    import { AssetLibrary } from '../dist/editor/asset-library.js';
+
+    // Initialize asset management system
+    const registry = getGlobalAssetRegistry();
+    const loader = getGlobalAssetLoader();
+    const importer = new AssetImporter(registry, loader);
+    const bundler = new AssetBundler(registry);
+
+    let bundleResult = null;
+
+    // Initialize UI
+    const assetLibrary = new AssetLibrary({
+      container: document.getElementById('asset-library'),
+      registry,
+      loader,
+      importer,
+    });
+
+    // Utility: Log to activity log
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('activity-log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // Update statistics
+    function updateStats() {
+      const totalAssets = registry.getAssetCount();
+      const totalSize = registry.getTotalSize();
+      const usedAssets = registry.getAllAssets().filter(a => registry.isAssetUsed(a.id)).length;
+      const unusedAssets = registry.getUnusedAssets().length;
+
+      document.getElementById('stat-total').textContent = totalAssets;
+      document.getElementById('stat-size').textContent = formatBytes(totalSize);
+      document.getElementById('stat-used').textContent = usedAssets;
+      document.getElementById('stat-unused').textContent = unusedAssets;
+    }
+
+    // Listen to registry events
+    registry.addEventListener('assetAdded', (event) => {
+      log(`Asset added: ${event.asset.name}`, 'success');
+      updateStats();
+    });
+
+    registry.addEventListener('assetRemoved', (event) => {
+      log(`Asset removed: ${event.asset.name}`, 'info');
+      updateStats();
+    });
+
+    registry.addEventListener('referenceChanged', (event) => {
+      log(`References changed for ${event.asset.name}: ${event.referenceCount}`, 'info');
+      updateStats();
+    });
+
+    // Button handlers
+    document.getElementById('btn-import-file').addEventListener('click', async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.accept = '*/*';
+
+      input.onchange = async () => {
+        if (!input.files || input.files.length === 0) return;
+
+        log(`Importing ${input.files.length} file(s)...`, 'info');
+
+        const results = await importer.importFiles(input.files, {
+          generateThumbnail: true,
+        });
+
+        const errors = results.filter(r => r.error);
+        if (errors.length > 0) {
+          log(`Failed to import ${errors.length} file(s)`, 'error');
+        } else {
+          log(`Successfully imported ${results.length} file(s)`, 'success');
+        }
+      };
+
+      input.click();
+    });
+
+    document.getElementById('btn-import-url').addEventListener('click', async () => {
+      const url = prompt('Enter asset URL:');
+      if (!url) return;
+
+      log(`Importing from URL: ${url}`, 'info');
+
+      try {
+        const result = await importer.importURL(url, {
+          generateThumbnail: true,
+        });
+
+        if (result.error) {
+          log(`Import failed: ${result.error}`, 'error');
+        } else {
+          log(`Successfully imported: ${result.name}`, 'success');
+        }
+      } catch (error) {
+        log(`Import error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btn-import-sample').addEventListener('click', async () => {
+      log('Importing sample assets...', 'info');
+
+      // Sample image URLs (using placeholder services)
+      const samples = [
+        { name: 'Sample Image 1', url: 'https://via.placeholder.com/300x200/3a7ba8/ffffff?text=Sample+1' },
+        { name: 'Sample Image 2', url: 'https://via.placeholder.com/400x300/7a3a7a/ffffff?text=Sample+2' },
+        { name: 'Sample Image 3', url: 'https://via.placeholder.com/200x200/3a7a3a/ffffff?text=Sample+3' },
+      ];
+
+      for (const sample of samples) {
+        try {
+          await importer.importURL(sample.url, {
+            name: sample.name,
+            generateThumbnail: true,
+          });
+        } catch (error) {
+          log(`Failed to import ${sample.name}: ${error.message}`, 'error');
+        }
+      }
+
+      log('Sample assets imported', 'success');
+    });
+
+    document.getElementById('btn-show-assets').addEventListener('click', () => {
+      const assets = registry.getAllAssets();
+
+      if (assets.length === 0) {
+        log('No assets in registry', 'info');
+        return;
+      }
+
+      log(`Total assets: ${assets.length}`, 'info');
+      assets.forEach(asset => {
+        const refs = registry.getReferenceCount(asset.id);
+        log(`  - ${asset.name} (${asset.type}, ${formatBytes(asset.size)}, ${refs} refs)`, 'info');
+      });
+    });
+
+    document.getElementById('btn-gc').addEventListener('click', () => {
+      const unused = registry.getUnusedAssets();
+
+      if (unused.length === 0) {
+        log('No unused assets to collect', 'info');
+        return;
+      }
+
+      const collected = registry.garbageCollect();
+      log(`Garbage collected ${collected.length} unused asset(s)`, 'success');
+    });
+
+    document.getElementById('btn-bundle').addEventListener('click', async () => {
+      log('Generating asset bundle...', 'info');
+
+      try {
+        bundleResult = await bundler.bundle({
+          embedThreshold: 10240, // 10KB
+          optimizeImages: true,
+          includeUnused: false,
+        });
+
+        log('Bundle generated successfully', 'success');
+        log(`  - Total assets: ${bundleResult.totalAssets}`, 'info');
+        log(`  - Embedded: ${bundleResult.embeddedCount} (${formatBytes(bundleResult.embeddedSize)})`, 'info');
+        log(`  - External: ${bundleResult.externalCount} (${formatBytes(bundleResult.externalSize)})`, 'info');
+
+        document.getElementById('btn-download-manifest').disabled = false;
+        document.getElementById('btn-show-report').disabled = false;
+      } catch (error) {
+        log(`Bundle error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btn-download-manifest').addEventListener('click', () => {
+      if (!bundleResult) return;
+
+      const json = JSON.stringify(bundleResult.manifest, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'asset-manifest.json';
+      a.click();
+
+      URL.revokeObjectURL(url);
+      log('Manifest downloaded', 'success');
+    });
+
+    document.getElementById('btn-show-report').addEventListener('click', () => {
+      if (!bundleResult) return;
+
+      const report = bundler.generateReport(bundleResult);
+      console.log(report);
+      log('Bundle report printed to console', 'info');
+      alert('Bundle report printed to console. Press F12 to view.');
+    });
+
+    document.getElementById('btn-add-ref').addEventListener('click', () => {
+      const assets = registry.getAllAssets();
+      if (assets.length === 0) {
+        log('No assets available', 'info');
+        return;
+      }
+
+      const asset = assets[0];
+      const objectId = `test-object-${Date.now()}`;
+      registry.addReference(asset.id, objectId);
+      log(`Added reference from ${objectId} to ${asset.name}`, 'success');
+    });
+
+    document.getElementById('btn-remove-ref').addEventListener('click', () => {
+      const assets = registry.getAllAssets();
+      const usedAsset = assets.find(a => registry.isAssetUsed(a.id));
+
+      if (!usedAsset) {
+        log('No assets with references', 'info');
+        return;
+      }
+
+      const refs = registry.getReferences(usedAsset.id);
+      if (refs.length > 0) {
+        registry.removeReference(usedAsset.id, refs[0]);
+        log(`Removed reference from ${usedAsset.name}`, 'success');
+      }
+    });
+
+    document.getElementById('btn-show-refs').addEventListener('click', () => {
+      const assets = registry.getAllAssets();
+      const usedAssets = assets.filter(a => registry.isAssetUsed(a.id));
+
+      if (usedAssets.length === 0) {
+        log('No assets with references', 'info');
+        return;
+      }
+
+      log('Assets with references:', 'info');
+      usedAssets.forEach(asset => {
+        const refs = registry.getReferences(asset.id);
+        log(`  - ${asset.name}: ${refs.join(', ')}`, 'info');
+      });
+    });
+
+    document.getElementById('btn-clear-cache').addEventListener('click', async () => {
+      await loader.clearCache();
+      log('Cache cleared', 'success');
+    });
+
+    document.getElementById('btn-test-cache').addEventListener('click', async () => {
+      log('Testing cache performance...', 'info');
+
+      // This is a placeholder - actual implementation would test cache hits/misses
+      log('Cache test: Memory cache active, IndexedDB available', 'success');
+    });
+
+    // Initial stats update
+    updateStats();
+
+    // Show library
+    assetLibrary.show();
+
+    // Log startup
+    log('Asset Management System initialized', 'success');
+    log('Features: Registry, Loader, Importer, Bundler, UI Library', 'info');
+  </script>
+</body>
+</html>

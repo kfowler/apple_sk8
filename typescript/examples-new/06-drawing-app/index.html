@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SK8 Example 06: Drawing Application</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #2d3748; overflow: hidden; height: 100vh; }
+        .app { display: flex; height: 100vh; }
+        .toolbar { width: 200px; background: #1a202c; color: white; padding: 20px; overflow-y: auto; }
+        .canvas-area { flex: 1; display: flex; flex-direction: column; padding: 20px; }
+        #canvas { background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); cursor: crosshair; }
+        .tool-section { margin-bottom: 25px; }
+        .tool-section h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: #a0aec0; }
+        .tool-btn { width: 100%; padding: 10px; margin: 5px 0; border: none; background: #4a5568; color: white; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .tool-btn:hover { background: #667eea; }
+        .tool-btn.active { background: #667eea; }
+        .color-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .color-box { width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+        .color-box.active { border-color: white; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        .controls button { padding: 10px 20px; border: none; background: #667eea; color: white; border-radius: 4px; cursor: pointer; }
+        .controls button:hover { background: #5568d3; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="toolbar">
+            <h2 style="margin-top: 0;">Drawing Tools</h2>
+
+            <div class="tool-section">
+                <h3>Tools</h3>
+                <button class="tool-btn active" onclick="selectTool('pen')">✏️ Pen</button>
+                <button class="tool-btn" onclick="selectTool('line')">📏 Line</button>
+                <button class="tool-btn" onclick="selectTool('rectangle')">⬜ Rectangle</button>
+                <button class="tool-btn" onclick="selectTool('circle')">⭕ Circle</button>
+                <button class="tool-btn" onclick="selectTool('eraser')">🧹 Eraser</button>
+            </div>
+
+            <div class="tool-section">
+                <h3>Colors</h3>
+                <div class="color-picker" id="colorPicker"></div>
+            </div>
+
+            <div class="tool-section">
+                <h3>Brush Size</h3>
+                <input type="range" min="1" max="20" value="3" style="width: 100%;" id="brushSize">
+                <div id="brushSizeValue" style="text-align: center; margin-top: 5px;">3px</div>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <div class="controls">
+                <button onclick="undo()">↶ Undo</button>
+                <button onclick="redo()">↷ Redo</button>
+                <button onclick="clearCanvas()">🗑️ Clear</button>
+                <button onclick="saveDrawing()">💾 Save</button>
+                <button onclick="exportPNG()">📤 Export PNG</button>
+            </div>
+            <canvas id="canvas" width="1000" height="700"></canvas>
+        </div>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let currentTool = 'pen';
+        let currentColor = '#000000';
+        let brushSize = 3;
+        let isDrawing = false;
+        let startPos = null;
+        let history = [];
+        let historyIndex = -1;
+
+        const colors = [
+            '#000000', '#FFFFFF', '#FF0000', '#00FF00',
+            '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+            '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+        ];
+
+        // Initialize
+        function init() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            saveState();
+
+            // Setup color picker
+            const colorPicker = document.getElementById('colorPicker');
+            colors.forEach((color, i) => {
+                const box = document.createElement('div');
+                box.className = 'color-box' + (i === 0 ? ' active' : '');
+                box.style.background = color;
+                box.onclick = () => selectColor(color, box);
+                colorPicker.appendChild(box);
+            });
+
+            // Brush size
+            document.getElementById('brushSize').oninput = (e) => {
+                brushSize = parseInt(e.target.value);
+                document.getElementById('brushSizeValue').textContent = brushSize + 'px';
+            };
+        }
+
+        window.selectTool = function(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            canvas.style.cursor = tool === 'eraser' ? 'not-allowed' : 'crosshair';
+        };
+
+        function selectColor(color, element) {
+            currentColor = color;
+            document.querySelectorAll('.color-box').forEach(box => box.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Drawing
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+
+            if (currentTool === 'pen' || currentTool === 'eraser') {
+                ctx.beginPath();
+                ctx.moveTo(startPos.x, startPos.y);
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (currentTool === 'pen') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.lineCap = 'round';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'eraser') {
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = brushSize * 3;
+                ctx.lineCap = 'round';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const endPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+
+            if (currentTool === 'line') {
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.beginPath();
+                ctx.moveTo(startPos.x, startPos.y);
+                ctx.lineTo(endPos.x, endPos.y);
+                ctx.stroke();
+            } else if (currentTool === 'rectangle') {
+                ctx.strokeStyle = currentColor;
+                ctx.fillStyle = currentColor + '40';
+                ctx.lineWidth = brushSize;
+                const width = endPos.x - startPos.x;
+                const height = endPos.y - startPos.y;
+                ctx.strokeRect(startPos.x, startPos.y, width, height);
+                ctx.fillRect(startPos.x, startPos.y, width, height);
+            } else if (currentTool === 'circle') {
+                const dx = endPos.x - startPos.x;
+                const dy = endPos.y - startPos.y;
+                const radius = Math.sqrt(dx * dx + dy * dy);
+                ctx.strokeStyle = currentColor;
+                ctx.fillStyle = currentColor + '40';
+                ctx.lineWidth = brushSize;
+                ctx.beginPath();
+                ctx.arc(startPos.x, startPos.y, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fill();
+            }
+
+            isDrawing = false;
+            saveState();
+        });
+
+        // History management
+        function saveState() {
+            historyIndex++;
+            history = history.slice(0, historyIndex);
+            history.push(canvas.toDataURL());
+            if (history.length > 50) history.shift();
+        }
+
+        window.undo = function() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreState(history[historyIndex]);
+            }
+        };
+
+        window.redo = function() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreState(history[historyIndex]);
+            }
+        };
+
+        function restoreState(dataURL) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = dataURL;
+        }
+
+        window.clearCanvas = function() {
+            if (confirm('Clear the canvas?')) {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                saveState();
+            }
+        };
+
+        window.saveDrawing = function() {
+            const data = JSON.stringify({
+                imageData: canvas.toDataURL(),
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('sk8-drawing', data);
+            alert('Drawing saved!');
+        };
+
+        window.exportPNG = function() {
+            const link = document.createElement('a');
+            link.download = 'sk8-drawing-' + Date.now() + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        };
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === 'z') {
+                    e.preventDefault();
+                    if (e.shiftKey) redo();
+                    else undo();
+                } else if (e.key === 'y') {
+                    e.preventDefault();
+                    redo();
+                }
+            }
+        });
+
+        init();
+        console.log('Drawing app loaded! Shortcuts: Ctrl+Z (undo), Ctrl+Y (redo)');
+    </script>
+</body>
+</html>

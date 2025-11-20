@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Example 03: Animation Basics</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+        }
+        h1 { margin: 0 0 10px; color: #333; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        #canvas { border: 2px solid #e0e0e0; border-radius: 8px; display: block; margin: 20px auto; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #764ba2; }
+        .info { background: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; border-radius: 4px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>03. Animation Basics</h1>
+        <p class="subtitle">Learn animation fundamentals with position, scale, rotation, and easing</p>
+
+        <canvas id="canvas" width="800" height="400"></canvas>
+
+        <div class="controls">
+            <button onclick="animatePosition()">Animate Position</button>
+            <button onclick="animateScale()">Animate Scale</button>
+            <button onclick="animateRotation()">Animate Rotation</button>
+            <button onclick="animateFade()">Animate Opacity</button>
+            <button onclick="easingLinear()">Linear Easing</button>
+            <button onclick="easingEaseInOut()">Ease In/Out</button>
+            <button onclick="easingBounce()">Bounce</button>
+            <button onclick="easingElastic()">Elastic</button>
+            <button onclick="chainAnimations()">Chain Animations</button>
+            <button onclick="parallelAnimations()">Parallel Animations</button>
+            <button onclick="stopAll()">Stop All</button>
+            <button onclick="reset()">Reset</button>
+        </div>
+
+        <div class="info">
+            <h3>Animation Concepts:</h3>
+            <p><strong>Position:</strong> Move actors smoothly from one location to another</p>
+            <p><strong>Scale:</strong> Grow or shrink actors</p>
+            <p><strong>Rotation:</strong> Spin actors around their center</p>
+            <p><strong>Opacity:</strong> Fade in or out</p>
+            <p><strong>Easing:</strong> Control animation timing and feel</p>
+            <p><strong>Chaining:</strong> Run animations in sequence</p>
+            <p><strong>Parallel:</strong> Run multiple animations simultaneously</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Simple animation system
+        class AnimationSystem {
+            constructor() {
+                this.animations = [];
+            }
+
+            animate(target, property, endValue, duration, easing = 'linear', onComplete = null) {
+                const startValue = target[property];
+                const startTime = Date.now();
+                const id = Math.random();
+
+                const anim = {
+                    id,
+                    target,
+                    property,
+                    startValue,
+                    endValue,
+                    duration,
+                    startTime,
+                    easing,
+                    onComplete
+                };
+
+                this.animations.push(anim);
+                return id;
+            }
+
+            update() {
+                const now = Date.now();
+                this.animations = this.animations.filter(anim => {
+                    const elapsed = now - anim.startTime;
+                    const progress = Math.min(elapsed / anim.duration, 1);
+                    const easedProgress = this.applyEasing(progress, anim.easing);
+
+                    anim.target[anim.property] = anim.startValue + (anim.endValue - anim.startValue) * easedProgress;
+
+                    if (progress >= 1) {
+                        if (anim.onComplete) anim.onComplete();
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            applyEasing(t, easing) {
+                switch(easing) {
+                    case 'linear': return t;
+                    case 'easeInOut': return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                    case 'bounce': return 1 - this.bounceOut(1 - t);
+                    case 'elastic':
+                        const c4 = (2 * Math.PI) / 3;
+                        return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+                    default: return t;
+                }
+            }
+
+            bounceOut(t) {
+                const n1 = 7.5625;
+                const d1 = 2.75;
+                if (t < 1 / d1) return n1 * t * t;
+                else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+                else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+                else return n1 * (t -= 2.625 / d1) * t + 0.984375;
+            }
+
+            stopAll() {
+                this.animations = [];
+            }
+        }
+
+        class Shape {
+            constructor(x, y, size, color) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.scale = 1;
+                this.rotation = 0;
+                this.opacity = 1;
+                this.color = color;
+            }
+
+            render(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.scale(this.scale, this.scale);
+
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-this.size / 2, -this.size / 2, this.size, this.size);
+
+                ctx.restore();
+            }
+        }
+
+        // Setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const animSystem = new AnimationSystem();
+        let currentEasing = 'linear';
+
+        const shape = new Shape(100, 200, 60, '#FF6B6B');
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            shape.render(ctx);
+            requestAnimationFrame(render);
+        }
+
+        function update() {
+            animSystem.update();
+            requestAnimationFrame(update);
+        }
+
+        render();
+        update();
+
+        // Animation functions
+        window.animatePosition = () => {
+            animSystem.animate(shape, 'x', 700, 1000, currentEasing);
+        };
+
+        window.animateScale = () => {
+            animSystem.animate(shape, 'scale', 2, 1000, currentEasing, () => {
+                animSystem.animate(shape, 'scale', 1, 1000, currentEasing);
+            });
+        };
+
+        window.animateRotation = () => {
+            animSystem.animate(shape, 'rotation', 360, 1000, currentEasing, () => {
+                shape.rotation = 0;
+            });
+        };
+
+        window.animateFade = () => {
+            animSystem.animate(shape, 'opacity', 0, 1000, currentEasing, () => {
+                animSystem.animate(shape, 'opacity', 1, 1000, currentEasing);
+            });
+        };
+
+        window.easingLinear = () => { currentEasing = 'linear'; console.log('Easing: Linear'); };
+        window.easingEaseInOut = () => { currentEasing = 'easeInOut'; console.log('Easing: Ease In/Out'); };
+        window.easingBounce = () => { currentEasing = 'bounce'; console.log('Easing: Bounce'); };
+        window.easingElastic = () => { currentEasing = 'elastic'; console.log('Easing: Elastic'); };
+
+        window.chainAnimations = () => {
+            animSystem.animate(shape, 'x', 400, 500, currentEasing, () => {
+                animSystem.animate(shape, 'y', 100, 500, currentEasing, () => {
+                    animSystem.animate(shape, 'x', 100, 500, currentEasing, () => {
+                        animSystem.animate(shape, 'y', 200, 500, currentEasing);
+                    });
+                });
+            });
+        };
+
+        window.parallelAnimations = () => {
+            animSystem.animate(shape, 'x', 700, 1500, currentEasing);
+            animSystem.animate(shape, 'rotation', 360, 1500, currentEasing);
+            animSystem.animate(shape, 'scale', 2, 750, currentEasing, () => {
+                animSystem.animate(shape, 'scale', 1, 750, currentEasing);
+            });
+        };
+
+        window.stopAll = () => {
+            animSystem.stopAll();
+        };
+
+        window.reset = () => {
+            animSystem.stopAll();
+            shape.x = 100;
+            shape.y = 200;
+            shape.scale = 1;
+            shape.rotation = 0;
+            shape.opacity = 1;
+        };
+
+        console.log('Animation basics example loaded!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Example 01: Hello World</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        #canvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto 20px;
+            cursor: pointer;
+        }
+
+        .info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .code .comment {
+            color: #6272a4;
+        }
+
+        .code .keyword {
+            color: #ff79c6;
+        }
+
+        .code .string {
+            color: #f1fa8c;
+        }
+
+        .code .function {
+            color: #50fa7b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>01. Hello World</h1>
+        <p class="subtitle">Your first SK8 application! Click the rectangle to change its color.</p>
+
+        <canvas id="canvas" width="500" height="300"></canvas>
+
+        <div class="info">
+            <h3>Try this:</h3>
+            <p>Click the colored rectangle to cycle through different colors.</p>
+            <p>Each click demonstrates event handling in SK8!</p>
+        </div>
+
+        <div class="code">
+<span class="comment">// Create a stage (canvas manager)</span>
+<span class="keyword">const</span> stage = <span class="keyword">new</span> <span class="function">SK8Stage</span>(canvas);
+
+<span class="comment">// Create a rectangle actor</span>
+<span class="keyword">const</span> rect = <span class="keyword">new</span> <span class="function">SK8Rectangle</span>();
+rect.<span class="function">setBoundsRect</span>({ left: 150, top: 100, right: 350, bottom: 200 });
+rect.<span class="function">setFillColor</span>({ r: 100, g: 150, b: 255, a: 1 });
+
+<span class="comment">// Add click handler</span>
+rect.<span class="function">addEventListener</span>(<span class="string">'click'</span>, () => {
+    <span class="comment">// Change color on click</span>
+    rect.<span class="function">setFillColor</span>(randomColor());
+});
+
+<span class="comment">// Add to stage and render</span>
+stage.<span class="function">addActor</span>(rect);
+stage.<span class="function">startRendering</span>();
+        </div>
+    </div>
+
+    <script type="module">
+        // In a real application, you would import from the SK8 library
+        // For this demo, we'll use a simplified inline implementation
+
+        class SK8Stage {
+            constructor(canvas) {
+                this.canvas = typeof canvas === 'string'
+                    ? document.getElementById(canvas)
+                    : canvas;
+                this.ctx = this.canvas.getContext('2d');
+                this.actors = [];
+                this.animationId = null;
+
+                // Setup event handlers
+                this.canvas.addEventListener('click', (e) => this.handleClick(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+            }
+
+            addActor(actor) {
+                this.actors.push(actor);
+                actor.stage = this;
+                this.render();
+            }
+
+            handleClick(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Check actors in reverse order (top to bottom)
+                for (let i = this.actors.length - 1; i >= 0; i--) {
+                    const actor = this.actors[i];
+                    if (actor.containsPoint(x, y)) {
+                        actor.handleClick(e);
+                        break;
+                    }
+                }
+            }
+
+            handleMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Update cursor
+                let foundActor = false;
+                for (let i = this.actors.length - 1; i >= 0; i--) {
+                    if (this.actors[i].containsPoint(x, y)) {
+                        foundActor = true;
+                        break;
+                    }
+                }
+                this.canvas.style.cursor = foundActor ? 'pointer' : 'default';
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // White background
+                this.ctx.fillStyle = 'white';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Render all actors
+                this.actors.forEach(actor => actor.render(this.ctx));
+            }
+
+            startRendering() {
+                const loop = () => {
+                    this.render();
+                    this.animationId = requestAnimationFrame(loop);
+                };
+                loop();
+            }
+        }
+
+        class SK8Rectangle {
+            constructor() {
+                this.bounds = { left: 0, top: 0, right: 100, bottom: 100 };
+                this.fillColor = { r: 200, g: 200, b: 200, a: 1 };
+                this.frameColor = { r: 0, g: 0, b: 0, a: 1 };
+                this.lineWidth = 2;
+                this.eventListeners = {};
+                this.stage = null;
+                this.hovering = false;
+            }
+
+            setBoundsRect(rect) {
+                this.bounds = rect;
+            }
+
+            setFillColor(color) {
+                this.fillColor = color;
+                if (this.stage) {
+                    this.stage.render();
+                }
+            }
+
+            setFrameColor(color) {
+                this.frameColor = color;
+            }
+
+            addEventListener(type, handler) {
+                if (!this.eventListeners[type]) {
+                    this.eventListeners[type] = [];
+                }
+                this.eventListeners[type].push(handler);
+            }
+
+            handleClick(e) {
+                const handlers = this.eventListeners['click'] || [];
+                handlers.forEach(handler => handler(e));
+            }
+
+            containsPoint(x, y) {
+                return x >= this.bounds.left && x <= this.bounds.right &&
+                       y >= this.bounds.top && y <= this.bounds.bottom;
+            }
+
+            render(ctx) {
+                const { left, top, right, bottom } = this.bounds;
+                const width = right - left;
+                const height = bottom - top;
+
+                // Draw fill
+                ctx.fillStyle = `rgba(${this.fillColor.r}, ${this.fillColor.g}, ${this.fillColor.b}, ${this.fillColor.a})`;
+                ctx.fillRect(left, top, width, height);
+
+                // Draw frame
+                ctx.strokeStyle = `rgba(${this.frameColor.r}, ${this.frameColor.g}, ${this.frameColor.b}, ${this.frameColor.a})`;
+                ctx.lineWidth = this.lineWidth;
+                ctx.strokeRect(left, top, width, height);
+
+                // Draw centered text
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Click Me!', left + width / 2, top + height / 2);
+            }
+        }
+
+        // Color palette
+        const colors = [
+            { r: 100, g: 150, b: 255, a: 1 },  // Blue
+            { r: 255, g: 100, b: 100, a: 1 },  // Red
+            { r: 100, g: 255, b: 150, a: 1 },  // Green
+            { r: 255, g: 200, b: 100, a: 1 },  // Orange
+            { r: 200, g: 100, b: 255, a: 1 },  // Purple
+            { r: 255, g: 150, b: 200, a: 1 },  // Pink
+        ];
+        let currentColorIndex = 0;
+
+        function randomColor() {
+            currentColorIndex = (currentColorIndex + 1) % colors.length;
+            return colors[currentColorIndex];
+        }
+
+        // Initialize the application
+        const canvas = document.getElementById('canvas');
+        const stage = new SK8Stage(canvas);
+
+        // Create a rectangle
+        const rect = new SK8Rectangle();
+        rect.setBoundsRect({ left: 150, top: 100, right: 350, bottom: 200 });
+        rect.setFillColor(colors[0]);
+
+        // Add click handler
+        rect.addEventListener('click', () => {
+            rect.setFillColor(randomColor());
+        });
+
+        // Add to stage
+        stage.addActor(rect);
+        stage.startRendering();
+
+        console.log('SK8 Hello World example loaded!');
+        console.log('Click the rectangle to change its color.');
+    </script>
+</body>
+</html>

@@ -150,7 +150,7 @@ export function serializeProjectToObject(
     actors.push(serializeActor(actor, id, context, options));
   }
 
-  // Serialize assets
+  // Serialize assets (with enhanced metadata if available)
   const assets = project.getAssets().map((asset) => ({ ...asset }));
 
   // Serialize scripts

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK8 Example 02: Interactive Shapes</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        #canvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .info h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .status {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>02. Interactive Shapes</h1>
+        <p class="subtitle">Click shapes to select, drag to move, explore different shape types!</p>
+
+        <canvas id="canvas" width="800" height="500"></canvas>
+
+        <div class="controls">
+            <button onclick="bringToFront()">Bring to Front</button>
+            <button onclick="sendToBack()">Send to Back</button>
+            <button onclick="clearSelection()">Clear Selection</button>
+            <button onclick="addRandom()">Add Random Shape</button>
+            <button onclick="clearAll()">Clear All</button>
+        </div>
+
+        <div class="status" id="status">Click a shape to select it</div>
+
+        <div class="info">
+            <h3>Try this:</h3>
+            <p><strong>Click</strong> on any shape to select it (shows a blue outline)</p>
+            <p><strong>Drag</strong> selected shapes to move them around</p>
+            <p><strong>Bring to Front/Back</strong> to change z-order</p>
+            <p><strong>Add Random Shape</strong> to create new shapes</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Simplified SK8 implementation for demo purposes
+
+        class SK8Stage {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.actors = [];
+                this.selectedActor = null;
+                this.dragging = false;
+                this.dragOffset = { x: 0, y: 0 };
+
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+            }
+
+            addActor(actor) {
+                this.actors.push(actor);
+                actor.stage = this;
+                this.render();
+            }
+
+            removeActor(actor) {
+                const index = this.actors.indexOf(actor);
+                if (index > -1) {
+                    this.actors.splice(index, 1);
+                    if (this.selectedActor === actor) {
+                        this.selectedActor = null;
+                    }
+                    this.render();
+                }
+            }
+
+            clearActors() {
+                this.actors = [];
+                this.selectedActor = null;
+                this.render();
+                updateStatus('All shapes cleared');
+            }
+
+            bringToFront(actor) {
+                const index = this.actors.indexOf(actor);
+                if (index > -1) {
+                    this.actors.splice(index, 1);
+                    this.actors.push(actor);
+                    this.render();
+                }
+            }
+
+            sendToBack(actor) {
+                const index = this.actors.indexOf(actor);
+                if (index > -1) {
+                    this.actors.splice(index, 1);
+                    this.actors.unshift(actor);
+                    this.render();
+                }
+            }
+
+            getMousePos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+
+            handleMouseDown(e) {
+                const pos = this.getMousePos(e);
+
+                // Find actor at position (in reverse order for top-to-bottom)
+                for (let i = this.actors.length - 1; i >= 0; i--) {
+                    const actor = this.actors[i];
+                    if (actor.containsPoint(pos.x, pos.y)) {
+                        this.selectedActor = actor;
+                        this.dragging = true;
+                        this.dragOffset = {
+                            x: pos.x - actor.x,
+                            y: pos.y - actor.y
+                        };
+                        updateStatus(`Selected: ${actor.type} (drag to move)`);
+                        this.render();
+                        return;
+                    }
+                }
+
+                // Clicked on empty space
+                this.selectedActor = null;
+                updateStatus('Click a shape to select it');
+                this.render();
+            }
+
+            handleMouseMove(e) {
+                const pos = this.getMousePos(e);
+
+                if (this.dragging && this.selectedActor) {
+                    this.selectedActor.x = pos.x - this.dragOffset.x;
+                    this.selectedActor.y = pos.y - this.dragOffset.y;
+                    this.render();
+                } else {
+                    // Update cursor
+                    let hovering = false;
+                    for (let i = this.actors.length - 1; i >= 0; i--) {
+                        if (this.actors[i].containsPoint(pos.x, pos.y)) {
+                            hovering = true;
+                            break;
+                        }
+                    }
+                    this.canvas.style.cursor = hovering ? 'pointer' : 'default';
+                }
+            }
+
+            handleMouseUp(e) {
+                if (this.dragging) {
+                    this.dragging = false;
+                    if (this.selectedActor) {
+                        updateStatus(`Selected: ${this.selectedActor.type}`);
+                    }
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = '#f0f0f0';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Render all actors
+                this.actors.forEach(actor => {
+                    actor.render(this.ctx);
+                });
+
+                // Render selection outline
+                if (this.selectedActor) {
+                    this.renderSelectionOutline(this.selectedActor);
+                }
+            }
+
+            renderSelectionOutline(actor) {
+                this.ctx.strokeStyle = '#667eea';
+                this.ctx.lineWidth = 3;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.strokeRect(
+                    actor.x - actor.width / 2 - 5,
+                    actor.y - actor.height / 2 - 5,
+                    actor.width + 10,
+                    actor.height + 10
+                );
+                this.ctx.setLineDash([]);
+            }
+        }
+
+        class Shape {
+            constructor(x, y, width, height, color, type) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.color = color;
+                this.type = type;
+                this.stage = null;
+            }
+
+            containsPoint(px, py) {
+                return px >= this.x - this.width / 2 &&
+                       px <= this.x + this.width / 2 &&
+                       py >= this.y - this.height / 2 &&
+                       py <= this.y + this.height / 2;
+            }
+        }
+
+        class Rectangle extends Shape {
+            constructor(x, y, width, height, color) {
+                super(x, y, width, height, color, 'Rectangle');
+            }
+
+            render(ctx) {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(
+                    this.x - this.width / 2,
+                    this.y - this.height / 2,
+                    this.width,
+                    this.height
+                );
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(
+                    this.x - this.width / 2,
+                    this.y - this.height / 2,
+                    this.width,
+                    this.height
+                );
+            }
+        }
+
+        class Circle extends Shape {
+            constructor(x, y, radius, color) {
+                super(x, y, radius * 2, radius * 2, color, 'Circle');
+                this.radius = radius;
+            }
+
+            containsPoint(px, py) {
+                const dx = px - this.x;
+                const dy = py - this.y;
+                return dx * dx + dy * dy <= this.radius * this.radius;
+            }
+
+            render(ctx) {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        class Triangle extends Shape {
+            constructor(x, y, size, color) {
+                super(x, y, size, size, color, 'Triangle');
+            }
+
+            render(ctx) {
+                const half = this.width / 2;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y - half);
+                ctx.lineTo(this.x + half, this.y + half);
+                ctx.lineTo(this.x - half, this.y + half);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        // Initialize
+        const canvas = document.getElementById('canvas');
+        const stage = new SK8Stage(canvas);
+
+        // Create initial shapes
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
+            '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+        ];
+
+        // Add some initial shapes
+        stage.addActor(new Rectangle(150, 150, 100, 80, colors[0]));
+        stage.addActor(new Circle(350, 150, 50, colors[1]));
+        stage.addActor(new Triangle(550, 150, 100, colors[2]));
+        stage.addActor(new Rectangle(150, 350, 120, 90, colors[3]));
+        stage.addActor(new Circle(350, 350, 45, colors[4]));
+        stage.addActor(new Triangle(550, 350, 90, colors[5]));
+
+        // Global functions for buttons
+        window.bringToFront = function() {
+            if (stage.selectedActor) {
+                stage.bringToFront(stage.selectedActor);
+                updateStatus(`${stage.selectedActor.type} brought to front`);
+            } else {
+                updateStatus('No shape selected');
+            }
+        };
+
+        window.sendToBack = function() {
+            if (stage.selectedActor) {
+                stage.sendToBack(stage.selectedActor);
+                updateStatus(`${stage.selectedActor.type} sent to back`);
+            } else {
+                updateStatus('No shape selected');
+            }
+        };
+
+        window.clearSelection = function() {
+            stage.selectedActor = null;
+            stage.render();
+            updateStatus('Selection cleared');
+        };
+
+        window.addRandom = function() {
+            const shapes = ['rectangle', 'circle', 'triangle'];
+            const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+            const x = Math.random() * (canvas.width - 100) + 50;
+            const y = Math.random() * (canvas.height - 100) + 50;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            let shape;
+            if (shapeType === 'rectangle') {
+                const w = 60 + Math.random() * 60;
+                const h = 60 + Math.random() * 60;
+                shape = new Rectangle(x, y, w, h, color);
+            } else if (shapeType === 'circle') {
+                const r = 30 + Math.random() * 30;
+                shape = new Circle(x, y, r, color);
+            } else {
+                const s = 60 + Math.random() * 60;
+                shape = new Triangle(x, y, s, color);
+            }
+
+            stage.addActor(shape);
+            updateStatus(`Added ${shape.type}`);
+        };
+
+        window.clearAll = function() {
+            if (confirm('Clear all shapes?')) {
+                stage.clearActors();
+            }
+        };
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        console.log('SK8 Interactive Shapes example loaded!');
+        console.log(`${stage.actors.length} shapes created.`);
+    </script>
+</body>
+</html>

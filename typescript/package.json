@@ -1,14 +1,42 @@
 {
   "name": "sk8-ts",
-  "version": "0.2.0",
-  "description": "SK8 reimagined in TypeScript - A multimedia authoring environment for the web",
-  "main": "dist/sk8.js",
+  "version": "1.0.0",
+  "description": "Modern multimedia authoring environment for the web, inspired by Apple's SK8",
+  "main": "dist/sk8.cjs.js",
+  "module": "dist/sk8.esm.js",
   "types": "dist/sk8.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/sk8.esm.js",
+      "require": "./dist/sk8.cjs.js",
+      "types": "./dist/sk8.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "homepage": "https://github.com/apple/sk8#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apple/sk8.git",
+    "directory": "typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/apple/sk8/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/build.js",
+    "build:tsc": "tsc",
+    "build:webpack": "webpack --mode production",
+    "build:rollup": "rollup -c",
     "watch": "tsc --watch",
-    "dev": "tsc --watch & node -e \"require('http').createServer((q,s)=>{require('fs').readFile('./demo/index.html',(e,d)=>{s.end(d)})}).listen(8080);console.log('Server: http://localhost:8080')\"",
-    "clean": "rm -rf dist",
+    "dev": "node scripts/dev-server.js",
+    "export": "node scripts/export-static.js",
+    "docs": "node scripts/generate-docs.js",
+    "release": "node scripts/release.js",
+    "deploy-demo": "node scripts/deploy-demo.js",
+    "clean": "rimraf dist dist-demo docs/api",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -17,32 +45,73 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+    "validate": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "prepublishOnly": "npm run validate && npm run build",
+    "prepare": "cd .. && husky install typescript/.husky || true"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write",
+      "jest --bail --findRelatedTests"
+    ]
   },
   "keywords": [
-    "sk8",
     "multimedia",
+    "visual-programming",
+    "animation",
+    "game-engine",
     "authoring",
+    "sk8",
+    "interactive",
     "canvas",
     "graphics",
-    "animation",
-    "apple"
+    "scripting",
+    "widgets",
+    "ide",
+    "typescript"
   ],
   "author": "SK8 TypeScript Port Contributors",
   "license": "SEE LICENSE IN ../sk8_license.pdf",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/jest": "^29.5.11",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
+    "chalk": "^5.6.2",
+    "chokidar": "^4.0.3",
+    "css-loader": "^7.1.2",
     "eslint": "^8.56.0",
+    "glob": "^13.0.0",
+    "html-minifier": "^4.0.0",
+    "html-webpack-plugin": "^5.6.5",
+    "husky": "^8.0.3",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^30.2.0",
+    "lint-staged": "^15.2.0",
+    "mini-css-extract-plugin": "^2.9.4",
     "prettier": "^3.1.1",
+    "rimraf": "^6.1.2",
+    "rollup": "^2.79.2",
+    "rollup-plugin-terser": "^7.0.2",
+    "style-loader": "^4.0.0",
+    "terser-webpack-plugin": "^5.3.14",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.3.0"
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.3.0",
+    "webpack": "^5.103.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2",
+    "ws": "^8.18.3"
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "README.md",
+    "CHANGELOG.md"
   ]
 }
